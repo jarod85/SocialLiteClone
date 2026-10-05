@@ -13,7 +13,8 @@ export default function BrowseScreen() {
   const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   if (!platform) return <UnknownPlatform id={platformId} onClose={close} />;
-  return <PlatformWebView platform={platform} onClose={close} />;
+  // Settings opens on top, so the page stays loaded and toggles apply to it live.
+  return <PlatformWebView platform={platform} onClose={close} onOpenSettings={() => router.push('/settings')} />;
 }
 
 function UnknownPlatform({ id, onClose }: { id: string | undefined; onClose: () => void }) {

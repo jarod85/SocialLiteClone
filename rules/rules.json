@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "updated": "2026-10-06",
+  "minEngineVersion": 1,
+  "platforms": {
+    "instagram": {
+      "routes": [
+        {
+          "id": "reels-pages",
+          "toggle": "blockReels",
+          "action": "block",
+          "paths": ["/reels/**", "/reel/**", "/*/reels/**", "/*/reel/**"],
+          "note": "The Reels tab, a single reel, a profile's Reels tab, and a reel opened from a profile. URLs are the most stable thing Instagram has. Usernames can't contain '/', so '/reelsfan/' is not matched."
+        },
+        {
+          "id": "stories-viewer",
+          "toggle": "hideStories",
+          "action": "block",
+          "paths": ["/stories/**"],
+          "note": "Stories and highlights open under /stories/. This works even when the tray selector misses."
+        },
+        {
+          "id": "suggested-people",
+          "toggle": "hideSuggested",
+          "action": "block",
+          "paths": ["/explore/people/**"],
+          "note": "The full-page 'Suggested for you' list behind 'See all'."
+        },
+        {
+          "id": "following-feed",
+          "toggle": "followingFeed",
+          "action": "redirect",
+          "paths": ["/"],
+          "to": "/?variant=following",
+          "note": "Instagram's own chronological Following feed. If Instagram drops the parameter, the normal feed shows; nothing breaks."
+        }
+      ],
+      "hide": [
+        {
+          "id": "app-banners",
+          "selectors": [
+            "a[href^=\"intent:\"]",
+            "a[href^=\"instagram:\"]",
+            "a[href*=\"apps.apple.com\"]",
+            "a[href*=\"itunes.apple.com\"]",
+            "a[href*=\"play.google.com/store\"]"
+          ],
+          "note": "'Open in app' and 'Get the app' buttons, matched by where they link rather than by class names."
+        },
+        {
+          "id": "reels-tab",
+          "toggle": "blockReels",
+          "selectors": [
+            "a[href=\"/reels/\"]",
+            "a[href^=\"/reels/\"]",
+            "a[href$=\"/reels/\"]",
+            "a[href*=\"instagram.com/reels/\"]",
+            "a:has(svg[aria-label=\"Reels\"])"
+          ],
+          "note": "Bottom-nav Reels tab and the Reels tab on profiles, matched by link target. The aria-label fallback covers icon-only links; 'Reels' is the same word in most languages."
+        },
+        {
+          "id": "reel-links",
+          "toggle": "blockReels",
+          "selectors": ["a[href*=\"/reel/\"]"],
+          "note": "Any link to a single reel: profile grid tiles, reel shelves, reels shared in DMs. '/reel/' (singular) only ever means a reel."
+        },
+        {
+          "id": "feed-videos",
+          "toggle": "blockReels",
+          "mode": "collapse",
+          "label": "Reel hidden by Lite Social",
+          "selectors": ["article:has(a[href*=\"/reel/\"])", "article:has(video)"],
+          "note": "Feed posts are <article> elements. A post that links to /reel/ or contains a <video> is a Reel (Instagram turned all feed videos into Reels). :has() is pure CSS, so there's no flash and no JS cost. Also catches reels opened via /p/ links."
+        },
+        {
+          "id": "explore-grid",
+          "toggle": "hideExplore",
+          "paths": ["/explore", "/explore/tags/**", "/explore/locations/**", "/explore/search/**"],
+          "selectors": ["a[href*=\"/p/\"]", "a[href*=\"/reel/\"]"],
+          "note": "On mobile, Explore doubles as search, so the page stays reachable and only its post tiles are hidden. Scoped to Explore paths so posts elsewhere are untouched."
+        },
+        {
+          "id": "stories-tray",
+          "toggle": "hideStories",
+          "paths": ["/"],
+          "selectors": ["[role=\"menu\"]:has(canvas)", "ul:has(> li [aria-label*=\"Story\"])"],
+          "note": "Best effort: the tray has no stable link to match. Story rings are drawn with <canvas>. Scoped to the home feed. The route rule blocks opening stories even if this misses."
+        }
+      ],
+      "textHide": [
+        {
+          "id": "suggested-posts",
+          "toggle": "hideSuggested",
+          "match": ["Suggested for you", "Suggested posts", "Suggested"],
+          "containers": ["article"],
+          "mode": "collapse",
+          "label": "Suggestion hidden by Lite Social",
+          "note": "Suggested posts are ordinary <article>s with a 'Suggested for you' label, so only text gives them away. English only for now; add translations to 'match'."
+        },
+        {
+          "id": "suggested-accounts",
+          "toggle": "hideSuggested",
+          "match": ["Suggested for you", "Suggestions for you", "Discover people"],
+          "containers": ["div:has(a[href^=\"/explore/people\"]):has(img)"],
+          "note": "The 'Suggested for you' accounts carousel. The closest ancestor that holds both the 'See all' link (/explore/people/) and profile pictures is the whole carousel; the header row alone has no images."
+        }
+      ],
+      "feedLimit": {
+        "id": "feed-limit",
+        "toggle": "limitFeed",
+        "itemSelector": "article",
+        "paths": ["/"]
+      }
+    }
+  }
+}

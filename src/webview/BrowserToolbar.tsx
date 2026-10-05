@@ -11,14 +11,25 @@ interface Props {
   onHome: () => void;
   onReload: () => void;
   onClose: () => void;
+  onReportLeak: () => void;
+  onOpenSettings: () => void;
 }
 
 /**
- * Slim bar above the site. Kept deliberately small so the site's own navigation
- * stays the main way around; this bar only adds what a bare WebView lacks
- * (back on iOS, reload on Android where there's no pull-to-refresh, a way out).
+ * Slim bar above the site. The site's own navigation stays the main way
+ * around; this bar only adds what a bare WebView lacks (back on iOS, reload on
+ * Android where there's no pull-to-refresh, a way out) plus our two actions.
  */
-export function BrowserToolbar({ title, canGoBack, onBack, onHome, onReload, onClose }: Props) {
+export function BrowserToolbar({
+  title,
+  canGoBack,
+  onBack,
+  onHome,
+  onReload,
+  onClose,
+  onReportLeak,
+  onOpenSettings,
+}: Props) {
   const theme = useTheme();
   return (
     <View style={[styles.bar, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
@@ -27,6 +38,8 @@ export function BrowserToolbar({ title, canGoBack, onBack, onHome, onReload, onC
       <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
         {title}
       </Text>
+      <ToolbarButton icon="flag-outline" label="Report a leak" onPress={onReportLeak} theme={theme} />
+      <ToolbarButton icon="options-outline" label="Settings" onPress={onOpenSettings} theme={theme} />
       <ToolbarButton icon="refresh" label="Reload" onPress={onReload} theme={theme} />
       <ToolbarButton icon="home-outline" label="Home" onPress={onHome} theme={theme} />
     </View>
@@ -53,7 +66,7 @@ function ToolbarButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
-      hitSlop={8}
+      hitSlop={4}
       style={({ pressed }) => [styles.button, pressed && { opacity: 0.5 }]}
     >
       <Ionicons name={icon} size={22} color={disabled ? theme.disabled : theme.text} />
@@ -66,7 +79,7 @@ const styles = StyleSheet.create({
     height: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   button: {

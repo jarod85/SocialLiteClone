@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><mask id="m"><rect width="1024" height="1024" fill="black"/>
+  <g transform="translate(512 512) scale(0.82) translate(-512 -512)">
+    <path d="M 300 724 C 300 470 470 300 724 300 C 724 554 554 724 300 724 Z" fill="white"/>
+    <path d="M 312 712 L 640 384" stroke="black" stroke-width="26" stroke-linecap="round" fill="none"/>
+    <path d="M 312 712 L 244 780" stroke="white" stroke-width="34" stroke-linecap="round" fill="none"/>
+  </g></mask>
+     <rect width="1024" height="1024" fill="#000000" mask="url(#m)"/></svg>

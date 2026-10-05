@@ -13,8 +13,7 @@ import type {
 import { decideNavigation, initialUrl, type NavigationContext } from '@/core/navigationPolicy';
 import { compileRoutes } from '@/core/routeMatcher';
 import { hostMatches, parseUrl, stripQueryAndHash } from '@/core/urls';
-import { LockOverlay } from '@/features/timeLimit/LockOverlay';
-import { useDailyLimit, useUsageTracking } from '@/features/timeLimit/useDailyLimit';
+import { DailyLimitGate } from '@/features/timeLimit/DailyLimitGate';
 import type { PlatformConfig } from '@/platforms/types';
 import { useRules } from '@/rules/rulesStore';
 import { platformRules } from '@/rules/schema';
@@ -190,12 +189,7 @@ export function PlatformWebView({ platform, onClose, onOpenSettings }: Props) {
     );
   }, [requestStats, addLeak, platform.id, rulesFile.revision]);
 
-  // ---- Daily time limit -------------------------------------------------------
-  const limit = useDailyLimit();
-  useUsageTracking(isFocused && !limit.locked);
-  useEffect(() => {
-    if (limit.locked) webViewRef.current?.injectJavaScript(PAUSE_MEDIA_SCRIPT);
-  }, [limit.locked]);
+  const pauseMedia = useCallback(() => webViewRef.current?.injectJavaScript(PAUSE_MEDIA_SCRIPT), []);
 
   // ---- Toolbar actions ------------------------------------------------------
   const goBack = useCallback(() => webViewRef.current?.goBack(), []);
@@ -324,15 +318,7 @@ export function PlatformWebView({ platform, onClose, onOpenSettings }: Props) {
             }}
           />
         )}
-        {limit.locked && (
-          <LockOverlay
-            usedMinutes={Math.floor(limit.usedSeconds / 60)}
-            limitMinutes={limit.limitMinutes}
-            canSnooze={limit.canSnooze}
-            onSnooze={limit.snooze}
-            onClose={onClose}
-          />
-        )}
+        <DailyLimitGate active={isFocused} onLock={pauseMedia} onClose={onClose} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

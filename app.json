@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Lite Social",
+    "slug": "lite-social",
+    "version": "1.0.0",
+    "scheme": "litesocial",
+    "platforms": ["ios", "android"],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.jarod85.litesocial",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.jarod85.litesocial",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-router", "expo-status-bar", "expo-font"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

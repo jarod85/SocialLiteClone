@@ -8,8 +8,8 @@ module.exports = defineConfig([
     ignores: ['dist/*', '.expo/*', 'android/*', 'ios/*', 'src/injected/generated/*'],
   },
   {
-    // Node build scripts and the Jest setup file.
-    files: ['scripts/**/*.js', 'tests/setup.js'],
+    // Node build scripts, Expo config plugins and the Jest setup file.
+    files: ['scripts/**/*.js', 'plugins/**/*.js', 'tests/setup.js'],
     languageOptions: {
       globals: { __dirname: 'readonly', require: 'readonly', module: 'writable', console: 'readonly', jest: 'readonly' },
     },

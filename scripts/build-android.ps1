@@ -3,10 +3,13 @@
   Builds an installable Lite Social APK on Windows, without Android Studio.
 
 .DESCRIPTION
-  1. Mirrors the project's source into a build folder whose path has no spaces
-     (React Native's native build can't cope with spaces, and mapping a drive
+  1. Mirrors the project's source into a short build folder with no spaces.
+     React Native's native build can't cope with spaces, and mapping a drive
      letter with subst doesn't work either: Node resolves it back to the real
-     path and Gradle then sees two different roots).
+     path and Gradle then sees two different roots. The folder must also be
+     short: even with plugins/withCMakeObjectPathMax.js shortening CMake's
+     object paths, the deepest ones are about 220 characters plus the folder,
+     and Windows (without the admin-only long-path setting) stops at 260.
   2. Installs dependencies there when package-lock.json changed.
   3. Generates the native android/ project from app.json (Expo prebuild).
   4. Runs Gradle's release build.
@@ -25,7 +28,7 @@
 #>
 param(
   [string]$Architectures = 'arm64-v8a',
-  [string]$BuildDir = "$env:LOCALAPPDATA\LiteSocialBuild",
+  [string]$BuildDir = "$env:USERPROFILE\lsb",
   [string]$JavaHome = $(if ($env:JAVA_HOME) { $env:JAVA_HOME } else { (Get-ChildItem "$env:LOCALAPPDATA\Programs" -Directory -Filter 'jdk-17*' -ErrorAction SilentlyContinue | Select-Object -First 1).FullName }),
   [string]$AndroidHome = $(if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA\Android\Sdk" })
 )
@@ -36,6 +39,7 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 if (-not $JavaHome -or -not (Test-Path "$JavaHome\bin\java.exe")) { throw "JDK 17 not found. Set JAVA_HOME or pass -JavaHome." }
 if (-not (Test-Path "$AndroidHome\platform-tools")) { throw "Android SDK not found at $AndroidHome. Set ANDROID_HOME or pass -AndroidHome." }
 if ($BuildDir -match '\s') { throw "The build folder must not contain spaces: $BuildDir" }
+if ($BuildDir.Length -gt 25) { throw "The build folder path must be 25 characters or less (Windows path limit): $BuildDir" }
 $env:JAVA_HOME = $JavaHome
 $env:ANDROID_HOME = $AndroidHome
 $env:Path = "$JavaHome\bin;$env:Path"

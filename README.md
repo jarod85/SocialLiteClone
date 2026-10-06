@@ -127,9 +127,10 @@ powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1
 
 Needs Node.js on PATH, JDK 17 (`JAVA_HOME`, or a `jdk-17*` folder in `%LOCALAPPDATA%\Programs`) and the Android SDK
 (`ANDROID_HOME`, or `%LOCALAPPDATA%\Android\Sdk`) with platform 36, build-tools 36.0.0, NDK 27.1.12297006 and
-CMake 3.22.1. React Native's native build breaks on paths with spaces, so the script mirrors the source into
-`%LOCALAPPDATA%\LiteSocialBuild` and builds there. The first build takes 20–40 minutes; later ones are much
-faster. It builds for arm64 phones only (pass `-Architectures "arm64-v8a,x86_64"` for emulators) and
+CMake 3.22.1. React Native's native build breaks on paths with spaces and on Windows' 260-character path limit,
+so the script mirrors the source into a short folder (`%USERPROFILE%\lsb`) and builds there, and
+`plugins/withCMakeObjectPathMax.js` makes CMake shorten its deepest object-file paths. The first build takes
+20–40 minutes; later ones are much faster. It builds for arm64 phones only (pass `-Architectures "arm64-v8a,x86_64"` for emulators) and
 writes `release\LiteSocial-<version>.apk`. The APK is signed with Expo's template debug key: fine for your own
 phones, and new builds install over old ones. Bump `version`/`android.versionCode` in `app.json` for each
 release you hand out.

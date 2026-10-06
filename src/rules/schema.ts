@@ -59,6 +59,7 @@ const routeSchema = z
   .object({
     id,
     toggle,
+    unless: toggle,
     paths: z.array(z.unknown()).max(MAX_ITEMS),
     action: z.enum(['block', 'redirect']),
     to: redirectTarget.optional(),
@@ -68,6 +69,7 @@ const routeSchema = z
 const hideSchema = z.object({
   id,
   toggle,
+  unless: toggle,
   selectors: z.array(z.unknown()).max(MAX_ITEMS),
   mode,
   label: label.optional(),
@@ -77,6 +79,7 @@ const hideSchema = z.object({
 const textHideSchema = z.object({
   id,
   toggle,
+  unless: toggle,
   match: z.array(text).min(1).max(MAX_ITEMS),
   containers: z.array(z.unknown()).max(MAX_ITEMS),
   mode,
@@ -152,7 +155,7 @@ function sanitizeRoute(raw: unknown, warn: (msg: string) => void): RouteRule | n
   if (!r.success) return reject(raw, warn);
   const paths = keepValid(r.data.paths, isPathPattern, r.data.id, 'path', warn);
   if (paths.length === 0) return reject(raw, warn, 'no valid paths');
-  return { id: r.data.id, toggle: r.data.toggle, action: r.data.action, paths, to: r.data.to };
+  return { id: r.data.id, toggle: r.data.toggle, unless: r.data.unless, action: r.data.action, paths, to: r.data.to };
 }
 
 function sanitizeHide(raw: unknown, warn: (msg: string) => void): HideRule | null {
@@ -162,7 +165,15 @@ function sanitizeHide(raw: unknown, warn: (msg: string) => void): HideRule | nul
   if (selectors.length === 0) return reject(raw, warn, 'no valid selectors');
   const paths = r.data.paths && keepValid(r.data.paths, isPathPattern, r.data.id, 'path', warn);
   if (paths && paths.length === 0) return reject(raw, warn, 'no valid paths'); // Never widen a scoped rule to "everywhere".
-  return { id: r.data.id, toggle: r.data.toggle, selectors, mode: r.data.mode, label: r.data.label, paths };
+  return {
+    id: r.data.id,
+    toggle: r.data.toggle,
+    unless: r.data.unless,
+    selectors,
+    mode: r.data.mode,
+    label: r.data.label,
+    paths,
+  };
 }
 
 function sanitizeTextHide(raw: unknown, warn: (msg: string) => void): TextHideRule | null {
@@ -175,6 +186,7 @@ function sanitizeTextHide(raw: unknown, warn: (msg: string) => void): TextHideRu
   return {
     id: r.data.id,
     toggle: r.data.toggle,
+    unless: r.data.unless,
     match: r.data.match,
     containers,
     mode: r.data.mode,

@@ -32,6 +32,13 @@ export const instagram: PlatformConfig = {
       default: true,
     },
     {
+      id: 'allowSharedReels',
+      label: 'Watch shared reels',
+      description:
+        'With Block Reels on, still lets you open a single reel someone sends you, or one on a profile or post. The Reels tab and the swipe-for-more viewer stay blocked, and reels in your home feed stay collapsed.',
+      default: true,
+    },
+    {
       id: 'hideExplore',
       label: 'Hide Explore',
       description: 'Search still works, but the grid of recommended posts under it is hidden.',

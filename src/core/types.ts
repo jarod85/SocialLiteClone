@@ -9,12 +9,14 @@
  */
 
 /** Bump when the engine learns a rule feature that older apps can't apply. */
-export const ENGINE_VERSION = 1;
+export const ENGINE_VERSION = 2;
 
 export interface RouteRule {
   id: string;
   /** Toggle that enables the rule. Omitted means always on. */
   toggle?: string;
+  /** Toggle that switches the rule off again, e.g. "allowSharedReels" lets single reels through "blockReels". */
+  unless?: string;
   /** Path globs: `*` = one segment, `**` = any number of segments. Case-insensitive, trailing slash ignored. */
   paths: string[];
   action: 'block' | 'redirect';
@@ -25,6 +27,7 @@ export interface RouteRule {
 export interface HideRule {
   id: string;
   toggle?: string;
+  unless?: string;
   /** CSS selectors. Each is applied as its own CSS rule, so one bad selector can't break the others. */
   selectors: string[];
   /** `hide` removes the element; `collapse` keeps a thin labelled bar so you can see filtering is working. */
@@ -38,6 +41,7 @@ export interface HideRule {
 export interface TextHideRule {
   id: string;
   toggle?: string;
+  unless?: string;
   /** Exact texts (trimmed, case-insensitive) that mark something for hiding, e.g. "Suggested for you". */
   match: string[];
   /** Selectors tried in order with closest() from the text's element; the first ancestor found is hidden. */
@@ -93,7 +97,11 @@ export type PageMessage =
   | { type: 'blocked'; ruleId: string; path: string }
   | { type: 'stats'; requestId: string; counts: Record<string, number> };
 
-/** A rule is active when it has no toggle or its toggle is on. */
-export function isActive(rule: { toggle?: string }, toggles: Toggles): boolean {
-  return rule.toggle === undefined || toggles[rule.toggle] === true;
+/**
+ * A rule is active when it has no toggle or its toggle is on, and its `unless`
+ * toggle (if any) is off. Apps older than engine v2 ignore `unless`, so for them
+ * such a rule is simply always on with its toggle: stricter, never looser.
+ */
+export function isActive(rule: { toggle?: string; unless?: string }, toggles: Toggles): boolean {
+  return (rule.toggle === undefined || toggles[rule.toggle] === true) && (rule.unless === undefined || toggles[rule.unless] !== true);
 }

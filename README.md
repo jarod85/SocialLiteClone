@@ -10,9 +10,9 @@ Instagram is supported first. The design makes adding YouTube (Shorts), Facebook
 
 ## Install on your Android phone
 
-1. Get `release/LiteSocial-1.0.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
+1. Get `release/LiteSocial-1.1.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
 2. Install it, either way works:
-   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.0.0.apk`.
+   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.1.0.apk`.
      If you use scrcpy, you can also drag the APK onto the scrcpy window.
    - **File:** copy the APK to the phone and open it in My Files. Allow "Install unknown apps" for My Files when asked.
 3. Samsung: if installation is refused, turn off **Settings → Security and privacy → Auto Blocker** while you
@@ -25,6 +25,7 @@ Instagram is supported first. The design makes adding YouTube (Shorts), Facebook
 | Setting (Instagram) | Default | What it does |
 | --- | --- | --- |
 | Block Reels | On | Removes the Reels tab, collapses Reels/videos in the feed and on profiles, blocks opening any Reel |
+| Watch shared reels | On | With Block Reels on, a single reel sent to you in a DM, on a profile or in a post still opens and plays. The Reels tab, its swipe-for-more viewer and reels in the home feed stay blocked |
 | Hide Explore | On | Search keeps working; the grid of recommended posts under it is hidden |
 | Hide suggestions | On | Hides "Suggested for you" posts and the suggested-accounts carousel |
 | Following feed | On | Opens Instagram's chronological feed of accounts you follow |
@@ -171,6 +172,10 @@ Rule types (see `src/core/types.ts`):
 
 Path globs: `*` is one segment, `**` any number. Case and trailing slashes are ignored.
 
+Any rule can have `toggle` (on only when that setting is on) and `unless` (off when that setting is on), e.g.
+`"toggle":"blockReels","unless":"allowSharedReels"`. Apps older than engine v2 ignore `unless`, which only makes
+them stricter.
+
 ## Adding a platform
 
 For a site that only needs the existing rule types (true for YouTube, Facebook, TikTok):
@@ -197,8 +202,11 @@ Said plainly, so nothing is oversold:
   via leak reports and `rules.json`. The URL-based blocking (`/reels/`, `/reel/…`) is the most reliable part.
 - **Text matching is English-only.** "Suggested for you" is found by its text. Add translations to `match`
   if your Instagram is in another language.
-- **Reels shared in DMs:** opening them is blocked and links to them are hidden, but a preview card in a
-  different format could still show. Its video can't autoplay.
+- **Reels shared in DMs** (with "Watch shared reels" off): opening them is blocked and links to them are hidden,
+  but a preview card in a different format could still show. Its video can't autoplay.
+- **Watch shared reels** allows `/reel/<id>` pages. A reel page can link to other single reels, and those open
+  too (one tap each); swiping into the endless viewer (`/reels/…`) stays blocked. A shared link in the plural
+  `/reels/<id>` form is treated as the viewer and blocked.
 - **Reels opened through `/p/` links** look like normal posts by URL; the in-page video check catches them,
   routing doesn't.
 - **Hide Stories** reliably blocks *opening* stories. Hiding the tray is best-effort (it has no stable link).

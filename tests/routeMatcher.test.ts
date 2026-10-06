@@ -76,6 +76,15 @@ describe('decideRoute', () => {
     expect(decideRoute('/reels/', '', compiled, {})).toEqual({ type: 'allow' });
   });
 
+  it('skips a rule whose "unless" toggle is on', () => {
+    const shared = compileRoutes(
+      [{ id: 'single', toggle: 'blockReels', unless: 'allowSharedReels', action: 'block', paths: ['/reel/**'] }],
+      [],
+    );
+    expect(decideRoute('/reel/ABC/', '', shared, { blockReels: true })).toEqual({ type: 'block', ruleId: 'single' });
+    expect(decideRoute('/reel/ABC/', '', shared, { blockReels: true, allowSharedReels: true })).toEqual({ type: 'allow' });
+  });
+
   it('applies rules without a toggle unconditionally', () => {
     expect(decideRoute('/forbidden', '', compiled, {})).toEqual({ type: 'block', ruleId: 'always' });
   });

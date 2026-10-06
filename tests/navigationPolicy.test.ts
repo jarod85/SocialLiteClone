@@ -29,18 +29,12 @@ const decide = (url: string, overrides?: Record<string, boolean>, isTopFrame = t
   decideNavigation(url, isTopFrame, context(overrides));
 
 describe('Instagram navigation policy (defaults)', () => {
-  it.each([
-    `${IG}/reels/`,
-    `${IG}/reels/DAbc123/`,
-    `${IG}/reel/DAbc123/`,
-    `${IG}/reel/DAbc123/?igsh=xyz`,
-    `${IG}/natgeo/reels/`,
-    `${IG}/natgeo/reel/DAbc123/`,
-    `https://instagram.com/reels/`,
-    `${IG}/REELS/`,
-  ])('blocks %s', (url) => {
-    expect(decide(url)).toMatchObject({ type: 'block', ruleId: 'reels-pages' });
-  });
+  it.each([`${IG}/reels/`, `${IG}/reels/DAbc123/`, `https://instagram.com/reels/`, `${IG}/REELS/`])(
+    'blocks the Reels tab and viewer %s',
+    (url) => {
+      expect(decide(url)).toMatchObject({ type: 'block', ruleId: 'reels-pages' });
+    },
+  );
 
   it.each([
     `${IG}/p/CXyz/`,
@@ -56,6 +50,10 @@ describe('Instagram navigation policy (defaults)', () => {
     `${IG}/explore/search/`,
     `${IG}/stories/natgeo/123/`, // Stories are allowed by default
     `${IG}/?variant=following`,
+    `${IG}/reel/DAbc123/`, // "Watch shared reels" is on by default
+    `${IG}/reel/DAbc123/?igsh=xyz`,
+    `${IG}/natgeo/reels/`,
+    `${IG}/natgeo/reel/DAbc123/`,
   ])('allows %s', (url) => {
     expect(decide(url)).toEqual({ type: 'allow' });
   });
@@ -77,6 +75,18 @@ describe('Instagram navigation policy (defaults)', () => {
 describe('Instagram navigation policy (toggles)', () => {
   it('allows Reels when "Block Reels" is off', () => {
     expect(decide(`${IG}/reels/`, { blockReels: false })).toEqual({ type: 'allow' });
+    expect(decide(`${IG}/reel/DAbc123/`, { blockReels: false, allowSharedReels: false })).toEqual({ type: 'allow' });
+  });
+
+  it.each([`${IG}/reel/DAbc123/`, `${IG}/reel/DAbc123/?igsh=xyz`, `${IG}/natgeo/reels/`, `${IG}/natgeo/reel/DAbc123/`])(
+    'blocks single reel %s when "Watch shared reels" is off',
+    (url) => {
+      expect(decide(url, { allowSharedReels: false })).toMatchObject({ type: 'block', ruleId: 'single-reels' });
+    },
+  );
+
+  it('keeps the Reels tab and viewer blocked when "Watch shared reels" is on', () => {
+    expect(decide(`${IG}/reels/DAbc123/`, { allowSharedReels: true })).toMatchObject({ type: 'block', ruleId: 'reels-pages' });
   });
 
   it('blocks stories only when "Hide Stories" is on', () => {

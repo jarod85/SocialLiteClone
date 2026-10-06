@@ -23,9 +23,13 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 ## Reels blocking
 
 - [ ] 11. The Reels tab is gone from the bottom navigation.
-- [ ] 12. On any profile, the Reels tab is gone and reel tiles are hidden from the grid.
-- [ ] 13. Open a direct link to a reel (e.g. send yourself one, or paste `https://www.instagram.com/reels/` into a
-      DM to yourself and tap it). You see the "Blocked by Lite Social" screen; "Back to Instagram" returns you.
+- [ ] 12. Paste `https://www.instagram.com/reels/` into a DM to yourself and tap it. You see the "Blocked by Lite
+      Social" screen; "Back to Instagram" returns you.
+- [ ] 12a. **Watch shared reels** (on by default): a reel someone sent you in a DM opens and plays when tapped.
+      On a profile, the Reels tab and reel tiles show and play. Swiping up on a reel never turns into the endless
+      Reels viewer. Reels in the home feed are still collapsed.
+- [ ] 13. Turn **Watch shared reels** off: the profile Reels tab and reel tiles are hidden, and opening a reel
+      from a DM shows the blocked screen. Turn it back on.
 - [ ] 14. Tap home in Instagram's own navigation and anywhere a reel might be linked; no Reels viewer opens.
 
 ## Core features still work

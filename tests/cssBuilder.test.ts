@@ -1,5 +1,8 @@
 import { buildCss, cssString } from '@/core/cssBuilder';
 import type { PlatformRules } from '@/core/types';
+import { platformRules, validateRules } from '@/rules/schema';
+
+import bundled from '../rules/rules.json';
 
 const rules: PlatformRules = {
   routes: [],
@@ -33,6 +36,15 @@ describe('buildCss', () => {
     expect(css).not.toContain('article:has(video)');
   });
 
+  it('leaves out rules whose "unless" toggle is on', () => {
+    const shared: PlatformRules = {
+      ...rules,
+      hide: [{ id: 'reel-links', toggle: 'blockReels', unless: 'allowSharedReels', selectors: ['a[href*="/reel/"]'] }],
+    };
+    expect(buildCss(shared, { blockReels: true }, '/', 30)).toContain('a[href*="/reel/"]');
+    expect(buildCss(shared, { blockReels: true, allowSharedReels: true }, '/', 30)).not.toContain('a[href*="/reel/"]');
+  });
+
   it('collapses to a labelled bar instead of hiding', () => {
     const css = buildCss(rules, { blockReels: true }, '/', 30);
     expect(css).toContain(':is(article:has(video))>*{display:none!important}');
@@ -55,5 +67,29 @@ describe('cssString', () => {
     expect(cssString('a"b\\c')).toBe('"a\\"b\\\\c"');
     expect(cssString('line1\nline2')).toBe('"line1\\A line2"');
     expect(cssString('x y')).toBe('"x y"');
+  });
+});
+
+describe('bundled Instagram rules with "Watch shared reels"', () => {
+  const result = validateRules(bundled);
+  if (!result.ok) throw new Error(result.error);
+  const ig = platformRules(result.rules, 'instagram');
+  const css = (path: string, allowSharedReels: boolean) => buildCss(ig, { blockReels: true, allowSharedReels }, path, 30);
+
+  it('keeps reels in the home feed collapsed', () => {
+    expect(css('/', true)).toContain(':is(article:has(video))>*');
+  });
+
+  it('lets reels on posts, profiles and DMs show and play', () => {
+    for (const path of ['/p/abc/', '/reel/abc/', '/natgeo/', '/direct/t/123/']) {
+      expect(css(path, true)).not.toContain('article:has(video)');
+      expect(css(path, true)).not.toContain('a[href*="/reel/"]');
+    }
+    expect(css('/natgeo/', true)).toContain('a[href^="/reels/"]'); // The Reels tab itself stays hidden.
+  });
+
+  it('hides all of it when switched off', () => {
+    expect(css('/p/abc/', false)).toContain(':is(article:has(video))>*');
+    expect(css('/direct/t/123/', false)).toContain('a[href*="/reel/"]{display:none!important}');
   });
 });

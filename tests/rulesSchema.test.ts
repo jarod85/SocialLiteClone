@@ -21,7 +21,7 @@ describe('bundled rules.json', () => {
       const r = result.rules.platforms[platform.id];
       expect(r).toBeDefined();
       const used = [...r.routes, ...r.hide, ...r.textHide, ...(r.feedLimit ? [r.feedLimit] : [])]
-        .map((rule) => rule.toggle)
+        .flatMap((rule) => [rule.toggle, 'unless' in rule ? rule.unless : undefined])
         .filter((t): t is string => t !== undefined);
       for (const toggle of used) expect(known).toContain(toggle);
     }

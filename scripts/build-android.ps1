@@ -3,14 +3,14 @@
   Builds an installable Lite Social APK on Windows, without Android Studio.
 
 .DESCRIPTION
-  1. Generates the native android/ project from app.json (Expo prebuild).
-  2. Runs Gradle's release build.
-  3. Copies the APK to release\LiteSocial-<version>.apk.
-
-  React Native's native (C++) build breaks on paths with spaces and on
-  Windows' 260-character path limit, so the build runs from a temporary drive
-  letter mapped to the project's parent folder with `subst` (no admin rights;
-  removed afterwards).
+  1. Mirrors the project's source into a build folder whose path has no spaces
+     (React Native's native build can't cope with spaces, and mapping a drive
+     letter with subst doesn't work either: Node resolves it back to the real
+     path and Gradle then sees two different roots).
+  2. Installs dependencies there when package-lock.json changed.
+  3. Generates the native android/ project from app.json (Expo prebuild).
+  4. Runs Gradle's release build.
+  5. Copies the APK to release\LiteSocial-<version>.apk in this project.
 
   The APK is signed with the debug key from Expo's template. That's fine for
   installing on your own phone, and updates install over each other because the
@@ -18,13 +18,14 @@
 
 .PARAMETER Architectures
   CPU architectures to build. arm64-v8a covers every current phone (incl. Galaxy S24 FE)
-  and builds ~4x faster than all four. Use "armeabi-v7a,arm64-v8a,x86,x86_64" for emulators too.
+  and builds ~4x faster than all four. Use "arm64-v8a,x86_64" to include emulators.
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1
 #>
 param(
   [string]$Architectures = 'arm64-v8a',
+  [string]$BuildDir = "$env:LOCALAPPDATA\LiteSocialBuild",
   [string]$JavaHome = $(if ($env:JAVA_HOME) { $env:JAVA_HOME } else { (Get-ChildItem "$env:LOCALAPPDATA\Programs" -Directory -Filter 'jdk-17*' -ErrorAction SilentlyContinue | Select-Object -First 1).FullName }),
   [string]$AndroidHome = $(if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA\Android\Sdk" })
 )
@@ -34,31 +35,36 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 
 if (-not $JavaHome -or -not (Test-Path "$JavaHome\bin\java.exe")) { throw "JDK 17 not found. Set JAVA_HOME or pass -JavaHome." }
 if (-not (Test-Path "$AndroidHome\platform-tools")) { throw "Android SDK not found at $AndroidHome. Set ANDROID_HOME or pass -AndroidHome." }
+if ($BuildDir -match '\s') { throw "The build folder must not contain spaces: $BuildDir" }
 $env:JAVA_HOME = $JavaHome
 $env:ANDROID_HOME = $AndroidHome
 $env:Path = "$JavaHome\bin;$env:Path"
 
-# Find a free drive letter for the short path.
-$used = (Get-PSDrive -PSProvider FileSystem).Name
-$letter = [char[]]'ZYXWVUTSRQPONMLK' | Where-Object { $used -notcontains [string]$_ } | Select-Object -First 1
-if (-not $letter) { throw 'No free drive letter for subst.' }
-$drive = "${letter}:"
-# Map the *parent* folder: Expo's autolinking can't find package.json when the
-# project itself sits at the root of a drive. The project folder's own name
-# must not contain spaces.
-$projectName = Split-Path -Leaf $projectRoot
-if ($projectName -match '\s') { throw "Rename the project folder '$projectName' so it has no spaces." }
-subst $drive (Split-Path -Parent $projectRoot)
-try {
-  Push-Location "$drive\$projectName"
-  Write-Host "Building from $drive\$projectName (mapped to $projectRoot)" -ForegroundColor Cyan
+Write-Host "1/5 Copying the project to $BuildDir..." -ForegroundColor Cyan
+# /MIR mirrors and deletes stale files; excluded folders are neither copied nor deleted.
+robocopy $projectRoot $BuildDir /MIR /NFL /NDL /NJH /NJS /NP /XD node_modules android ios release .expo .git dist | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "Copying the project failed (robocopy exit $LASTEXITCODE)" }
 
-  Write-Host '1/3 Generating the native Android project...' -ForegroundColor Cyan
+Push-Location $BuildDir
+try {
+  $lockHash = (Get-FileHash package-lock.json).Hash
+  $stamp = 'node_modules\.lite-social-lock-hash'
+  if (-not (Test-Path $stamp) -or (Get-Content $stamp) -ne $lockHash) {
+    Write-Host '2/5 Installing dependencies...' -ForegroundColor Cyan
+    npm ci --no-audit --no-fund
+    if ($LASTEXITCODE -ne 0) { throw 'npm ci failed' }
+    Set-Content $stamp $lockHash
+  } else {
+    Write-Host '2/5 Dependencies unchanged.' -ForegroundColor Cyan
+  }
+
+  Write-Host '3/5 Generating the native Android project...' -ForegroundColor Cyan
+  $env:CI = '1'
   npx expo prebuild --platform android --clean --no-install
   if ($LASTEXITCODE -ne 0) { throw 'expo prebuild failed' }
   Set-Content -Path android\local.properties -Value "sdk.dir=$($AndroidHome -replace '\\', '/')" -Encoding ascii
 
-  Write-Host "2/3 Building the release APK ($Architectures)..." -ForegroundColor Cyan
+  Write-Host "4/5 Building the release APK ($Architectures)..." -ForegroundColor Cyan
   Push-Location android
   try {
     .\gradlew.bat assembleRelease "-PreactNativeArchitectures=$Architectures" --no-daemon
@@ -67,13 +73,12 @@ try {
     Pop-Location
   }
 
-  Write-Host '3/3 Copying the APK...' -ForegroundColor Cyan
+  Write-Host '5/5 Copying the APK...' -ForegroundColor Cyan
   $version = (Get-Content app.json -Raw | ConvertFrom-Json).expo.version
-  New-Item -ItemType Directory -Force release | Out-Null
-  $apk = "release\LiteSocial-$version.apk"
+  New-Item -ItemType Directory -Force "$projectRoot\release" | Out-Null
+  $apk = "$projectRoot\release\LiteSocial-$version.apk"
   Copy-Item android\app\build\outputs\apk\release\app-release.apk $apk -Force
-  Write-Host "Done: $projectRoot\$apk" -ForegroundColor Green
+  Write-Host "Done: $apk" -ForegroundColor Green
 } finally {
   Pop-Location
-  subst $drive /d
 }

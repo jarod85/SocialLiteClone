@@ -9,7 +9,8 @@
 
   React Native's native (C++) build breaks on paths with spaces and on
   Windows' 260-character path limit, so the build runs from a temporary drive
-  letter mapped to the project with `subst` (no admin rights; removed afterwards).
+  letter mapped to the project's parent folder with `subst` (no admin rights;
+  removed afterwards).
 
   The APK is signed with the debug key from Expo's template. That's fine for
   installing on your own phone, and updates install over each other because the
@@ -42,10 +43,15 @@ $used = (Get-PSDrive -PSProvider FileSystem).Name
 $letter = [char[]]'ZYXWVUTSRQPONMLK' | Where-Object { $used -notcontains [string]$_ } | Select-Object -First 1
 if (-not $letter) { throw 'No free drive letter for subst.' }
 $drive = "${letter}:"
-subst $drive $projectRoot
+# Map the *parent* folder: Expo's autolinking can't find package.json when the
+# project itself sits at the root of a drive. The project folder's own name
+# must not contain spaces.
+$projectName = Split-Path -Leaf $projectRoot
+if ($projectName -match '\s') { throw "Rename the project folder '$projectName' so it has no spaces." }
+subst $drive (Split-Path -Parent $projectRoot)
 try {
-  Push-Location "$drive\"
-  Write-Host "Building from $drive (mapped to $projectRoot)" -ForegroundColor Cyan
+  Push-Location "$drive\$projectName"
+  Write-Host "Building from $drive\$projectName (mapped to $projectRoot)" -ForegroundColor Cyan
 
   Write-Host '1/3 Generating the native Android project...' -ForegroundColor Cyan
   npx expo prebuild --platform android --clean --no-install

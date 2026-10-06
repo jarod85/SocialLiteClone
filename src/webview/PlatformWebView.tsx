@@ -10,7 +10,7 @@ import type {
   WebViewProgressEvent,
 } from 'react-native-webview/lib/WebViewTypes';
 
-import { decideNavigation, initialUrl, type NavigationContext } from '@/core/navigationPolicy';
+import { decideNavigation, initialUrl, type NavigationContext, resolveSitePath } from '@/core/navigationPolicy';
 import { compileRoutes } from '@/core/routeMatcher';
 import { hostMatches, parseUrl, stripQueryAndHash } from '@/core/urls';
 import { DailyLimitGate } from '@/features/timeLimit/DailyLimitGate';
@@ -38,6 +38,10 @@ import { useBrowserUserAgent } from './useBrowserUserAgent';
 
 interface Props {
   platform: PlatformConfig;
+  /** Start on this site path instead of home (e.g. the inbox, from a message alert). */
+  openPath?: string;
+  /** Changes when the same path is asked for again while the page is open (another alert tapped). */
+  openKey?: string;
   onClose: () => void;
   onOpenSettings: () => void;
 }
@@ -54,7 +58,7 @@ type StatsCallback = (counts: Record<string, number> | null) => void;
  * The user logs in on the real site inside this WebView. The app never sees
  * credentials, cookies or page content.
  */
-export function PlatformWebView({ platform, onClose, onOpenSettings }: Props) {
+export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSettings }: Props) {
   const theme = useTheme();
   const webViewRef = useRef<WebView>(null);
   const userAgent = useBrowserUserAgent(platform.userAgent);
@@ -79,7 +83,7 @@ export function PlatformWebView({ platform, onClose, onOpenSettings }: Props) {
   );
   const homeUrl = useMemo(() => initialUrl(navContext), [navContext]);
   // The first page only. Later changes are applied to the live page instead of reloading it.
-  const [startUrl] = useState(homeUrl);
+  const [startUrl] = useState(() => (openPath ? resolveSitePath(platform.baseUrl, openPath) : homeUrl));
 
   const payload = useMemo(
     () => buildPayload(platform, rules, toggles, feedLimit, platform.baseUrl),
@@ -206,6 +210,25 @@ export function PlatformWebView({ platform, onClose, onOpenSettings }: Props) {
     // supported way to navigate while keeping back/forward history intact.
     webViewRef.current?.injectJavaScript(`window.location.assign(${JSON.stringify(homeUrl)});true;`);
   }, [homeUrl]);
+
+  // A message alert tapped while this page is already open: clear any overlay (during render,
+  // as React recommends for prop changes), then go to the inbox.
+  const [shownOpenKey, setShownOpenKey] = useState(openKey);
+  if (openKey !== shownOpenKey) {
+    setShownOpenKey(openKey);
+    if (openPath) {
+      setLoadError(null);
+      setBlockedRuleId(null);
+    }
+  }
+  const openedKeyRef = useRef(openKey);
+  useEffect(() => {
+    if (openKey === openedKeyRef.current) return;
+    openedKeyRef.current = openKey;
+    if (!openPath) return;
+    const url = resolveSitePath(platform.baseUrl, openPath);
+    webViewRef.current?.injectJavaScript(`window.location.assign(${JSON.stringify(url)});true;`);
+  }, [openKey, openPath, platform.baseUrl]);
 
   const recreateWebView = useCallback(() => {
     setLoadError(null);

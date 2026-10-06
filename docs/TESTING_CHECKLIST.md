@@ -43,6 +43,17 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 - [ ] 19. **Posting:** tap +, pick a photo from the gallery, post it (or cancel at the last step).
 - [ ] 20. A link to another website (e.g. in a bio) opens in your normal browser.
 
+## Message alerts (Android)
+
+- [ ] 20a. Settings → **Message alerts** on → allow notifications → turn on Lite Social under Notification access
+      (if greyed out: App info → ⋮ → Allow restricted settings). Back in Settings it says "On."
+- [ ] 20b. With Lite Social closed, have someone message you. A Lite Social notification shows the sender and text;
+      Instagram's own notification is gone.
+- [ ] 20c. Tap it: Lite Social opens on your Instagram inbox (not the Instagram app). Tap a second alert while
+      Lite Social is open on another page: it goes to the inbox again.
+- [ ] 20d. Reply from the notification: the reply arrives in the conversation.
+- [ ] 20e. Turn Message alerts off: Instagram's own notifications come back unchanged.
+
 ## Settings (open with the sliders icon in the toolbar while Instagram is open)
 
 - [ ] 21. Turn **Block Reels** off → back in Instagram the Reels tab is visible again *without* reloading. Turn it on again.

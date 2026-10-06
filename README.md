@@ -10,9 +10,9 @@ Instagram is supported first. The design makes adding YouTube (Shorts), Facebook
 
 ## Install on your Android phone
 
-1. Get `release/LiteSocial-1.1.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
+1. Get `release/LiteSocial-1.2.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
 2. Install it, either way works:
-   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.1.0.apk`.
+   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.2.0.apk`.
      If you use scrcpy, you can also drag the APK onto the scrcpy window.
    - **File:** copy the APK to the phone and open it in My Files. Allow "Install unknown apps" for My Files when asked.
 3. Samsung: if installation is refused, turn off **Settings → Security and privacy → Auto Blocker** while you
@@ -32,6 +32,23 @@ Instagram is supported first. The design makes adding YouTube (Shorts), Facebook
 | Stop the feed | On, 30 posts | Ends the home feed with a "you're all caught up" card (10/20/30/50) |
 | Hide Stories | Off | Blocks opening stories; hides the tray where it can be found |
 | Daily time limit | Off | 15–120 min/day; then a break screen, with one "5 more minutes" per day |
+
+### Message alerts (Android)
+
+Lite Social can't receive Instagram's notifications itself: the site runs in a WebView, and Android's WebView has no
+web push. Instead, keep the Instagram app installed and logged in, and let Lite Social take over its message
+notifications:
+
+1. In the Instagram app: **Settings → Notifications**, turn everything off except **Messages**.
+2. In Lite Social: **Settings → Message alerts**, turn it on, allow notifications, then turn on Lite Social under
+   Android's **Notification access**.
+   If that switch is greyed out ("Restricted setting", Android 13+ for apps installed from a file), open
+   **App info → ⋮ → Allow restricted settings** first. Installing with `adb install` avoids this.
+
+From then on, each Instagram message notification is replaced by a Lite Social one (same sender, text and picture).
+Tapping it opens your inbox in Lite Social instead of the Instagram app; Instagram's inline **Reply** still works.
+If Lite Social can't post notifications (you turned them off), Instagram's own notification is left alone, so no
+alert is lost. The code is a small native module in `modules/message-alerts/`.
 
 Also: "Open in app" banners are hidden, links that try to switch to the Instagram
 app are ignored, links to other sites open in your normal browser, videos don't
@@ -82,6 +99,9 @@ up rather than reloading forever.
   rule X on path Y" (path only, no query) and, for leak reports, how many elements each rule matched.
 - The only network request the app makes itself is downloading the public rules file. No analytics.
 - Stored on the phone: settings, today's total minutes, leak reports.
+- Message alerts (off by default) need Android's Notification access. The listener ignores every app but
+  Instagram, and copies an Instagram message's sender, text and picture into a Lite Social notification. Nothing is
+  stored or sent.
 
 ## Project structure
 
@@ -94,8 +114,10 @@ src/
   rules/               Rules validation (schema.ts) and loading/updating (rulesStore.ts)
   webview/             PlatformWebView (all three layers), toolbar, overlays, UA handling, page bridge
   features/timeLimit/  Daily limit tracking and the break screen
+  features/messageAlerts/ JS side of message alerts (status, permissions)
   state/               Persisted stores: settings, usage, leak reports
   ui/                  Theme and shared components
+modules/message-alerts/ Native Android module: notification listener for message alerts
 rules/rules.json       Blocking rules: bundled with the app AND fetched remotely
 scripts/               build-engine.js (bundles the injected script), build-android.ps1 (builds the APK)
 tests/                 Jest tests (route matching, navigation policy, CSS, rules validation, engine in jsdom)
@@ -216,6 +238,8 @@ Said plainly, so nothing is oversold:
   Instagram's own scripts. CSS is applied a moment later on a cold start, and the Navigation API hook
   covers navigation the history patch might miss.
 - **Pull-to-refresh is iOS-only** (a `react-native-webview` limitation); Android has the toolbar reload button.
+- **Message alerts open the inbox, not the conversation.** Instagram's notification doesn't reveal the web
+  thread address. They also depend on the Instagram app: if it's uninstalled or logged out, no alerts arrive.
 - **It's not a device-level blocker.** The Instagram app and website still work outside Lite Social. Blocking
   those needs Screen Time (iOS) or Accessibility/VPN (Android) APIs, a separate project.
 - **Platform risk:** Instagram can detect embedded browsers and could degrade the site or block login, and

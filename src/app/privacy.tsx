@@ -23,6 +23,10 @@ const POINTS: [string, string][] = [
     'Your settings, today’s total time, and any leak reports you create (a page address without its query, plus how many items each rule caught). All of it stays on this phone.',
   ],
   [
+    'Message alerts (optional, Android)',
+    'If you turn them on and grant Notification access, Lite Social sees the notifications on your phone. It ignores every app except Instagram, and for Instagram messages it copies the sender, text and picture into its own notification, then removes Instagram’s. Nothing is saved or sent anywhere.',
+  ],
+  [
     'What goes over the network',
     'Besides the platform itself, the app makes one request: it downloads the public blocking-rules file. That request carries no account or browsing data. There are no analytics and no tracking.',
   ],

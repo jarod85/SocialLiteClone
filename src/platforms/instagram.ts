@@ -16,6 +16,7 @@ export const instagram: PlatformConfig = {
     'meta.com',
     '*.meta.com', // Accounts Center and account recovery flows
   ],
+  messagesPath: '/direct/inbox/',
   neverBlock: [
     '/accounts/**', // login, signup, settings, password reset, activity
     '/challenge/**', // suspicious-login checks

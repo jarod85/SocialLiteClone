@@ -5,6 +5,7 @@
 import { decideNavigation, initialUrl, type NavigationContext } from '@/core/navigationPolicy';
 import { compileRoutes } from '@/core/routeMatcher';
 import { instagram } from '@/platforms/instagram';
+import { startPath } from '@/platforms/registry';
 import { effectiveToggles } from '@/platforms/toggles';
 import { platformRules, validateRules } from '@/rules/schema';
 
@@ -96,6 +97,25 @@ describe('Instagram navigation policy (toggles)', () => {
   it('keeps the normal home feed when "Following feed" is off', () => {
     expect(decide(`${IG}/`, { followingFeed: false })).toEqual({ type: 'allow' });
     expect(initialUrl(context({ followingFeed: false }))).toBe(instagram.baseUrl);
+  });
+});
+
+describe('links from message alerts', () => {
+  it('open the inbox, which no rule can block', () => {
+    const path = startPath(instagram, 'messages');
+    expect(path).toBe('/direct/inbox/');
+    for (const allowSharedReels of [true, false]) {
+      expect(decide(`${IG}${path}`, { allowSharedReels, hideStories: true })).toEqual({ type: 'allow' });
+    }
+  });
+
+  it.each(['/reels/', 'reels', '', 'MESSAGES'])('ignore anything but named targets (%s)', (open) => {
+    expect(startPath(instagram, open)).toBeUndefined();
+  });
+
+  it('ignore repeated parameters', () => {
+    expect(startPath(instagram, ['messages', 'messages'])).toBeUndefined();
+    expect(startPath(instagram, undefined)).toBeUndefined();
   });
 });
 

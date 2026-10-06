@@ -46,7 +46,9 @@ $env:Path = "$JavaHome\bin;$env:Path"
 
 Write-Host "1/5 Copying the project to $BuildDir..." -ForegroundColor Cyan
 # /MIR mirrors and deletes stale files; excluded folders are neither copied nor deleted.
-robocopy $projectRoot $BuildDir /MIR /NFL /NDL /NJH /NJS /NP /XD node_modules android ios release .expo .git dist | Out-Null
+# android/ and ios/ are excluded by full path: they're generated at the root, but local
+# modules (modules/*/android) are source and must be copied.
+robocopy $projectRoot $BuildDir /MIR /NFL /NDL /NJH /NJS /NP /XD node_modules "$projectRoot\android" "$projectRoot\ios" release .expo .git dist | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Copying the project failed (robocopy exit $LASTEXITCODE)" }
 
 Push-Location $BuildDir

@@ -1,12 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { getPlatform } from '@/platforms/registry';
+import { getPlatform, startPath } from '@/platforms/registry';
 import { useTheme } from '@/ui/theme';
 import { PlatformWebView } from '@/webview/PlatformWebView';
 
 export default function BrowseScreen() {
-  const { platformId } = useLocalSearchParams<{ platformId: string }>();
+  // `open` and `at` come from message alerts: litesocial://browse/instagram?open=messages&at=<time>.
+  const { platformId, open, at } = useLocalSearchParams<{ platformId: string; open?: string; at?: string }>();
   const router = useRouter();
   const platform = getPlatform(platformId);
 
@@ -14,7 +15,15 @@ export default function BrowseScreen() {
 
   if (!platform) return <UnknownPlatform id={platformId} onClose={close} />;
   // Settings opens on top, so the page stays loaded and toggles apply to it live.
-  return <PlatformWebView platform={platform} onClose={close} onOpenSettings={() => router.push('/settings')} />;
+  return (
+    <PlatformWebView
+      platform={platform}
+      openPath={startPath(platform, open)}
+      openKey={at}
+      onClose={close}
+      onOpenSettings={() => router.push('/settings')}
+    />
+  );
 }
 
 function UnknownPlatform({ id, onClose }: { id: string | undefined; onClose: () => void }) {

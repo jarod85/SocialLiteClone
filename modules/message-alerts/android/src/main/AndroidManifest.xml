@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Android 13+: needed to show the re-posted message alerts. -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+  <application>
+    <!--
+      Only the system can bind this (BIND_NOTIFICATION_LISTENER_SERVICE), and only after the user
+      grants Notification access in Android settings. It acts on Instagram's notifications only.
+    -->
+    <service
+      android:name="com.jarod85.litesocial.alerts.MessageListenerService"
+      android:exported="true"
+      android:label="Lite Social message alerts"
+      android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+      <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>

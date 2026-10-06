@@ -1,8 +1,15 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import {
+  openAppSettings,
+  openListenerSettings,
+  requestNotificationPermission,
+  setEnabled as setMessageAlertsEnabled,
+} from '@/features/messageAlerts/messageAlerts';
+import { useMessageAlerts } from '@/features/messageAlerts/useMessageAlerts';
 import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
 import { platforms } from '@/platforms/registry';
 import type { PlatformConfig } from '@/platforms/types';
@@ -31,6 +38,8 @@ export default function SettingsScreen() {
         {platforms.map((platform) => (
           <PlatformSection key={platform.id} platform={platform} />
         ))}
+
+        <MessageAlertsSection />
 
         <Section
           title="Daily time limit"
@@ -95,6 +104,74 @@ function PlatformSection({ platform }: { platform: PlatformConfig }) {
   );
 }
 
+function MessageAlertsSection() {
+  const [status, refresh] = useMessageAlerts();
+  if (!status.supported) return null;
+
+  const askForListenerAccess = () =>
+    Alert.alert(
+      'Allow notification access',
+      'On the next screen, turn on Lite Social. It only acts on Instagram message notifications.\n\n' +
+        'If the switch is greyed out ("Restricted setting"), go back, tap "App info", then ⋮ → "Allow restricted settings", and try again.',
+      [
+        { text: 'Not now', style: 'cancel' },
+        { text: 'Continue', onPress: openListenerSettings },
+      ],
+    );
+
+  const onToggle = async (value: boolean) => {
+    setMessageAlertsEnabled(value);
+    refresh();
+    if (!value) return;
+    await requestNotificationPermission();
+    refresh();
+    if (!status.listenerAccess) askForListenerAccess();
+  };
+
+  let state: string;
+  if (!status.enabled) state = '';
+  else if (!status.listenerAccess) state = 'Not working yet: Lite Social needs Notification access.';
+  else if (!status.canNotify) state = "Not working yet: Lite Social's notifications are turned off.";
+  else state = 'On. New Instagram messages show up as Lite Social notifications.';
+
+  return (
+    <Section
+      title="Message alerts"
+      footer={
+        'Needs the Instagram app installed and logged in, with only Messages notifications on (Instagram → Settings → Notifications). ' +
+        "Lite Social replaces those notifications with its own; nothing is stored or sent anywhere. Instagram's Reply button still works."
+      }
+    >
+      <SwitchRow
+        label="Instagram message alerts"
+        description="Get notified about new messages. Tapping one opens your inbox in Lite Social instead of the Instagram app."
+        value={status.enabled}
+        onValueChange={(value) => void onToggle(value)}
+      />
+      {state ? <TextRow>{state}</TextRow> : null}
+      {status.enabled && !status.listenerAccess ? (
+        <View style={styles.buttonColumn}>
+          <Button label="Allow notification access" onPress={askForListenerAccess} />
+          <Button label="App info" variant="secondary" onPress={openAppSettings} />
+        </View>
+      ) : null}
+      {status.enabled && status.listenerAccess && !status.canNotify ? (
+        <View style={styles.buttonColumn}>
+          <Button label="Turn on notifications" onPress={openAppSettings} />
+        </View>
+      ) : null}
+      {!status.enabled && status.listenerAccess ? (
+        <>
+          <TextRow>Lite Social still has Notification access but ignores everything while this is off. You can remove the access too.</TextRow>
+          <View style={styles.buttonColumn}>
+            <Button label="Notification access" variant="secondary" onPress={openListenerSettings} />
+          </View>
+        </>
+      ) : null}
+    </Section>
+  );
+}
+
 function RulesSection() {
   const rules = useRules((s) => s.rules);
   const source = useRules((s) => s.source);
@@ -131,5 +208,6 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 40 },
   chipsTop: { height: 14 },
   buttonRow: { paddingHorizontal: 16, paddingBottom: 14 },
+  buttonColumn: { paddingHorizontal: 16, paddingBottom: 14, gap: 10 },
   version: { textAlign: 'center', fontSize: 12, marginTop: 28 },
 });

@@ -12,7 +12,7 @@ const POINTS: [string, string][] = [
   ],
   [
     'Your session stays in the browser',
-    'Cookies live in the in-app browser’s own storage, just as they would in a normal browser. The app never reads, copies or sends them.',
+    'Cookies live in the in-app browser’s own storage, just as they would in a normal browser. The only exception is Instagram notifications (below).',
   ],
   [
     'Filtering only hides things',
@@ -20,15 +20,19 @@ const POINTS: [string, string][] = [
   ],
   [
     'What the app keeps',
-    'Your settings, today’s total time, and any leak reports you create (a page address without its query, plus how many items each rule caught). All of it stays on this phone.',
+    'Your settings, today’s total time, any leak reports you create (a page address without its query, plus how many items each rule caught), your YouTube channel list and its cached feed. All of it stays on this phone.',
   ],
   [
-    'Message alerts (optional, Android)',
-    'If you turn them on and grant Notification access, Lite Social sees the notifications on your phone. It ignores every app except Instagram, and for Instagram messages it copies the sender, text and picture into its own notification, then removes Instagram’s. Nothing is saved or sent anywhere.',
+    'Instagram notifications (optional, Android)',
+    'If you turn them on, a background check uses your Instagram login from the in-app browser to ask instagram.com, the same way the site itself does, for new messages and activity. The login cookies are only ever sent to instagram.com. Sender names, message previews and activity texts go straight into a notification on this phone; nothing is saved or sent anywhere else.',
+  ],
+  [
+    'YouTube',
+    'YouTube runs without a Google account. Searches, channel pages, your feed and videos are loaded directly from YouTube by the app (with the open-source NewPipe Extractor). YouTube sees requests from your phone, but they aren’t linked to any account. Downloads are saved on this phone only.',
   ],
   [
     'What goes over the network',
-    'Besides the platform itself, the app makes one request: it downloads the public blocking-rules file. That request carries no account or browsing data. There are no analytics and no tracking.',
+    'Besides the platforms themselves, the app makes one request: it downloads the public blocking-rules file. That request carries no account or browsing data. There are no analytics and no tracking.',
   ],
 ];
 

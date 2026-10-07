@@ -1,0 +1,25 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.jarod85.litesocial'
+version = '1.0.0'
+
+android {
+  namespace "com.jarod85.litesocial.youtube"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+
+dependencies {
+  implementation 'androidx.core:core:1.17.0'
+  // YouTube without an account or ads: search, channels, feeds and stream URLs. From JitPack (GPL-3.0).
+  // Needs minSdk 33 (app.json, expo-build-properties) or core library desugaring.
+  implementation 'com.github.teamnewpipe:NewPipeExtractor:v0.26.5'
+  // LAME MP3 encoder ported to Java (LGPL). Only its encoder core is used; the
+  // javax.sound-based wrapper class it also ships is never loaded on Android.
+  implementation 'de.sciss:jump3r:1.0.5'
+}

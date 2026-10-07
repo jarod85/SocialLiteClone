@@ -43,16 +43,39 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 - [ ] 19. **Posting:** tap +, pick a photo from the gallery, post it (or cancel at the last step).
 - [ ] 20. A link to another website (e.g. in a bio) opens in your normal browser.
 
-## Message alerts (Android)
+## Instagram notifications (Android)
 
-- [ ] 20a. Settings → **Message alerts** on → allow notifications → turn on Lite Social under Notification access
-      (if greyed out: App info → ⋮ → Allow restricted settings). Back in Settings it says "On."
-- [ ] 20b. With Lite Social closed, have someone message you. A Lite Social notification shows the sender and text;
-      Instagram's own notification is gone.
-- [ ] 20c. Tap it: Lite Social opens on your Instagram inbox (not the Instagram app). Tap a second alert while
-      Lite Social is open on another page: it goes to the inbox again.
-- [ ] 20d. Reply from the notification: the reply arrives in the conversation.
-- [ ] 20e. Turn Message alerts off: Instagram's own notifications come back unchanged.
+- [ ] 20a. Log in to Instagram in Lite Social. Settings → **Instagram notifications** on → allow notifications. A check
+      runs right away; the section shows "Messages: OK (N unread)" and "Activity: OK" (or a clear error).
+- [ ] 20b. Tap **Allow background checks** and confirm Android's dialog. The button disappears.
+- [ ] 20c. Have someone message you, then tap **Check now** (or wait up to 15 minutes with Lite Social closed). A
+      notification shows the sender, the message and their picture.
+- [ ] 20d. Tap it: Lite Social opens that conversation (not just the inbox). Read it; at the next check the
+      notification disappears by itself.
+- [ ] 20e. Have someone like or comment on a post: an "Instagram" activity notification appears; tapping it opens your
+      activity page in Lite Social.
+- [ ] 20f. Log out of Instagram in Lite Social → Check now says "Not logged in". Log back in → OK again.
+- [ ] 20g. Turn Instagram notifications off: no more checks or alerts.
+
+## YouTube
+
+- [ ] Y1. Start screen → **YouTube** → "No subscriptions yet". Find channels: search a channel name, tap Subscribe.
+- [ ] Y2. Your channels → **Import subscriptions file** → pick Google Takeout's `subscriptions.csv`: "N new channels added".
+- [ ] Y3. Back on Subscriptions: newest videos of your channels, newest first, with durations. No Shorts, no
+      recommendations. Pull down refreshes.
+- [ ] Y4. Open a video: it plays at good quality without any ads. There are no related videos below it.
+- [ ] Y5. Press Home (leave the app): the sound keeps playing; the notification has play/pause. Lock the phone: still
+      playing; lock-screen controls work.
+- [ ] Y6. Back in the app, go back to the feed: the mini player shows; play/pause and × work; tapping it reopens the video.
+- [ ] Y7. Download → **Video (MP4)**: a progress notification, then "Saved MP4"; the video is in Gallery → Movies/Lite Social
+      and plays with sound.
+- [ ] Y8. Download → **Audio (MP3)**: first time it asks for the music folder (pick Musicolet's folder, e.g. Music). Then
+      the folder screen: open a subfolder or create one, "Save in …". "Saved MP3" notification; tapping it opens
+      Musicolet; the song is in that folder with title, channel and cover art.
+- [ ] Y9. Second MP3: the folder screen starts in the subfolder used last time.
+- [ ] Y10. In another app (e.g. a chat), tap a YouTube link → "Open with Lite Social" → it plays in Lite Social. A
+      Shorts link shows "Shorts are hidden by Lite Social".
+- [ ] Y11. Search → Videos: no Shorts among the results.
 
 ## Settings (open with the sliders icon in the toolbar while Instagram is open)
 

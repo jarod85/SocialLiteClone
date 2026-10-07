@@ -6,8 +6,13 @@ import { useTheme } from '@/ui/theme';
 import { PlatformWebView } from '@/webview/PlatformWebView';
 
 export default function BrowseScreen() {
-  // `open` and `at` come from message alerts: litesocial://browse/instagram?open=messages&at=<time>.
-  const { platformId, open, at } = useLocalSearchParams<{ platformId: string; open?: string; at?: string }>();
+  // `open`, `thread` and `at` come from Instagram alerts: litesocial://browse/instagram?open=thread&thread=<id>&at=<time>.
+  const { platformId, open, thread, at } = useLocalSearchParams<{
+    platformId: string;
+    open?: string;
+    thread?: string;
+    at?: string;
+  }>();
   const router = useRouter();
   const platform = getPlatform(platformId);
 
@@ -18,7 +23,7 @@ export default function BrowseScreen() {
   return (
     <PlatformWebView
       platform={platform}
-      openPath={startPath(platform, open)}
+      openPath={startPath(platform, open, thread)}
       openKey={at}
       onClose={close}
       onOpenSettings={() => router.push('/settings')}

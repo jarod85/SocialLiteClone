@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Android 13+: needed to show the alerts. -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!--
+    Lets Settings show Android's "Let Lite Social run in the background?" dialog,
+    so battery optimization doesn't hold the background checks back for hours.
+  -->
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+</manifest>

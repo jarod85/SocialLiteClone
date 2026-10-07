@@ -1,16 +1,24 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
+  CHECK_INTERVAL_OPTIONS,
+  checkNow as checkInstagramNow,
+  hasSession as hasInstagramSession,
   openAppSettings,
-  openListenerSettings,
   requestNotificationPermission,
-  setEnabled as setMessageAlertsEnabled,
-} from '@/features/messageAlerts/messageAlerts';
-import { useMessageAlerts } from '@/features/messageAlerts/useMessageAlerts';
+  requestUnrestrictedBattery,
+  setEnabled as setInstagramAlertsEnabled,
+  setIntervalMinutes as setInstagramCheckInterval,
+} from '@/features/instagramAlerts/instagramAlerts';
+import { useInstagramAlerts } from '@/features/instagramAlerts/useInstagramAlerts';
 import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
+import { chooseMusicFolder } from '@/features/youtube/components/useDownloadFlow';
+import { youtubeAvailable } from '@/features/youtube/native';
+import { MP3_BITRATES, useSubscriptions, useYouTubeSettings, VIDEO_HEIGHTS } from '@/features/youtube/stores';
 import { platforms } from '@/platforms/registry';
 import type { PlatformConfig } from '@/platforms/types';
 import { refreshRules, RULES_URL, useRules } from '@/rules/rulesStore';
@@ -39,7 +47,9 @@ export default function SettingsScreen() {
           <PlatformSection key={platform.id} platform={platform} />
         ))}
 
-        <MessageAlertsSection />
+        <InstagramAlertsSection />
+
+        <YouTubeSection />
 
         <Section
           title="Daily time limit"
@@ -104,70 +114,129 @@ function PlatformSection({ platform }: { platform: PlatformConfig }) {
   );
 }
 
-function MessageAlertsSection() {
-  const [status, refresh] = useMessageAlerts();
+function InstagramAlertsSection() {
+  const [status, refresh] = useInstagramAlerts();
+  const [checking, setChecking] = useState(false);
   if (!status.supported) return null;
 
-  const askForListenerAccess = () =>
-    Alert.alert(
-      'Allow notification access',
-      'On the next screen, turn on Lite Social. It only acts on Instagram message notifications.\n\n' +
-        'If the switch is greyed out ("Restricted setting"), go back, tap "App info", then ⋮ → "Allow restricted settings", and try again.',
-      [
-        { text: 'Not now', style: 'cancel' },
-        { text: 'Continue', onPress: openListenerSettings },
-      ],
-    );
+  const runCheck = async () => {
+    setChecking(true);
+    try {
+      await checkInstagramNow();
+    } finally {
+      setChecking(false);
+      refresh();
+    }
+  };
 
   const onToggle = async (value: boolean) => {
-    setMessageAlertsEnabled(value);
+    if (value && !(await hasInstagramSession())) {
+      Alert.alert(
+        'Log in to Instagram first',
+        'Notifications use the Instagram login in Lite Social. Open Instagram from the start screen, log in, then turn this on.',
+      );
+      return;
+    }
+    setInstagramAlertsEnabled(value);
     refresh();
     if (!value) return;
     await requestNotificationPermission();
     refresh();
-    if (!status.listenerAccess) askForListenerAccess();
+    await runCheck();
   };
 
-  let state: string;
-  if (!status.enabled) state = '';
-  else if (!status.listenerAccess) state = 'Not working yet: Lite Social needs Notification access.';
-  else if (!status.canNotify) state = "Not working yet: Lite Social's notifications are turned off.";
-  else state = 'On. New Instagram messages show up as Lite Social notifications.';
+  const result = status.lastResult;
+  const lines: string[] = [];
+  if (status.enabled && !status.canNotify) lines.push("Not working yet: Lite Social's notifications are turned off.");
+  if (result) {
+    const when = new Date(result.checkedAt).toLocaleString();
+    if (!result.loggedIn) lines.push(`Last check (${when}): not logged in. Open Instagram in Lite Social and log in.`);
+    else {
+      lines.push(`Last check: ${when}.`);
+      lines.push(`Messages: ${result.messages}${result.messages === 'OK' ? ` (${result.unreadConversations} unread)` : ''}.`);
+      lines.push(`Activity: ${result.activity}.`);
+    }
+  }
 
   return (
     <Section
-      title="Message alerts"
+      title="Instagram notifications"
       footer={
-        'Needs the Instagram app installed and logged in, with only Messages notifications on (Instagram → Settings → Notifications). ' +
-        "Lite Social replaces those notifications with its own; nothing is stored or sent anywhere. Instagram's Reply button still works."
+        "Lite Social can't receive Instagram's push notifications, so it checks Instagram itself in the background, using your " +
+        'Instagram login in this app. Alerts can arrive up to the interval late (Android decides the exact time). ' +
+        'Nothing is stored or sent anywhere except to instagram.com.'
       }
     >
       <SwitchRow
-        label="Instagram message alerts"
-        description="Get notified about new messages. Tapping one opens your inbox in Lite Social instead of the Instagram app."
+        label="Instagram notifications"
+        description="New messages (tap to open the chat) plus likes, comments, follows and mentions (tap to open your activity)."
         value={status.enabled}
         onValueChange={(value) => void onToggle(value)}
       />
-      {state ? <TextRow>{state}</TextRow> : null}
-      {status.enabled && !status.listenerAccess ? (
-        <View style={styles.buttonColumn}>
-          <Button label="Allow notification access" onPress={askForListenerAccess} />
-          <Button label="App info" variant="secondary" onPress={openAppSettings} />
-        </View>
-      ) : null}
-      {status.enabled && status.listenerAccess && !status.canNotify ? (
-        <View style={styles.buttonColumn}>
-          <Button label="Turn on notifications" onPress={openAppSettings} />
-        </View>
-      ) : null}
-      {!status.enabled && status.listenerAccess ? (
+      {status.enabled ? (
         <>
-          <TextRow>Lite Social still has Notification access but ignores everything while this is off. You can remove the access too.</TextRow>
-          <View style={styles.buttonColumn}>
-            <Button label="Notification access" variant="secondary" onPress={openListenerSettings} />
-          </View>
+          <TextRow>Check every</TextRow>
+          <Chips
+            options={CHECK_INTERVAL_OPTIONS}
+            value={status.intervalMinutes as (typeof CHECK_INTERVAL_OPTIONS)[number]}
+            onChange={(minutes) => {
+              setInstagramCheckInterval(minutes);
+              refresh();
+            }}
+            format={(m) => (m === 60 ? '1 hour' : `${m} min`)}
+          />
         </>
       ) : null}
+      {lines.length > 0 ? <TextRow>{lines.join('\n')}</TextRow> : null}
+      {status.enabled ? (
+        <View style={styles.buttonColumn}>
+          <Button label={checking ? 'Checking...' : 'Check now'} variant="secondary" disabled={checking} onPress={() => void runCheck()} />
+          {!status.canNotify ? <Button label="Turn on notifications" onPress={openAppSettings} /> : null}
+          {!status.unrestricted ? (
+            <>
+              <TextRow>
+                Battery optimization can hold the background checks back for hours. Allow Lite Social to run in the background
+                for timely alerts.
+              </TextRow>
+              <Button label="Allow background checks" onPress={requestUnrestrictedBattery} />
+            </>
+          ) : null}
+        </View>
+      ) : null}
+    </Section>
+  );
+}
+
+function YouTubeSection() {
+  const musicFolder = useYouTubeSettings((s) => s.musicFolder);
+  const mp3Kbps = useYouTubeSettings((s) => s.mp3Kbps);
+  const setMp3Kbps = useYouTubeSettings((s) => s.setMp3Kbps);
+  const videoMaxHeight = useYouTubeSettings((s) => s.videoMaxHeight);
+  const setVideoMaxHeight = useYouTubeSettings((s) => s.setVideoMaxHeight);
+  const subscriptions = useSubscriptions((s) => s.channels.length);
+  const router = useRouter();
+  if (!youtubeAvailable) return null;
+
+  return (
+    <Section
+      title="YouTube"
+      footer="MP3s are saved into the music folder you pick (the one Musicolet plays from); you choose the subfolder for each song. Videos go to Movies/Lite Social."
+    >
+      <LinkRow label="Your channels" detail={String(subscriptions)} onPress={() => router.push('/youtube/subscriptions')} />
+      <LinkRow
+        label="Music folder"
+        detail={musicFolder?.name ?? 'Not chosen'}
+        onPress={() => void chooseMusicFolder()}
+      />
+      <TextRow>MP3 quality</TextRow>
+      <Chips options={MP3_BITRATES} value={mp3Kbps as (typeof MP3_BITRATES)[number]} onChange={setMp3Kbps} format={(k) => `${k} kbps`} />
+      <TextRow>Video download quality (up to)</TextRow>
+      <Chips
+        options={VIDEO_HEIGHTS}
+        value={videoMaxHeight as (typeof VIDEO_HEIGHTS)[number]}
+        onChange={setVideoMaxHeight}
+        format={(h) => `${h}p`}
+      />
     </Section>
   );
 }

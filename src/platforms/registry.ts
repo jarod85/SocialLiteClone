@@ -12,10 +12,27 @@ export function getPlatform(id: string | undefined): PlatformConfig | undefined 
 }
 
 /**
- * The page a link into the app asks to start on, e.g. `?open=messages` from a
- * message alert. Only named targets from the platform's own config are
- * accepted, never a path from the link itself, since any app can send us links.
+ * The page a link into the app asks to start on, e.g. `?open=thread&thread=123`
+ * from an Instagram alert. Only named targets from the platform's own config
+ * are accepted, plus a numeric conversation id; never a path from the link
+ * itself, since any app can send us links.
  */
-export function startPath(platform: PlatformConfig, open: string | string[] | undefined): string | undefined {
-  return open === 'messages' ? platform.messagesPath : undefined;
+export function startPath(
+  platform: PlatformConfig,
+  open: string | string[] | undefined,
+  thread?: string | string[],
+): string | undefined {
+  switch (open) {
+    case 'messages':
+      return platform.messagesPath;
+    case 'thread':
+      if (platform.threadPath && typeof thread === 'string' && /^\d{1,40}$/.test(thread)) {
+        return platform.threadPath.replace('{id}', thread);
+      }
+      return platform.messagesPath;
+    case 'activity':
+      return platform.activityPath;
+    default:
+      return undefined;
+  }
 }

@@ -54,6 +54,26 @@ export default function HomeScreen() {
           </Pressable>
         ))}
 
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open YouTube"
+          onPress={() => router.push('/youtube')}
+          style={({ pressed }) => [
+            styles.card,
+            { backgroundColor: theme.surface, borderColor: theme.border },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <View style={[styles.swatch, { backgroundColor: '#E62117' }]} />
+          <View style={styles.cardText}>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>YouTube</Text>
+            <Text style={[styles.cardTagline, { color: theme.textMuted }]}>
+              Your subscriptions only. No Shorts, no ads, plays in the background
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={theme.textMuted} />
+        </Pressable>
+
         <Text style={[styles.usage, { color: theme.textMuted }]}>
           Today: {usedMinutes} min
           {limit.limitMinutes > 0 ? ` of ${limit.limitMinutes} min` : ''}

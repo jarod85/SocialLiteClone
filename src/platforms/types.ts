@@ -28,8 +28,12 @@ export interface PlatformConfig {
    * system browser. `*.example.com` matches subdomains.
    */
   allowedHosts: string[];
-  /** Where `?open=messages` (from a message alert) starts the browser. Must be on the neverBlock list. */
+  /** Where `?open=messages` (from an alert) starts the browser. Must be on the neverBlock list. */
   messagesPath?: string;
+  /** One conversation, `{id}` replaced by a numeric id, for `?open=thread`. Must be on the neverBlock list. */
+  threadPath?: string;
+  /** Notifications/activity page, for `?open=activity`. Must be on the neverBlock list. */
+  activityPath?: string;
   /** Path globs no rule may ever block, so a bad rule can't break login, 2FA or DMs. */
   neverBlock: string[];
   /** Settings toggles. Rules reference them by id; the settings screen is generated from this list. */

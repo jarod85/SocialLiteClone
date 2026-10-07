@@ -5,14 +5,16 @@ mobile website inside a controlled in-app browser and removes the addictive
 parts (Reels, the algorithmic feed, Explore, suggestions, endless scroll), while
 keeping the useful ones: DMs, profiles, notifications, search, and posting.
 
-Instagram is supported first. The design makes adding YouTube (Shorts), Facebook
-(Reels), TikTok and others mostly a configuration change.
+Instagram runs in that filtered browser. YouTube is different: Google blocks signing in inside embedded
+browsers, so Lite Social has its own small YouTube client instead (no account, no ads, no Shorts, only your
+subscriptions, background play and downloads). The browser design makes adding Facebook (Reels), TikTok and
+others mostly a configuration change.
 
 ## Install on your Android phone
 
-1. Get `release/LiteSocial-1.2.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
+1. Get `release/LiteSocial-1.3.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
 2. Install it, either way works:
-   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.2.0.apk`.
+   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.3.0.apk`.
      If you use scrcpy, you can also drag the APK onto the scrcpy window.
    - **File:** copy the APK to the phone and open it in My Files. Allow "Install unknown apps" for My Files when asked.
 3. Samsung: if installation is refused, turn off **Settings → Security and privacy → Auto Blocker** while you
@@ -33,22 +35,46 @@ Instagram is supported first. The design makes adding YouTube (Shorts), Facebook
 | Hide Stories | Off | Blocks opening stories; hides the tray where it can be found |
 | Daily time limit | Off | 15–120 min/day; then a break screen, with one "5 more minutes" per day |
 
-### Message alerts (Android)
+### Instagram notifications (Android)
 
-Lite Social can't receive Instagram's notifications itself: the site runs in a WebView, and Android's WebView has no
-web push. Instead, keep the Instagram app installed and logged in, and let Lite Social take over its message
-notifications:
+Lite Social can't receive Instagram's push notifications: the site runs in a WebView, and Android's WebView has no
+web push. So Lite Social checks Instagram itself, in the background, with the login from its in-app browser. It
+calls the same web API instagram.com calls (`/api/v1/direct_v2/inbox/` for messages, `/api/v1/news/inbox/` for
+activity), and needs no Instagram app.
 
-1. In the Instagram app: **Settings → Notifications**, turn everything off except **Messages**.
-2. In Lite Social: **Settings → Message alerts**, turn it on, allow notifications, then turn on Lite Social under
-   Android's **Notification access**.
-   If that switch is greyed out ("Restricted setting", Android 13+ for apps installed from a file), open
-   **App info → ⋮ → Allow restricted settings** first. Installing with `adb install` avoids this.
+1. Open Instagram in Lite Social and log in.
+2. **Settings → Instagram notifications**: turn it on and allow notifications. "Check now" runs a check right away
+   and shows what it found (or what went wrong, e.g. "Not logged in").
+3. Tap **Allow background checks** (battery optimization off), or Android may hold the checks back for hours.
 
-From then on, each Instagram message notification is replaced by a Lite Social one (same sender, text and picture).
-Tapping it opens your inbox in Lite Social instead of the Instagram app; Instagram's inline **Reply** still works.
-If Lite Social can't post notifications (you turned them off), Instagram's own notification is left alone, so no
-alert is lost. The code is a small native module in `modules/message-alerts/`.
+From then on, every new message gets a notification with the sender, a preview and their picture; tapping it opens
+that conversation in Lite Social. Likes, comments, follows and mentions get their own notifications that open your
+activity page. Once a conversation is read (anywhere), its notification disappears at the next check.
+
+Limits: Android runs background work at most every **15 minutes** (choose 15/30/60), so alerts aren't instant, and
+Doze can delay them further while the phone lies still. Muted chats and message requests don't alert. If the inbox
+can't be read, the unread-messages count is the fallback ("3 unread messages"). The code is a small native module in
+`modules/instagram-alerts/` (a WorkManager job; the logic is in `InstagramChecker.kt`).
+
+### YouTube
+
+YouTube is a native screen, not the website: Google blocks signing in inside embedded browsers, so there is no
+YouTube account in Lite Social. It's built on [NewPipe Extractor](https://github.com/TeamNewPipe/NewPipeExtractor)
+(the library behind the NewPipe app), which reads YouTube directly from the phone.
+
+| Feature | How |
+| --- | --- |
+| Only your subscriptions | The home screen is the newest uploads of channels you subscribe to *in Lite Social*. No home page, trending, related videos or autoplay. Search exists so you can find channels (and a specific video). |
+| Subscriptions | Stored on the phone. Add them with Search → Subscribe, or import Google Takeout's `subscriptions.csv` (takeout.google.com → "YouTube and YouTube Music" → subscriptions) or a NewPipe export. |
+| No Shorts | The feed uses each channel's *Videos* tab, which never contains Shorts. Shorts are also dropped from search, and a Shorts link shows "Shorts are hidden". |
+| No ads | The player plays the video's own streams (DASH, up to 1080p H.264). Ads are never requested. |
+| Background and screen-off play | One shared player keeps playing when you leave the video, the app or turn the screen off, with lock-screen and notification controls. A mini player shows while you browse. |
+| Download MP4 | Best H.264 video up to your chosen quality plus AAC audio, joined on the phone (MediaMuxer), saved to **Movies/Lite Social**. |
+| Download MP3 | AAC audio decoded and encoded to MP3 on the phone (pure-Java LAME), tagged with title, channel and cover art, and saved into your **Musicolet music folder**. You pick that folder once (Android's folder picker, it starts in Music) and choose or create the subfolder for every song. |
+| YouTube links | Tapping a YouTube link in another app offers "Open with Lite Social". |
+
+Downloads run in a foreground service (progress notification), so they finish with the app closed. Musicolet scans
+its folders itself: if a new song doesn't show up, pull down in Musicolet's folder view or use its rescan option.
 
 Also: "Open in app" banners are hidden, links that try to switch to the Instagram
 app are ignored, links to other sites open in your normal browser, videos don't
@@ -93,31 +119,37 @@ up rather than reloading forever.
 ## Privacy
 
 - No fake login: you sign in on the real site inside the WebView.
-- The app never reads, stores or transmits credentials, cookies, messages or page content. The session lives in
-  the WebView's own cookie store.
+- The app never reads, stores or transmits credentials, messages or page content. The session lives in the
+  WebView's own cookie store (Instagram notifications below are the one exception).
 - The injected script reads the page only to decide what to hide. All it sends back to the app is "blocked
   rule X on path Y" (path only, no query) and, for leak reports, how many elements each rule matched.
-- The only network request the app makes itself is downloading the public rules file. No analytics.
-- Stored on the phone: settings, today's total minutes, leak reports.
-- Message alerts (off by default) need Android's Notification access. The listener ignores every app but
-  Instagram, and copies an Instagram message's sender, text and picture into a Lite Social notification. Nothing is
-  stored or sent.
+- Besides the platforms, the only network request the app makes itself is downloading the public rules file. No
+  analytics.
+- Stored on the phone: settings, today's total minutes, leak reports, YouTube subscriptions and feed cache.
+- Instagram notifications (off by default) are the one place the app reads the in-app browser's cookies: the
+  background check sends your Instagram login cookies to instagram.com (and only there) to ask for new messages and
+  activity, as the site itself would. Sender names, previews and activity texts go straight into notifications.
+  Nothing is stored or sent anywhere else.
+- YouTube needs no account. Searches, channels, feeds and videos are requested from YouTube directly by the phone;
+  the subscription list, cached feed and downloads stay on the phone.
 
 ## Project structure
 
 ```
 src/
-  app/                 Expo Router screens: picker, browse/[platformId], settings, leaks, privacy
+  app/                 Expo Router screens: picker, browse/[platformId], youtube/*, settings, leaks, privacy
   platforms/           Code-side platform configs (instagram.ts), registry, toggle defaults
   core/                Pure logic shared by app and page: URLs, route matcher, navigation policy, CSS builder, types
   injected/            In-page engine (engine.ts) and its generated bundle (generated/engineSource.ts)
   rules/               Rules validation (schema.ts) and loading/updating (rulesStore.ts)
   webview/             PlatformWebView (all three layers), toolbar, overlays, UA handling, page bridge
   features/timeLimit/  Daily limit tracking and the break screen
-  features/messageAlerts/ JS side of message alerts (status, permissions)
+  features/instagramAlerts/ JS side of Instagram notifications (status, settings)
+  features/youtube/    YouTube client: native bridge, stores, player, downloads, components
   state/               Persisted stores: settings, usage, leak reports
   ui/                  Theme and shared components
-modules/message-alerts/ Native Android module: notification listener for message alerts
+modules/instagram-alerts/ Native Android module: background Instagram check (WorkManager) and its notifications
+modules/youtube/       Native Android module: NewPipe Extractor, DASH playback manifests, downloads, MP3 encoding
 rules/rules.json       Blocking rules: bundled with the app AND fetched remotely
 scripts/               build-engine.js (bundles the injected script), build-android.ps1 (builds the APK)
 tests/                 Jest tests (route matching, navigation policy, CSS, rules validation, engine in jsdom)
@@ -148,7 +180,7 @@ On Windows, without Android Studio:
 powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1
 ```
 
-Needs Node.js on PATH, JDK 17 (`JAVA_HOME`, or a `jdk-17*` folder in `%LOCALAPPDATA%\Programs`) and the Android SDK
+The build pulls NewPipe Extractor from JitPack and sets `minSdkVersion` 33 (Android 13+) for it. Needs Node.js on PATH, JDK 17 (`JAVA_HOME`, or a `jdk-17*` folder in `%LOCALAPPDATA%\Programs`) and the Android SDK
 (`ANDROID_HOME`, or `%LOCALAPPDATA%\Android\Sdk`) with platform 36, build-tools 36.0.0, NDK 27.1.12297006 and
 CMake 3.22.1. React Native's native build breaks on paths with spaces and on Windows' 260-character path limit,
 so the script mirrors the source into a short folder (`%USERPROFILE%\lsb`) and builds there, and
@@ -238,9 +270,21 @@ Said plainly, so nothing is oversold:
   Instagram's own scripts. CSS is applied a moment later on a cold start, and the Navigation API hook
   covers navigation the history patch might miss.
 - **Pull-to-refresh is iOS-only** (a `react-native-webview` limitation); Android has the toolbar reload button.
-- **Message alerts open the inbox, not the conversation.** Instagram's notification doesn't reveal the web
-  thread address. They also depend on the Instagram app: if it's uninstalled or logged out, no alerts arrive.
-- **It's not a device-level blocker.** The Instagram app and website still work outside Lite Social. Blocking
+- **Instagram notifications are checked, not pushed.** Every 15 minutes at best, later when Android's battery
+  management holds background work back. They use Instagram's undocumented web API; if Instagram changes it,
+  Settings → "Check now" shows the error and the app needs an update. Activity alerts depend on
+  `/api/v1/news/inbox/`, the least certain part.
+- **YouTube depends on NewPipe Extractor keeping up with YouTube.** When YouTube changes something, playback or
+  downloads can stop until the library (and this app) is updated: bump the version in
+  `modules/youtube/android/build.gradle` and rebuild. YouTube may also ask a network to "confirm you're not a bot".
+  There's no account: no watch history, likes, comments or members-only videos. Age-restricted videos don't play.
+- **MP3 conversion takes a moment.** It runs on the phone's CPU (a 4-minute song takes roughly 10–30 seconds).
+- **It's not a device-level blocker.** The Instagram and YouTube apps and websites still work outside Lite Social. Blocking
   those needs Screen Time (iOS) or Accessibility/VPN (Android) APIs, a separate project.
 - **Platform risk:** Instagram can detect embedded browsers and could degrade the site or block login, and
   app stores may reject apps that modify third-party sites (Apple 5.2.2/4.2). This build is for personal use.
+
+## Licenses
+
+NewPipe Extractor is GPL-3.0 and jump3r (the LAME MP3 encoder in Java) is LGPL. That's fine for building this app
+for yourself; handing the APK to others means following those licenses.

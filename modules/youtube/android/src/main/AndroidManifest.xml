@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Downloads run as a foreground service so they finish with the app closed or the screen off. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+  <!-- "Open Musicolet" on a finished MP3 download. -->
+  <queries>
+    <package android:name="in.krosbits.musicolet" />
+  </queries>
+
+  <application>
+    <service
+      android:name="com.jarod85.litesocial.youtube.DownloadService"
+      android:exported="false"
+      android:foregroundServiceType="dataSync" />
+  </application>
+</manifest>

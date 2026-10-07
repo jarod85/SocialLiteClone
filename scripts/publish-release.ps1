@@ -54,7 +54,11 @@ try {
   Write-Host '2/4 Getting GitHub access...' -ForegroundColor Cyan
   $token = $env:GITHUB_TOKEN
   if (-not $token) {
-    $answer = "protocol=https`nhost=github.com`n`n" | git credential fill 2>$null
+    # Git's credential protocol wants LF-only input, which Windows PowerShell can't pipe; use a file.
+    $request = [IO.Path]::GetTempFileName()
+    [IO.File]::WriteAllText($request, "protocol=https`nhost=github.com`n`n", (New-Object System.Text.UTF8Encoding $false))
+    $answer = cmd /c "git credential fill < `"$request`" 2>nul"
+    Remove-Item $request
     $token = ($answer | Where-Object { $_ -like 'password=*' } | Select-Object -First 1) -replace '^password=', ''
   }
   if (-not $token) { throw 'No GitHub access. Set GITHUB_TOKEN (a token with Contents: read and write on this repository).' }

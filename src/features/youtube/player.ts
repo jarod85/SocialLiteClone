@@ -9,16 +9,24 @@
 import { createVideoPlayer, type VideoPlayer, type VideoSource } from 'expo-video';
 import { create } from 'zustand';
 
-import type { VideoDetails } from './types';
+import { pickQuality } from './quality';
+import { useYouTubeSettings } from './stores';
+import type { PlaybackSource, VideoDetails } from './types';
 
 interface PlayerState {
   current: VideoDetails | null;
   /** Which of current.sources is playing; the next one is tried if it fails. */
   sourceIndex: number;
+  /** Height of the quality picked by hand (one of current.qualities), or null for automatic. */
+  quality: number | null;
+  /** Play the current video again from the start when it ends. Off for each new video. */
+  loop: boolean;
   error: string | null;
 }
 
-export const usePlayer = create<PlayerState>()(() => ({ current: null, sourceIndex: 0, error: null }));
+const idle = { current: null, sourceIndex: 0, quality: null, loop: false, error: null };
+
+export const usePlayer = create<PlayerState>()(() => ({ ...idle }));
 
 let player: VideoPlayer | null = null;
 
@@ -36,8 +44,7 @@ export function getPlayer(): VideoPlayer {
   return p;
 }
 
-function sourceFor(details: VideoDetails, index: number): VideoSource {
-  const source = details.sources[index];
+function sourceFor(details: VideoDetails, source: PlaybackSource): VideoSource {
   return {
     uri: source.uri,
     contentType: source.contentType,
@@ -57,26 +64,53 @@ export async function play(details: VideoDetails): Promise<void> {
     p.play();
     return;
   }
+  p.loop = false;
   if (details.sources.length === 0) {
-    usePlayer.setState({ current: details, sourceIndex: 0, error: 'No playable version of this video was found.' });
+    usePlayer.setState({ ...idle, current: details, error: 'No playable version of this video was found.' });
     return;
   }
-  usePlayer.setState({ current: details, sourceIndex: 0, error: null });
-  await p.replaceAsync(sourceFor(details, 0));
+  const quality = pickQuality(details.qualities, useYouTubeSettings.getState().playbackHeight);
+  usePlayer.setState({ ...idle, current: details, quality: quality?.height ?? null });
+  await p.replaceAsync(sourceFor(details, quality ? { uri: quality.uri, contentType: 'dash' } : details.sources[0]));
   p.play();
 }
 
-async function tryNextSource(message: string | undefined): Promise<void> {
-  const { current, sourceIndex } = usePlayer.getState();
+/**
+ * Keeps a quality (a height, or null for automatic) for the next videos and
+ * switches the current one to it, or the nearest below, where it is.
+ */
+export async function setQuality(height: number | null): Promise<void> {
+  useYouTubeSettings.getState().setPlaybackHeight(height);
+  const { current } = usePlayer.getState();
   if (!current || !player) return;
-  const next = sourceIndex + 1;
+  const quality = pickQuality(current.qualities, height);
+  const source = quality ? { uri: quality.uri, contentType: 'dash' as const } : current.sources[0];
+  if (!source) return;
+  const position = player.currentTime;
+  const wasPlaying = player.playing;
+  usePlayer.setState({ quality: quality?.height ?? null, sourceIndex: 0, error: null });
+  await player.replaceAsync(sourceFor(current, source));
+  if (position > 0) player.currentTime = position;
+  if (wasPlaying) player.play();
+}
+
+export function setLoop(loop: boolean): void {
+  getPlayer().loop = loop;
+  usePlayer.setState({ loop });
+}
+
+async function tryNextSource(message: string | undefined): Promise<void> {
+  const { current, sourceIndex, quality } = usePlayer.getState();
+  if (!current || !player) return;
+  // A hand-picked quality that fails falls back to automatic, then down the usual list.
+  const next = quality != null ? 0 : sourceIndex + 1;
   if (next >= current.sources.length) {
     usePlayer.setState({ error: message ? `Couldn't play this video: ${message}` : "Couldn't play this video." });
     return;
   }
   const position = player.currentTime;
-  usePlayer.setState({ sourceIndex: next });
-  await player.replaceAsync(sourceFor(current, next));
+  usePlayer.setState({ sourceIndex: next, quality: null });
+  await player.replaceAsync(sourceFor(current, current.sources[next]));
   if (position > 0) player.currentTime = position;
   player.play();
 }
@@ -85,9 +119,10 @@ async function tryNextSource(message: string | undefined): Promise<void> {
 export function stop(): void {
   if (player) {
     player.pause();
+    player.loop = false;
     void player.replaceAsync(null);
   }
-  usePlayer.setState({ current: null, sourceIndex: 0, error: null });
+  usePlayer.setState({ ...idle });
 }
 
 export function pause(): void {

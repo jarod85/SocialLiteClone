@@ -19,7 +19,8 @@ import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
 import { checkForUpdate, installedVersion, installUpdate, updatesSupported, useUpdates } from '@/features/updates/updates';
 import { chooseMusicFolder } from '@/features/youtube/components/useDownloadFlow';
 import { youtubeAvailable } from '@/features/youtube/native';
-import { MP3_BITRATES, useSubscriptions, useYouTubeSettings, VIDEO_HEIGHTS } from '@/features/youtube/stores';
+import { setQuality } from '@/features/youtube/player';
+import { MP3_BITRATES, PLAYBACK_HEIGHTS, useSubscriptions, useYouTubeSettings, VIDEO_HEIGHTS } from '@/features/youtube/stores';
 import { platforms } from '@/platforms/registry';
 import type { PlatformConfig } from '@/platforms/types';
 import { refreshRules, RULES_URL, useRules } from '@/rules/rulesStore';
@@ -216,6 +217,7 @@ function YouTubeSection() {
   const setMp3Kbps = useYouTubeSettings((s) => s.setMp3Kbps);
   const videoMaxHeight = useYouTubeSettings((s) => s.videoMaxHeight);
   const setVideoMaxHeight = useYouTubeSettings((s) => s.setVideoMaxHeight);
+  const playbackHeight = useYouTubeSettings((s) => s.playbackHeight);
   const subscriptions = useSubscriptions((s) => s.channels.length);
   const router = useRouter();
   if (!youtubeAvailable) return null;
@@ -230,6 +232,13 @@ function YouTubeSection() {
         label="Music folder"
         detail={musicFolder?.name ?? 'Not chosen'}
         onPress={() => void chooseMusicFolder()}
+      />
+      <TextRow>Playback quality (up to)</TextRow>
+      <Chips
+        options={PLAYBACK_HEIGHTS}
+        value={(playbackHeight ?? 'auto') as (typeof PLAYBACK_HEIGHTS)[number]}
+        onChange={(h) => void setQuality(h === 'auto' ? null : h)}
+        format={(h) => (h === 'auto' ? 'Auto' : `${h}p`)}
       />
       <TextRow>MP3 quality</TextRow>
       <Chips options={MP3_BITRATES} value={mp3Kbps as (typeof MP3_BITRATES)[number]} onChange={setMp3Kbps} format={(k) => `${k} kbps`} />

@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { VideoView } from 'expo-video';
-import { useEffect, useState } from 'react';
+import { VideoView, type VideoViewProps } from 'expo-video';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { PlayerControls } from '@/features/youtube/components/PlayerControls';
 import { Avatar, SubscribeButton } from '@/features/youtube/components/rows';
 import { useDownloadFlow } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
@@ -14,6 +15,9 @@ import { useSubscriptions } from '@/features/youtube/stores';
 import type { VideoDetails } from '@/features/youtube/types';
 import { Button } from '@/ui/components';
 import { useTheme } from '@/ui/theme';
+
+/** Full screen turns the phone sideways; turning it back upright leaves full screen (with auto-rotate on). */
+const FULLSCREEN: VideoViewProps['fullscreenOptions'] = { enable: true, orientation: 'landscape', autoExitOnRotate: true };
 
 /**
  * The player: the video, its title, channel and description, and Download.
@@ -31,6 +35,7 @@ export default function WatchScreen() {
   const error = loaded?.id === videoId ? (loaded.error ?? null) : null;
   const [expanded, setExpanded] = useState(false);
   const { start: download, picker } = useDownloadFlow();
+  const videoView = useRef<VideoView>(null);
 
   const isShortLink = short === '1';
   const isSubscribed = useSubscriptions((s) => (details?.channelId ? s.channels.some((c) => c.id === details.channelId) : false));
@@ -89,11 +94,21 @@ export default function WatchScreen() {
       <YouTubeHeader title="" onBack={back} backIcon="chevron-down" />
       <View style={styles.video}>
         {details && current?.id === details.id ? (
-          <VideoView player={getPlayer()} style={StyleSheet.absoluteFill} nativeControls contentFit="contain" />
+          <VideoView
+            ref={videoView}
+            player={getPlayer()}
+            style={StyleSheet.absoluteFill}
+            nativeControls
+            contentFit="contain"
+            fullscreenOptions={FULLSCREEN}
+          />
         ) : error ? null : (
           <ActivityIndicator style={styles.videoLoading} color="#FFFFFF" />
         )}
       </View>
+      {details && current?.id === details.id ? (
+        <PlayerControls details={details} onLandscape={() => void videoView.current?.enterFullscreen()} />
+      ) : null}
 
       {error ? (
         <View style={styles.centered}>

@@ -73,6 +73,7 @@ YouTube account in Lite Social. It's built on [NewPipe Extractor](https://github
 | Subscriptions | Stored on the phone. Add them with Search → Subscribe, or import Google Takeout's `subscriptions.csv` (takeout.google.com → "YouTube and YouTube Music" → subscriptions) or a NewPipe export. |
 | No Shorts | The feed uses each channel's *Videos* tab, which never contains Shorts. Shorts are also dropped from search, and a Shorts link shows "Shorts are hidden". |
 | No ads | The player plays the video's own streams (DASH, up to 1080p H.264). Ads are never requested. |
+| Player options | **Landscape** (full screen sideways; the full-screen button does the same), **quality** (Auto, or any resolution the video has, kept for the next videos; default in Settings) and **Loop** (for the current video). |
 | Background and screen-off play | One shared player keeps playing when you leave the video, the app or turn the screen off, with lock-screen and notification controls. A mini player shows while you browse. |
 | Download MP4 | Best H.264 video up to your chosen quality plus AAC audio, joined on the phone (MediaMuxer), saved to **Movies/Lite Social**. |
 | Download MP3 | AAC audio decoded and encoded to MP3 on the phone (pure-Java LAME), tagged with title, channel and cover art, and saved into your **Musicolet music folder**. You pick that folder once (Android's folder picker, it starts in Music) and choose or create the subfolder for every song. |

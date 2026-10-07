@@ -58,6 +58,16 @@ export interface PlaybackSource {
   contentType: 'dash' | 'hls' | 'progressive';
 }
 
+/** One resolution of a video, to pick by hand instead of automatic quality. */
+export interface VideoQuality {
+  /** Pixels, e.g. 720. */
+  height: number;
+  /** "720p", or "1080p60" for high frame rates. */
+  label: string;
+  /** Local DASH manifest that plays only this resolution. */
+  uri: string;
+}
+
 export interface VideoDetails {
   id: string;
   url: string;
@@ -75,6 +85,8 @@ export interface VideoDetails {
   isLive: boolean;
   /** Best first; the player falls back to the next if one fails to load. */
   sources: PlaybackSource[];
+  /** Highest first. Empty for live streams. */
+  qualities: VideoQuality[];
 }
 
 export type DownloadFormat = 'mp4' | 'mp3';

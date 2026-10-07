@@ -76,6 +76,12 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 - [ ] Y10. In another app (e.g. a chat), tap a YouTube link → "Open with Lite Social" → it plays in Lite Social. A
       Shorts link shows "Shorts are hidden by Lite Social".
 - [ ] Y11. Search → Videos: no Shorts among the results.
+- [ ] Y12. In a video, tap **Landscape**: full screen, phone sideways. The full-screen button of the player does the same.
+      With auto-rotate on, turning the phone upright leaves full screen.
+- [ ] Y13. Tap the quality button (shows "Auto · 720p" or similar) → pick 360p: the video carries on from the same spot,
+      visibly softer. Open another video: it starts at 360p. Pick **Auto** to go back. Settings → YouTube → Playback
+      quality shows the same choice.
+- [ ] Y14. Tap **Loop**: it turns "Loop on"; at the end the video starts again. Opening another video turns loop off.
 
 ## Settings (open with the sliders icon in the toolbar while Instagram is open)
 

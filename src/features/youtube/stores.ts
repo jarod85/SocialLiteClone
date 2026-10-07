@@ -112,6 +112,8 @@ export const useFeed = create<FeedState>()(
 
 export const MP3_BITRATES = [128, 192, 256, 320] as const;
 export const VIDEO_HEIGHTS = [480, 720, 1080] as const;
+/** Playback quality choices in Settings; the player itself offers every height a video has. */
+export const PLAYBACK_HEIGHTS = ['auto', 360, 480, 720, 1080] as const;
 
 interface YouTubeSettingsState {
   /** Where MP3s go: the folder Musicolet plays from. */
@@ -120,10 +122,13 @@ interface YouTubeSettingsState {
   lastFolderPath: string[];
   mp3Kbps: number;
   videoMaxHeight: number;
+  /** Quality picked in the player, kept for the next videos. Null: automatic. */
+  playbackHeight: number | null;
   setMusicFolder: (folder: MusicFolder | null) => void;
   setLastFolderPath: (path: string[]) => void;
   setMp3Kbps: (kbps: number) => void;
   setVideoMaxHeight: (height: number) => void;
+  setPlaybackHeight: (height: number | null) => void;
 }
 
 export const useYouTubeSettings = create<YouTubeSettingsState>()(
@@ -133,10 +138,12 @@ export const useYouTubeSettings = create<YouTubeSettingsState>()(
       lastFolderPath: [],
       mp3Kbps: 192,
       videoMaxHeight: 1080,
+      playbackHeight: null,
       setMusicFolder: (musicFolder) => set({ musicFolder, lastFolderPath: [] }),
       setLastFolderPath: (lastFolderPath) => set({ lastFolderPath }),
       setMp3Kbps: (mp3Kbps) => set({ mp3Kbps }),
       setVideoMaxHeight: (videoMaxHeight) => set({ videoMaxHeight }),
+      setPlaybackHeight: (playbackHeight) => set({ playbackHeight }),
     }),
     { name: 'lite-social.youtube.settings', version: 1, storage: createJSONStorage(() => AsyncStorage) },
   ),

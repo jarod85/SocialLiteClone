@@ -2,7 +2,8 @@ import { FEED_LIMIT, mergeFeed } from '@/features/youtube/feed';
 import { formatAge, formatCount, formatDuration, videoSubtitle } from '@/features/youtube/format';
 import { parseCsvLine, parseSubscriptionsExport } from '@/features/youtube/importSubscriptions';
 import { parseYouTubeLink, routeForLink } from '@/features/youtube/links';
-import type { Video } from '@/features/youtube/types';
+import { pickQuality } from '@/features/youtube/quality';
+import type { Video, VideoQuality } from '@/features/youtube/types';
 
 const CHANNEL = 'UCHnyfMqiRRG1u-2MsSQLbXA';
 const OTHER = 'UCsXVk37bltHxD1rDPwtNM8Q';
@@ -135,5 +136,25 @@ describe('mergeFeed', () => {
     const merged = mergeFeed([], [...fresh, fresh[0]], [CHANNEL], []);
     expect(merged).toHaveLength(FEED_LIMIT);
     expect(merged[0].id).toBe(`v${FEED_LIMIT + 9}`);
+  });
+});
+
+describe('pickQuality', () => {
+  const q = (height: number): VideoQuality => ({ height, label: `${height}p`, uri: `file:///v-${height}.mpd` });
+  const qualities = [q(1080), q(720), q(480), q(360)];
+
+  it('is automatic without a preference or qualities', () => {
+    expect(pickQuality(qualities, null)).toBeNull();
+    expect(pickQuality([], 720)).toBeNull();
+  });
+
+  it('takes the preferred height, or the nearest below', () => {
+    expect(pickQuality(qualities, 720)?.height).toBe(720);
+    expect(pickQuality([q(480), q(1080), q(360)], 720)?.height).toBe(480);
+    expect(pickQuality(qualities, 2160)?.height).toBe(1080);
+  });
+
+  it('takes the lowest when all are higher', () => {
+    expect(pickQuality([q(720), q(1080)], 360)?.height).toBe(720);
   });
 });

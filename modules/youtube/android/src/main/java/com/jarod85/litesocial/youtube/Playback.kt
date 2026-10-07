@@ -32,23 +32,53 @@ object Playback {
    */
   fun sources(context: Context, info: StreamInfo): List<Map<String, Any?>> {
     val sources = mutableListOf<Map<String, Any?>>()
-    val isLive = info.streamType == StreamType.LIVE_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM
-    if (!isLive) {
+    val live = isLive(info)
+    if (!live) {
       val video = adaptiveVideo(info)
       val audio = adaptiveAudio(info)
       if (video.isNotEmpty() && audio.isNotEmpty()) {
-        val file = File(File(context.cacheDir, "youtube").apply { mkdirs() }, "${info.id}.mpd")
-        file.writeText(manifest(durationMs(info, video + audio), video, audio))
-        sources += mapOf("uri" to "file://${file.absolutePath}", "contentType" to "dash")
+        val uri = writeManifest(context, info.id, manifest(durationMs(info, video + audio), video, audio))
+        sources += mapOf("uri" to uri, "contentType" to "dash")
       }
     }
     if (info.hlsUrl.isNotEmpty()) sources += mapOf("uri" to info.hlsUrl, "contentType" to "hls")
-    if (isLive && info.dashMpdUrl.isNotEmpty()) sources += mapOf("uri" to info.dashMpdUrl, "contentType" to "dash")
+    if (live && info.dashMpdUrl.isNotEmpty()) sources += mapOf("uri" to info.dashMpdUrl, "contentType" to "dash")
     info.videoStreams
       .filter { it.isUrl && it.deliveryMethod == DeliveryMethod.PROGRESSIVE_HTTP }
       .maxByOrNull { height(it) }
       ?.let { sources += mapOf("uri" to it.content, "contentType" to "progressive") }
     return sources
+  }
+
+  /**
+   * One DASH manifest per resolution, highest first, for picking the quality
+   * by hand (the "auto" source above switches by itself). Empty for live
+   * streams and videos without separate video and audio streams.
+   */
+  fun qualities(context: Context, info: StreamInfo): List<Map<String, Any?>> {
+    if (isLive(info)) return emptyList()
+    val video = adaptiveVideo(info)
+    val audio = adaptiveAudio(info)
+    if (video.isEmpty() || audio.isEmpty()) return emptyList()
+    val duration = durationMs(info, video + audio)
+    return video.groupBy { height(it) }.entries.sortedByDescending { it.key }.map { (height, streams) ->
+      val fps = streams.maxOf { it.fps }
+      mapOf(
+        "height" to height,
+        "label" to if (fps > 30) "${height}p$fps" else "${height}p",
+        "uri" to writeManifest(context, "${info.id}-$height", manifest(duration, streams, audio)),
+      )
+    }
+  }
+
+  private fun isLive(info: StreamInfo): Boolean =
+    info.streamType == StreamType.LIVE_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM
+
+  /** Saves a manifest in the cache and returns its file:// URI. */
+  private fun writeManifest(context: Context, name: String, manifest: String): String {
+    val file = File(File(context.cacheDir, "youtube").apply { mkdirs() }, "$name.mpd")
+    file.writeText(manifest)
+    return "file://${file.absolutePath}"
   }
 
   /** H.264 MP4 video-only streams up to MAX_HEIGHT that have the byte ranges a DASH manifest needs. */

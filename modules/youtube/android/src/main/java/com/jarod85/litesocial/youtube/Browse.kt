@@ -170,6 +170,7 @@ class Browse(private val context: Context) {
       "isShort" to (info.isShortFormContent || info.url.contains("/shorts/")),
       "isLive" to isLive,
       "sources" to Playback.sources(context, info),
+      "qualities" to Playback.qualities(context, info),
     )
   }
 

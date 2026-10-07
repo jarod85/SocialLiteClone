@@ -15,13 +15,23 @@
   4. Runs Gradle's release build.
   5. Copies the APK to release\LiteSocial-<version>.apk in this project.
 
-  The APK is signed with the debug key from Expo's template. That's fine for
-  installing on your own phone, and updates install over each other because the
-  key never changes. For the Play Store you'd need your own upload key (or EAS Build).
+  The APK is signed with your private release key, described by
+  %USERPROFILE%\.litesocial\signing.properties (see plugins/withReleaseSigning.js).
+  The key never changes, so every new build installs over the previous one, and
+  nobody else can make an APK your phone accepts as an update. Back the folder up:
+  without the key, the next version can only be installed after uninstalling.
+  Use -DebugSigning to sign with Expo's public debug key instead (not installable
+  over a release-signed build).
 
 .PARAMETER Architectures
   CPU architectures to build. arm64-v8a covers every current phone (incl. Galaxy S24 FE)
   and builds ~4x faster than all four. Use "arm64-v8a,x86_64" to include emulators.
+
+.PARAMETER Signing
+  Properties file for the release key (storeFile, storePassword, keyAlias, keyPassword).
+
+.PARAMETER DebugSigning
+  Sign with Expo's public debug key instead of the release key.
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1
@@ -30,7 +40,9 @@ param(
   [string]$Architectures = 'arm64-v8a',
   [string]$BuildDir = "$env:USERPROFILE\lsb",
   [string]$JavaHome = $(if ($env:JAVA_HOME) { $env:JAVA_HOME } else { (Get-ChildItem "$env:LOCALAPPDATA\Programs" -Directory -Filter 'jdk-17*' -ErrorAction SilentlyContinue | Select-Object -First 1).FullName }),
-  [string]$AndroidHome = $(if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA\Android\Sdk" })
+  [string]$AndroidHome = $(if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA\Android\Sdk" }),
+  [string]$Signing = "$env:USERPROFILE\.litesocial\signing.properties",
+  [switch]$DebugSigning
 )
 
 $ErrorActionPreference = 'Stop'
@@ -40,6 +52,13 @@ if (-not $JavaHome -or -not (Test-Path "$JavaHome\bin\java.exe")) { throw "JDK 1
 if (-not (Test-Path "$AndroidHome\platform-tools")) { throw "Android SDK not found at $AndroidHome. Set ANDROID_HOME or pass -AndroidHome." }
 if ($BuildDir -match '\s') { throw "The build folder must not contain spaces: $BuildDir" }
 if ($BuildDir.Length -gt 25) { throw "The build folder path must be 25 characters or less (Windows path limit): $BuildDir" }
+if ($DebugSigning) {
+  $env:LITESOCIAL_SIGNING = ''
+} elseif (Test-Path $Signing) {
+  $env:LITESOCIAL_SIGNING = (Resolve-Path $Signing).Path
+} else {
+  throw "Release key not found at $Signing. Create it (see README, 'Signing key') or pass -DebugSigning."
+}
 $env:JAVA_HOME = $JavaHome
 $env:ANDROID_HOME = $AndroidHome
 $env:Path = "$JavaHome\bin;$env:Path"
@@ -84,6 +103,12 @@ try {
   New-Item -ItemType Directory -Force "$projectRoot\release" | Out-Null
   $apk = "$projectRoot\release\LiteSocial-$version.apk"
   Copy-Item android\app\build\outputs\apk\release\app-release.apk $apk -Force
+  if (-not $DebugSigning) {
+    # Fail loudly rather than hand out an APK that won't install over the previous one.
+    $apksigner = Get-ChildItem "$AndroidHome\build-tools" -Directory | Sort-Object Name -Descending | ForEach-Object { "$($_.FullName)\apksigner.bat" } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $certs = & $apksigner verify --print-certs $apk 2>&1 | Out-String
+    if ($certs -notmatch 'CN=Lite Social') { throw "The APK isn't signed with the release key:`n$certs" }
+  }
   Write-Host "Done: $apk" -ForegroundColor Green
 } finally {
   Pop-Location

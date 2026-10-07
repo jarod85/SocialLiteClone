@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lite Social",
     "slug": "lite-social",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "scheme": "litesocial",
     "platforms": ["ios", "android"],
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.jarod85.litesocial",
-      "versionCode": 4,
+      "versionCode": 5,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -79,6 +79,7 @@
     },
     "plugins": [
       "./plugins/withCMakeObjectPathMax",
+      "./plugins/withReleaseSigning",
       "expo-router",
       "expo-status-bar",
       "expo-font",

@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Lets Lite Social hand a downloaded update to Android's installer. You still confirm every install. -->
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+  <application>
+    <!-- Shares only the downloaded update file (cache/updates/) with the installer. -->
+    <provider
+      android:name="com.jarod85.litesocial.updater.UpdateFileProvider"
+      android:authorities="${applicationId}.updates"
+      android:exported="false"
+      android:grantUriPermissions="true">
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/lite_social_update_paths" />
+    </provider>
+  </application>
+</manifest>

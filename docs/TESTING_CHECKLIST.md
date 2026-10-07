@@ -98,3 +98,11 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 - [ ] 29. Airplane mode → reload: a "Couldn't load Instagram" screen with "Try again" (no crash).
 - [ ] 30. Android back button: goes back inside Instagram, closes the blocked screen, and finally returns to the start screen.
 - [ ] 31. Dark mode on the phone: Lite Social's toolbar and screens follow it.
+
+## App updates
+
+- [ ] U1. Settings → App updates shows the installed version; "Check for updates" says up to date (or shows the newer one).
+- [ ] U2. After publishing a newer release: reopen the app (or Check for updates). The start screen shows "Lite Social X is
+      available" → Install update. First time: allow Lite Social to install apps, then Install again.
+- [ ] U3. The download progresses, Android's installer opens, Update. Lite Social restarts at the new version with
+      Instagram still logged in and settings and YouTube channels kept.

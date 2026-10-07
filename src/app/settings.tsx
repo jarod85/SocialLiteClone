@@ -16,6 +16,7 @@ import {
 } from '@/features/instagramAlerts/instagramAlerts';
 import { useInstagramAlerts } from '@/features/instagramAlerts/useInstagramAlerts';
 import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
+import { checkForUpdate, installedVersion, installUpdate, updatesSupported, useUpdates } from '@/features/updates/updates';
 import { chooseMusicFolder } from '@/features/youtube/components/useDownloadFlow';
 import { youtubeAvailable } from '@/features/youtube/native';
 import { MP3_BITRATES, useSubscriptions, useYouTubeSettings, VIDEO_HEIGHTS } from '@/features/youtube/stores';
@@ -69,6 +70,8 @@ export default function SettingsScreen() {
         <Section title="Feedback">
           <LinkRow label="Leak reports" detail={String(leakCount)} onPress={() => router.push('/leaks')} />
         </Section>
+
+        <AppUpdatesSection />
 
         <Section title="About">
           <LinkRow label="Privacy" onPress={() => router.push('/privacy')} />
@@ -237,6 +240,39 @@ function YouTubeSection() {
         onChange={setVideoMaxHeight}
         format={(h) => `${h}p`}
       />
+    </Section>
+  );
+}
+
+function AppUpdatesSection() {
+  const available = useUpdates((s) => s.available);
+  const checking = useUpdates((s) => s.checking);
+  const lastCheckedAt = useUpdates((s) => s.lastCheckedAt);
+  const error = useUpdates((s) => s.error);
+  const progress = useUpdates((s) => s.progress);
+  if (!updatesSupported) return null;
+
+  const lines = [`Installed: ${installedVersion()}.`];
+  if (available) lines.push(`Available: ${available.version}.`);
+  else if (lastCheckedAt) lines.push(`Up to date (checked ${new Date(lastCheckedAt).toLocaleString()}).`);
+  if (error) lines.push(`Last check failed: ${error}.`);
+  if (progress !== null) lines.push(`Downloading: ${Math.round(progress * 100)}%.`);
+
+  return (
+    <Section
+      title="App updates"
+      footer="New versions are published on GitHub. Lite Social checks a few times a day and when you tap the button; installing asks Android to confirm. Your settings and logins stay."
+    >
+      <TextRow>{lines.join('\n')}</TextRow>
+      <View style={styles.buttonColumn}>
+        {available ? <Button label={`Install ${available.version}`} disabled={progress !== null} onPress={() => void installUpdate()} /> : null}
+        <Button
+          label={checking ? 'Checking...' : 'Check for updates'}
+          variant="secondary"
+          disabled={checking}
+          onPress={() => void checkForUpdate()}
+        />
+      </View>
     </Section>
   );
 }

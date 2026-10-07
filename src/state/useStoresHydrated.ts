@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 
+import { useUpdates } from '@/features/updates/updates';
 import { useFeed, useSubscriptions, useYouTubeSettings } from '@/features/youtube/stores';
 
 import { useLeaks } from './leakStore';
 import { useSettings } from './settingsStore';
 import { useUsage } from './usageStore';
 
-const stores = [useSettings, useUsage, useLeaks, useSubscriptions, useFeed, useYouTubeSettings];
+const stores = [useSettings, useUsage, useLeaks, useSubscriptions, useFeed, useYouTubeSettings, useUpdates];
 const allHydrated = () => stores.every((s) => s.persist.hasHydrated());
 
 /**

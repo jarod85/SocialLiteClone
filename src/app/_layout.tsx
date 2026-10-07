@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 
+import { autoCheckForUpdate } from '@/features/updates/updates';
 import { loadRules, useRules } from '@/rules/rulesStore';
 import { useStoresHydrated } from '@/state/useStoresHydrated';
 import { useTheme } from '@/ui/theme';
@@ -15,6 +16,10 @@ export default function RootLayout() {
   useEffect(() => {
     void loadRules();
   }, []);
+
+  useEffect(() => {
+    if (hydrated) autoCheckForUpdate();
+  }, [hydrated]);
 
   return (
     <>

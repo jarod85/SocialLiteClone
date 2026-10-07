@@ -12,15 +12,20 @@ others mostly a configuration change.
 
 ## Install on your Android phone
 
-1. Get `release/LiteSocial-1.3.0.apk` (build it with `scripts/build-android.ps1`, see [Building the APK](#building-the-apk)).
-2. Install it, either way works:
-   - **USB:** enable USB debugging on the phone, connect it, and run `adb install -r release\LiteSocial-1.3.0.apk`.
-     If you use scrcpy, you can also drag the APK onto the scrcpy window.
-   - **File:** copy the APK to the phone and open it in My Files. Allow "Install unknown apps" for My Files when asked.
+1. On the phone, open the latest release: https://github.com/jarod85/SocialLiteClone/releases/latest and tap
+   `LiteSocial-<version>.apk` to download it.
+2. Open the download and tap **Install**. Allow "Install unknown apps" for your browser or My Files when asked.
 3. Samsung: if installation is refused, turn off **Settings → Security and privacy → Auto Blocker** while you
    install, then turn it back on. Google Play Protect may ask you to scan the app; that's normal for apps not
    from the Play Store.
 4. Open Lite Social, tap Instagram and log in on Instagram's own login page.
+
+From then on, updates arrive in the app (see [Updating the app](#updating-the-app)); no cable or computer needed.
+
+Versions up to 1.3.0 were signed with a different key: if one of those is installed, uninstall it first (Android
+refuses to install over it). You'll need to log in to Instagram again and re-add YouTube channels once.
+
+With a USB cable you can also run `adb install -r release\LiteSocial-<version>.apk`.
 
 ## What it does
 
@@ -123,8 +128,8 @@ up rather than reloading forever.
   WebView's own cookie store (Instagram notifications below are the one exception).
 - The injected script reads the page only to decide what to hide. All it sends back to the app is "blocked
   rule X on path Y" (path only, no query) and, for leak reports, how many elements each rule matched.
-- Besides the platforms, the only network request the app makes itself is downloading the public rules file. No
-  analytics.
+- Besides the platforms, the app itself only downloads the public rules file and checks GitHub for app updates.
+  Neither request carries account or browsing data. No analytics.
 - Stored on the phone: settings, today's total minutes, leak reports, YouTube subscriptions and feed cache.
 - Instagram notifications (off by default) are the one place the app reads the in-app browser's cookies: the
   background check sends your Instagram login cookies to instagram.com (and only there) to ask for new messages and
@@ -150,8 +155,10 @@ src/
   ui/                  Theme and shared components
 modules/instagram-alerts/ Native Android module: background Instagram check (WorkManager) and its notifications
 modules/youtube/       Native Android module: NewPipe Extractor, DASH playback manifests, downloads, MP3 encoding
+modules/app-updater/   Native Android module: downloads, verifies and installs app updates
 rules/rules.json       Blocking rules: bundled with the app AND fetched remotely
-scripts/               build-engine.js (bundles the injected script), build-android.ps1 (builds the APK)
+scripts/               build-engine.js (bundles the injected script), build-android.ps1 (builds the APK),
+                       publish-release.ps1 (publishes it as an update)
 tests/                 Jest tests (route matching, navigation policy, CSS, rules validation, engine in jsdom)
 docs/TESTING_CHECKLIST.md
 ```
@@ -186,11 +193,47 @@ CMake 3.22.1. React Native's native build breaks on paths with spaces and on Win
 so the script mirrors the source into a short folder (`%USERPROFILE%\lsb`) and builds there, and
 `plugins/withCMakeObjectPathMax.js` makes CMake shorten its deepest object-file paths. The first build takes
 20–40 minutes; later ones are much faster. It builds for arm64 phones only (pass `-Architectures "arm64-v8a,x86_64"` for emulators) and
-writes `release\LiteSocial-<version>.apk`. The APK is signed with Expo's template debug key: fine for your own
-phones, and new builds install over old ones. Bump `version`/`android.versionCode` in `app.json` for each
-release you hand out.
+writes `release\LiteSocial-<version>.apk`, signed with your private release key (below). Bump
+`version`/`android.versionCode` in `app.json` for each release.
 
-Alternatively, `npx eas-cli build -p android --profile preview` builds in Expo's cloud (needs a free Expo account).
+### Signing key
+
+Release builds are signed with your own key, not Expo's public debug key (anyone could sign an APK with that one
+and your phone would accept it as an update). `plugins/withReleaseSigning.js` reads the key from the properties
+file in `LITESOCIAL_SIGNING`; the build script points it at `%USERPROFILE%\.litesocial\signing.properties`
+(`storeFile`, `storePassword`, `keyAlias`, `keyPassword`), next to `release.keystore`. Neither is in the repository.
+
+**Back up `%USERPROFILE%\.litesocial\`.** Android only installs an update signed with the same key. Lose it and
+the next version can only be installed after uninstalling (losing logins and settings).
+
+To create a key on a new computer (once):
+
+```powershell
+$d = "$env:USERPROFILE\.litesocial"; mkdir $d -Force
+keytool -genkeypair -keystore $d\release.keystore -storetype PKCS12 -alias litesocial -keyalg RSA -keysize 4096 -validity 36500 -dname "CN=Lite Social, O=jarod85"
+# then write $d\signing.properties with storeFile=..., storePassword=..., keyAlias=litesocial, keyPassword=<same>
+```
+
+The build refuses to run without the key; `-DebugSigning` builds with the debug key instead (for testing only: it
+won't install over a release-signed app).
+
+## Updating the app
+
+New versions go out as GitHub Releases, and the app installs them itself:
+
+1. Make the change, bump `version` and `android.versionCode` in `app.json`, commit and `git push`.
+2. `powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1`
+3. `powershell -ExecutionPolicy Bypass -File scripts\publish-release.ps1 -Notes "What changed"`
+
+On the phone, Lite Social checks GitHub a few times a day (and from **Settings → App updates → Check for updates**).
+When there's a newer version, the start screen shows "Lite Social X is available" → **Install update**: it downloads
+the APK, checks it's a newer Lite Social signed with the same key, and opens Android's installer. The first time,
+Android asks to allow Lite Social to install apps. Logins, settings and YouTube channels stay.
+
+`publish-release.ps1` uses `GITHUB_TOKEN` if set, otherwise the GitHub login Git already has for this repository.
+The update check reads `https://api.github.com/repos/jarod85/SocialLiteClone/releases/latest` (override with
+`EXPO_PUBLIC_RELEASES_URL`); it needs the repository to be public. The code is in `modules/app-updater/` and
+`src/features/updates/`.
 
 ## Updating the blocking rules (no app update needed)
 

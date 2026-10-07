@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
+import { UpdateBanner } from '@/features/updates/UpdateBanner';
 import { platforms } from '@/platforms/registry';
 import { useTheme } from '@/ui/theme';
 
@@ -32,6 +33,8 @@ export default function HomeScreen() {
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
           The useful parts of social media, without the endless feed.
         </Text>
+
+        <UpdateBanner />
 
         {platforms.map((platform) => (
           <Pressable

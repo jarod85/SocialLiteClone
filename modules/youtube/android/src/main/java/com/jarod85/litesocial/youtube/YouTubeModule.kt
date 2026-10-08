@@ -22,14 +22,16 @@ class YouTubeModule : Module() {
   private var pendingPick: Promise? = null
   private val downloadListener: (Downloads.Update) -> Unit = { sendEvent(DOWNLOAD_EVENT, it.toMap()) }
 
-  private class YouTubeException(message: String, cause: Throwable?) : CodedException(message, cause)
+  private class YouTubeException(code: String, message: String, cause: Throwable?) : CodedException(code, message, cause) {
+    constructor(message: String, cause: Throwable?) : this(Errors.OTHER, message, cause)
+  }
 
-  /** Every error reaches JS as a short, readable message. */
+  /** Every error reaches JS as a short, readable message, with a code from [Errors]. */
   private suspend fun <T> guarded(block: suspend () -> T): T =
     try {
       block()
     } catch (e: Throwable) {
-      throw YouTubeException(Errors.describe(e), e)
+      throw YouTubeException(Errors.code(e), Errors.describe(e), e)
     }
 
   override fun definition() = ModuleDefinition {

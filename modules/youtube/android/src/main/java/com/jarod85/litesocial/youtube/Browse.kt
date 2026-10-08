@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
@@ -149,9 +150,16 @@ class Browse(private val context: Context) {
   }
 
   /** Details, a playable source and nothing else: no related videos, no comments. */
-  suspend fun video(url: String): Map<String, Any?> = io {
+  suspend fun video(url: String): Map<String, Any?> = withContext(Dispatchers.IO) {
     val yt = Extractor.youtube
-    val info = StreamInfo.getInfo(yt, url)
+    val info = try {
+      StreamInfo.getInfo(yt, url)
+    } catch (e: Exception) {
+      // YouTube decides per request (each one gets a fresh visitor id), so a second try sometimes passes.
+      if (!Errors.isBlocked(e)) throw e
+      delay(BLOCKED_RETRY_DELAY_MS)
+      StreamInfo.getInfo(yt, url)
+    }
     val id = info.id
     val isLive = info.streamType == StreamType.LIVE_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM
     mapOf(
@@ -190,5 +198,6 @@ class Browse(private val context: Context) {
   companion object {
     private const val FEED_PARALLELISM = 6
     private const val FEED_ITEMS_PER_CHANNEL = 15
+    private const val BLOCKED_RETRY_DELAY_MS = 1500L
   }
 }

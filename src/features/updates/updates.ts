@@ -12,7 +12,7 @@ import { Alert, Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { type AvailableUpdate, compareVersions, parseRelease } from './releases';
+import { type AvailableUpdate, compareVersions, latestReleasePageUrl, parseRelease, parseReleasePageUrl } from './releases';
 
 interface UpdaterModule {
   getInstalledVersion(): { versionName: string; versionCode: number };
@@ -60,18 +60,31 @@ export async function checkForUpdate(): Promise<void> {
   if (!native || useUpdates.getState().checking) return;
   useUpdates.setState({ checking: true, error: null });
   try {
-    const response = await fetch(RELEASES_URL, { headers: { Accept: 'application/vnd.github+json' } });
-    if (response.status === 404) {
-      useUpdates.setState({ available: null, lastCheckedAt: Date.now(), checking: false });
-      return;
-    }
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const latest = parseRelease(await response.json());
+    const latest = await fetchLatestRelease();
     const newer = latest && compareVersions(latest.version, installedVersion()) > 0 ? latest : null;
     useUpdates.setState({ available: newer, lastCheckedAt: Date.now(), checking: false });
   } catch (e) {
     useUpdates.setState({ checking: false, error: e instanceof Error ? e.message : String(e) });
   }
+}
+
+/** The latest release, or null if there is none yet. */
+async function fetchLatestRelease(): Promise<AvailableUpdate | null> {
+  let apiError: unknown;
+  try {
+    const response = await fetch(RELEASES_URL, { headers: { Accept: 'application/vnd.github+json' } });
+    if (response.status === 404) return null;
+    if (response.ok) return parseRelease(await response.json());
+    apiError = new Error(`HTTP ${response.status}`);
+  } catch (e) {
+    apiError = e;
+  }
+  // The API refused (often its hourly limit, shared by everyone on this network): ask github.com instead.
+  const page = latestReleasePageUrl(RELEASES_URL);
+  if (!page) throw apiError;
+  const response = await fetch(page, { method: 'HEAD' });
+  if (!response.ok) throw apiError;
+  return parseReleasePageUrl(response.url);
 }
 
 /** On launch: checks if the last check is old enough. Drops a stale offer once it's installed. */

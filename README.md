@@ -233,7 +233,9 @@ Android asks to allow Lite Social to install apps. Logins, settings and YouTube 
 
 `publish-release.ps1` uses `GITHUB_TOKEN` if set, otherwise the GitHub login Git already has for this repository.
 The update check reads `https://api.github.com/repos/jarod85/SocialLiteClone/releases/latest` (override with
-`EXPO_PUBLIC_RELEASES_URL`); it needs the repository to be public. The code is in `modules/app-updater/` and
+`EXPO_PUBLIC_RELEASES_URL`); it needs the repository to be public. When that API refuses (it allows 60 calls an hour
+per network), the app reads the version from where `github.com/<repo>/releases/latest` redirects instead, so the
+APK must keep the name `LiteSocial-<version>.apk` that `publish-release.ps1` gives it. The code is in `modules/app-updater/` and
 `src/features/updates/`.
 
 ## Updating the blocking rules (no app update needed)
@@ -320,7 +322,12 @@ Said plainly, so nothing is oversold:
   `/api/v1/news/inbox/`, the least certain part.
 - **YouTube depends on NewPipe Extractor keeping up with YouTube.** When YouTube changes something, playback or
   downloads can stop until the library (and this app) is updated: bump the version in
-  `modules/youtube/android/build.gradle` and rebuild. YouTube may also ask a network to "confirm you're not a bot".
+  `modules/youtube/android/build.gradle` and rebuild. It's pinned to a dev-branch commit (see the comment there)
+  until a release drops the Android client that YouTube bot-checks.
+- **YouTube can block a network** with "confirm you're not a bot" (often a shared Wi-Fi; mobile data usually
+  works). The app retries once, then offers **Play in YouTube's player**: YouTube's own embedded player in a
+  WebView, which passes the checks a real browser passes. It can show ads and doesn't download or play in the
+  background. Once chosen, blocked videos open in it until the app restarts.
   There's no account: no watch history, likes, comments or members-only videos. Age-restricted videos don't play.
 - **MP3 conversion takes a moment.** It runs on the phone's CPU (a 4-minute song takes roughly 10–30 seconds).
 - **It's not a device-level blocker.** The Instagram and YouTube apps and websites still work outside Lite Social. Blocking

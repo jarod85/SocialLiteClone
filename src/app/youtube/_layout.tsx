@@ -12,8 +12,10 @@ import { Button } from '@/ui/components';
 import { useTheme } from '@/ui/theme';
 
 /**
- * The YouTube section: a native client (no WebView, no Google account) that
- * only shows your subscriptions. Shorts, recommendations and ads never appear.
+ * The YouTube section: a native client (no Google account) that
+ * only shows your subscriptions. Shorts, recommendations and ads never appear,
+ * except in YouTube's own player, a fallback you choose when YouTube blocks the
+ * network (watch/[videoId].tsx).
  */
 export default function YouTubeLayout() {
   const theme = useTheme();

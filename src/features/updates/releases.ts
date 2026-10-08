@@ -49,3 +49,28 @@ export function parseRelease(json: unknown): AvailableUpdate | null {
     publishedAt: typeof release.published_at === 'string' ? release.published_at : null,
   };
 }
+
+/**
+ * The fallback when api.github.com refuses (it allows 60 calls an hour per
+ * network, shared by every phone behind it): github.com's own "latest release"
+ * page, which redirects to /releases/tag/v<version>. Null if `apiUrl` isn't a
+ * GitHub "latest release" API address.
+ */
+export function latestReleasePageUrl(apiUrl: string): string | null {
+  const repo = /^https:\/\/api\.github\.com\/repos\/([\w.-]+\/[\w.-]+)\/releases\/latest$/.exec(apiUrl)?.[1];
+  return repo ? `https://github.com/${repo}/releases/latest` : null;
+}
+
+/** The update behind the page the "latest release" link redirected to, assuming publish-release.ps1's naming. */
+export function parseReleasePageUrl(finalUrl: string): AvailableUpdate | null {
+  const match = /^https:\/\/github\.com\/([\w.-]+\/[\w.-]+)\/releases\/tag\/v?(\d+\.\d+(?:\.\d+)?)$/.exec(finalUrl);
+  if (!match) return null;
+  const [, repo, version] = match;
+  return {
+    version,
+    notes: '',
+    apkUrl: `https://github.com/${repo}/releases/download/v${version}/LiteSocial-${version}.apk`,
+    sizeBytes: null,
+    publishedAt: null,
+  };
+}

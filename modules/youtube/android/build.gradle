@@ -18,7 +18,10 @@ dependencies {
   implementation 'androidx.core:core:1.17.0'
   // YouTube without an account or ads: search, channels, feeds and stream URLs. From JitPack (GPL-3.0).
   // Needs minSdk 33 (app.json, expo-build-properties) or core library desugaring.
-  implementation 'com.github.teamnewpipe:NewPipeExtractor:v0.26.5'
+  // A dev-branch commit (the one NewPipe's own dev builds use): v0.26.5 asks YouTube as the
+  // Android app first, which YouTube answers with "confirm you're not a bot" on many networks.
+  // This commit uses the visionOS client only. Go back to a release tag once one includes it.
+  implementation 'com.github.teamnewpipe:NewPipeExtractor:65cabc2ba5216ee871ace4a9963c08bdbf5d5dc0'
   // LAME MP3 encoder ported to Java (LGPL). Only its encoder core is used; the
   // javax.sound-based wrapper class it also ships is never loaded on Android.
   implementation 'de.sciss:jump3r:1.0.5'

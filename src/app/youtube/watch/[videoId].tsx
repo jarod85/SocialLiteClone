@@ -4,13 +4,14 @@ import { VideoView, type VideoViewProps } from 'expo-video';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { EmbeddedPlayer, isEmbeddableId } from '@/features/youtube/components/EmbeddedPlayer';
 import { PlayerControls } from '@/features/youtube/components/PlayerControls';
 import { Avatar, SubscribeButton } from '@/features/youtube/components/rows';
 import { useDownloadFlow } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatAge, formatCount } from '@/features/youtube/format';
 import { watchUrl, youtube } from '@/features/youtube/native';
-import { getPlayer, play, usePlayer } from '@/features/youtube/player';
+import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
 import { useSubscriptions } from '@/features/youtube/stores';
 import type { VideoDetails } from '@/features/youtube/types';
 import { Button } from '@/ui/components';
@@ -18,6 +19,12 @@ import { useTheme } from '@/ui/theme';
 
 /** Full screen turns the phone sideways; turning it back upright leaves full screen (with auto-rotate on). */
 const FULLSCREEN: VideoViewProps['fullscreenOptions'] = { enable: true, orientation: 'landscape', autoExitOnRotate: true };
+
+/** Errors (codes from modules/youtube Errors.kt) where YouTube's own player may still work. */
+const EMBED_FALLBACK_CODES = new Set(['ERR_YOUTUBE_BLOCKED', 'ERR_YOUTUBE']);
+
+/** Once you choose YouTube's player, later blocked videos open in it too until the app restarts. */
+let embedChosen = false;
 
 /**
  * The player: the video, its title, channel and description, and Download.
@@ -30,9 +37,13 @@ export default function WatchScreen() {
   const current = usePlayer((s) => s.current);
   const playerError = usePlayer((s) => s.error);
   // What was fetched for which video id, so a new id never shows the previous video's details.
-  const [loaded, setLoaded] = useState<{ id: string; details?: VideoDetails; error?: string } | null>(null);
+  const [loaded, setLoaded] = useState<{ id: string; details?: VideoDetails; error?: string; code?: string } | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [embedded, setEmbedded] = useState<string | null>(null);
   const details = current?.id === videoId ? current : loaded?.id === videoId ? (loaded.details ?? null) : null;
   const error = loaded?.id === videoId ? (loaded.error ?? null) : null;
+  const canEmbed = error !== null && EMBED_FALLBACK_CODES.has(loaded?.code ?? '') && isEmbeddableId(videoId);
+  const showEmbed = canEmbed && (embedded === videoId || embedChosen);
   const [expanded, setExpanded] = useState(false);
   const { start: download, picker } = useDownloadFlow();
   const videoView = useRef<VideoView>(null);
@@ -52,11 +63,30 @@ export default function WatchScreen() {
         setLoaded({ id: videoId, details: d });
         if (!d.isShort) void play(d);
       })
-      .catch((e) => active && setLoaded({ id: videoId, error: e instanceof Error ? e.message : String(e) }));
+      .catch((e) => {
+        if (!active) return;
+        const code = (e as { code?: unknown }).code;
+        setLoaded({ id: videoId, error: e instanceof Error ? e.message : String(e), code: typeof code === 'string' ? code : undefined });
+      });
     return () => {
       active = false;
     };
-  }, [videoId, isShortLink]);
+  }, [videoId, isShortLink, attempt]);
+
+  useEffect(() => {
+    // Never two videos at once: the embed has its own sound.
+    if (showEmbed) pause();
+  }, [showEmbed]);
+
+  const retry = () => {
+    setEmbedded(null);
+    setLoaded(null);
+    setAttempt((n) => n + 1);
+  };
+  const openEmbed = () => {
+    embedChosen = true;
+    setEmbedded(videoId);
+  };
 
   const back = () => (router.canGoBack() ? router.back() : router.replace('/youtube'));
 
@@ -102,6 +132,8 @@ export default function WatchScreen() {
             contentFit="contain"
             fullscreenOptions={FULLSCREEN}
           />
+        ) : showEmbed ? (
+          <EmbeddedPlayer videoId={videoId} />
         ) : error ? null : (
           <ActivityIndicator style={styles.videoLoading} color="#FFFFFF" />
         )}
@@ -110,10 +142,27 @@ export default function WatchScreen() {
         <PlayerControls details={details} onLandscape={() => void videoView.current?.enterFullscreen()} />
       ) : null}
 
-      {error ? (
+      {showEmbed ? (
+        <ScrollView contentContainerStyle={styles.info}>
+          <Text style={[styles.stats, { color: theme.textMuted }]}>
+            {`This is YouTube's own player. Lite Social's couldn't load the video: ${error}\n\n` +
+              "YouTube's player can show ads, and it doesn't download or keep playing in the background."}
+          </Text>
+          <Button label="Try Lite Social's player again" variant="secondary" onPress={retry} />
+        </ScrollView>
+      ) : error ? (
         <View style={styles.centered}>
           <Text style={[styles.message, { color: theme.text }]}>{error}</Text>
-          <Button label="Back" onPress={back} />
+          {canEmbed ? (
+            <>
+              <Button label="Play in YouTube's player" onPress={openEmbed} />
+              <Text style={[styles.stats, styles.note, { color: theme.textMuted }]}>
+                YouTube&apos;s own player usually works on networks that block Lite Social&apos;s. It can show ads.
+              </Text>
+            </>
+          ) : null}
+          <Button label="Try again" variant="secondary" onPress={retry} />
+          <Button label="Back" variant="secondary" onPress={back} />
         </View>
       ) : details ? (
         <ScrollView contentContainerStyle={styles.info}>
@@ -165,6 +214,7 @@ const styles = StyleSheet.create({
   info: { padding: 16, gap: 12, paddingBottom: 40 },
   title: { fontSize: 18, fontWeight: '700', lineHeight: 24 },
   stats: { fontSize: 13 },
+  note: { textAlign: 'center' },
   channel: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   channelLink: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   channelName: { flex: 1, fontSize: 15, fontWeight: '600' },

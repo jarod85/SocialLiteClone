@@ -1,4 +1,4 @@
-import { compareVersions, parseRelease } from '@/features/updates/releases';
+import { compareVersions, latestReleasePageUrl, parseRelease, parseReleasePageUrl } from '@/features/updates/releases';
 
 describe('compareVersions', () => {
   it.each([
@@ -49,5 +49,30 @@ describe('parseRelease', () => {
     ).toBeNull();
     expect(parseRelease({ ...release, tag_name: 'latest' })).toBeNull();
     expect(parseRelease(null)).toBeNull();
+  });
+});
+
+describe('release page fallback', () => {
+  it('derives the page from the API address', () => {
+    expect(latestReleasePageUrl('https://api.github.com/repos/jarod85/SocialLiteClone/releases/latest')).toBe(
+      'https://github.com/jarod85/SocialLiteClone/releases/latest',
+    );
+    expect(latestReleasePageUrl('https://example.com/releases/latest')).toBeNull();
+  });
+
+  it('reads the version from the redirect target', () => {
+    expect(parseReleasePageUrl('https://github.com/jarod85/SocialLiteClone/releases/tag/v1.5.1')).toEqual({
+      version: '1.5.1',
+      notes: '',
+      apkUrl: 'https://github.com/jarod85/SocialLiteClone/releases/download/v1.5.1/LiteSocial-1.5.1.apk',
+      sizeBytes: null,
+      publishedAt: null,
+    });
+  });
+
+  it('ignores anything that is not a release tag page', () => {
+    expect(parseReleasePageUrl('https://github.com/jarod85/SocialLiteClone/releases')).toBeNull();
+    expect(parseReleasePageUrl('https://github.com/login')).toBeNull();
+    expect(parseReleasePageUrl('https://evil.example/jarod85/SocialLiteClone/releases/tag/v9.0.0')).toBeNull();
   });
 });

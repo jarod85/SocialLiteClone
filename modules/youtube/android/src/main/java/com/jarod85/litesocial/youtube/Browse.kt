@@ -184,7 +184,7 @@ class Browse(private val context: Context) {
 
   private fun plainText(description: Description?): String {
     val content = description?.content ?: return ""
-    return if (description.type == Description.HTML) {
+    return if (description.type == Description.Type.HTML) {
       Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY).toString().trim()
     } else {
       content.trim()

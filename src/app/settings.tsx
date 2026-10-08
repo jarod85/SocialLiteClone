@@ -11,6 +11,7 @@ import {
   openAppSettings,
   requestNotificationPermission,
   requestUnrestrictedBattery,
+  sendTestNotification,
   setEnabled as setInstagramAlertsEnabled,
   setIntervalMinutes as setInstagramCheckInterval,
 } from '@/features/instagramAlerts/instagramAlerts';
@@ -151,7 +152,9 @@ function InstagramAlertsSection() {
 
   const result = status.lastResult;
   const lines: string[] = [];
-  if (status.enabled && !status.canNotify) lines.push("Not working yet: Lite Social's notifications are turned off.");
+  if (status.enabled && !status.canNotify) {
+    lines.push("Not working yet: Lite Social's notifications (or their \"Instagram messages\" category) are turned off.");
+  }
   if (result) {
     const when = new Date(result.checkedAt).toLocaleString();
     if (!result.loggedIn) lines.push(`Last check (${when}): not logged in. Open Instagram in Lite Social and log in.`);
@@ -160,6 +163,13 @@ function InstagramAlertsSection() {
       lines.push(`Messages: ${result.messages}${result.messages === 'OK' ? ` (${result.unreadConversations} unread)` : ''}.`);
       lines.push(`Activity: ${result.activity}.`);
     }
+  }
+  if (status.enabled) {
+    lines.push(
+      status.lastBackgroundCheckAt
+        ? `Last background check: ${new Date(status.lastBackgroundCheckAt).toLocaleString()}.`
+        : 'No background check has run yet.',
+    );
   }
 
   return (
@@ -195,12 +205,13 @@ function InstagramAlertsSection() {
       {status.enabled ? (
         <View style={styles.buttonColumn}>
           <Button label={checking ? 'Checking...' : 'Check now'} variant="secondary" disabled={checking} onPress={() => void runCheck()} />
+          {status.canNotify ? <Button label="Send a test notification" variant="secondary" onPress={sendTestNotification} /> : null}
           {!status.canNotify ? <Button label="Turn on notifications" onPress={openAppSettings} /> : null}
           {!status.unrestricted ? (
             <>
               <TextRow>
-                Battery optimization can hold the background checks back for hours. Allow Lite Social to run in the background
-                for timely alerts.
+                Android pauses background checks while the phone lies unused, often for hours, and without this permission they
+                can&apos;t reach Instagram then. Allow Lite Social to run in the background for timely alerts.
               </TextRow>
               <Button label="Allow background checks" onPress={requestUnrestrictedBattery} />
             </>

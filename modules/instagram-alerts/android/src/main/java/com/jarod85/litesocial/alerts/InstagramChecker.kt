@@ -19,6 +19,8 @@ object InstagramChecker {
   private const val TAG = "LiteSocialAlerts"
   /** More new activity items than this in one check become a single summary alert. */
   private const val MAX_ACTIVITY_ALERTS = 5
+  /** CheckAlarm and CheckWorker can fire close together; the second one then skips. */
+  private const val MIN_BACKGROUND_GAP_MS = 5 * 60_000L
 
   data class Result(
     val loggedIn: Boolean,
@@ -39,8 +41,18 @@ object InstagramChecker {
       .toString()
   }
 
+  /** A check from CheckAlarm or CheckWorker, unless one just ran. */
+  @Synchronized
+  fun runInBackground(context: Context) {
+    val now = System.currentTimeMillis()
+    if (now - AlertPrefs.lastCheckAt(context) in 0 until MIN_BACKGROUND_GAP_MS) return
+    AlertPrefs.setLastBackgroundAt(context, now)
+    run(context)
+  }
+
   @Synchronized
   fun run(context: Context): Result {
+    AlertPrefs.setLastCheckAt(context, System.currentTimeMillis())
     val result = try {
       check(context)
     } catch (e: Exception) {

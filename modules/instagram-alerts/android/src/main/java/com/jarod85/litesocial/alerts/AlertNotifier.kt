@@ -28,6 +28,7 @@ object AlertNotifier {
   private const val DM_TAG = "ig-dm:"
   private const val ACTIVITY_TAG = "ig-activity:"
   private const val BADGE_TAG = "ig-dm-badge"
+  private const val TEST_TAG = "ig-test"
 
   enum class Target(val open: String) { THREAD("thread"), INBOX("messages"), ACTIVITY("activity") }
 
@@ -49,8 +50,27 @@ object AlertNotifier {
     }
   }
 
-  /** False when the user turned off Lite Social's notifications or hasn't allowed them yet. */
-  fun canPost(context: Context): Boolean = NotificationManagerCompat.from(context).areNotificationsEnabled()
+  /**
+   * False when the user turned off Lite Social's notifications, hasn't allowed
+   * them yet, or turned off the "Instagram messages" category.
+   */
+  fun canPost(context: Context): Boolean {
+    if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
+    val messages = context.getSystemService(NotificationManager::class.java).getNotificationChannel(MESSAGES_CHANNEL)
+    return messages == null || messages.importance != NotificationManager.IMPORTANCE_NONE
+  }
+
+  /** A sample message alert, from Settings, to see that alerts show up and how. */
+  fun postTest(context: Context) {
+    val now = System.currentTimeMillis()
+    val builder = base(context, MESSAGES_CHANNEL, MESSAGES_GROUP, now)
+      .setContentTitle("Lite Social")
+      .setContentText("Instagram alerts will show up like this.")
+      .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
+      .setContentIntent(open(context, Target.INBOX, null, now))
+    notify(context, TEST_TAG, builder)
+  }
 
   fun postMessage(context: Context, threadId: String, title: String, text: String, picture: String?, sentAtMs: Long) {
     val builder = base(context, MESSAGES_CHANNEL, MESSAGES_GROUP, sentAtMs)

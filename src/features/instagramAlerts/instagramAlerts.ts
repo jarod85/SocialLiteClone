@@ -2,8 +2,9 @@
  * Instagram alerts (Android only).
  *
  * Lite Social can't receive Instagram's push notifications: the site runs in a
- * WebView, and Android's WebView has no web push. Instead, a background job in
- * modules/instagram-alerts checks Instagram every 15+ minutes with the login
+ * WebView, and Android's WebView has no web push. Instead, modules/instagram-alerts
+ * checks Instagram in the background every 15+ minutes (an alarm that also fires
+ * while the phone dozes, backed by a WorkManager job) with the login
  * from the in-app browser (the same web API instagram.com itself calls) and
  * posts a Lite Social notification for each new message and activity item.
  *
@@ -19,6 +20,8 @@ interface InstagramAlertsModule {
   getIntervalMinutes(): number;
   setIntervalMinutes(minutes: number): void;
   getLastResult(): string | null;
+  getLastBackgroundCheckAt(): number | null;
+  sendTestNotification(): void;
   checkNow(): Promise<string>;
   hasSession(): Promise<boolean>;
   canPostNotifications(): boolean;
@@ -52,6 +55,8 @@ export interface InstagramAlertsStatus {
   /** Battery optimization off, so Android doesn't hold the checks back for hours. */
   unrestricted: boolean;
   lastResult: CheckResult | null;
+  /** When a background check last ran (ms), or null if none has yet. */
+  lastBackgroundCheckAt: number | null;
 }
 
 export function parseCheckResult(json: string | null | undefined): CheckResult | null {
@@ -75,7 +80,15 @@ export function parseCheckResult(json: string | null | undefined): CheckResult |
 
 export function getStatus(): InstagramAlertsStatus {
   if (!native) {
-    return { supported: false, enabled: false, intervalMinutes: 15, canNotify: false, unrestricted: false, lastResult: null };
+    return {
+      supported: false,
+      enabled: false,
+      intervalMinutes: 15,
+      canNotify: false,
+      unrestricted: false,
+      lastResult: null,
+      lastBackgroundCheckAt: null,
+    };
   }
   return {
     supported: true,
@@ -84,6 +97,7 @@ export function getStatus(): InstagramAlertsStatus {
     canNotify: native.canPostNotifications(),
     unrestricted: native.isIgnoringBatteryOptimizations(),
     lastResult: parseCheckResult(native.getLastResult()),
+    lastBackgroundCheckAt: native.getLastBackgroundCheckAt(),
   };
 }
 
@@ -109,6 +123,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
   if (Platform.OS !== 'android' || (Platform.Version as number) < 33) return true;
   const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
   return result === PermissionsAndroid.RESULTS.GRANTED;
+}
+
+/** Posts a sample message alert, to see that alerts show up. */
+export function sendTestNotification(): void {
+  native?.sendTestNotification();
 }
 
 export function requestUnrestrictedBattery(): void {

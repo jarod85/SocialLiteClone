@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lite Social",
     "slug": "lite-social",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "scheme": "litesocial",
     "platforms": ["ios", "android"],
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.jarod85.litesocial",
-      "versionCode": 7,
+      "versionCode": 8,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",

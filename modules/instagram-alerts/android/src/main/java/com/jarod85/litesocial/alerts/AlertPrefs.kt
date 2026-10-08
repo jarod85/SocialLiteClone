@@ -19,6 +19,8 @@ object AlertPrefs {
   private const val KEY_BADGE = "dm_badge"
   private const val KEY_NOTIFIED_THREADS = "notified_threads"
   private const val KEY_LAST_RESULT = "last_result"
+  private const val KEY_LAST_CHECK_AT = "last_check_at"
+  private const val KEY_LAST_BACKGROUND_AT = "last_background_at"
 
   const val DEFAULT_INTERVAL_MINUTES = 15
   /** Android runs periodic background work at most every 15 minutes. */
@@ -75,6 +77,20 @@ object AlertPrefs {
 
   fun setLastResult(context: Context, json: String) {
     prefs(context).edit().putString(KEY_LAST_RESULT, json).apply()
+  }
+
+  /** When the last check of any kind ran (ms), so overlapping triggers don't check twice in a row. */
+  fun lastCheckAt(context: Context): Long = prefs(context).getLong(KEY_LAST_CHECK_AT, 0)
+
+  fun setLastCheckAt(context: Context, ms: Long) {
+    prefs(context).edit().putLong(KEY_LAST_CHECK_AT, ms).apply()
+  }
+
+  /** When a background check last ran (ms), shown in Settings to tell whether Android lets them run. 0: never. */
+  fun lastBackgroundAt(context: Context): Long = prefs(context).getLong(KEY_LAST_BACKGROUND_AT, 0)
+
+  fun setLastBackgroundAt(context: Context, ms: Long) {
+    prefs(context).edit().putLong(KEY_LAST_BACKGROUND_AT, ms).apply()
   }
 
   /** Start from "now": only what arrives after alerts were switched on is announced. */

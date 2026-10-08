@@ -24,6 +24,9 @@ class InstagramAlertsModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("InstagramAlerts")
 
+    // Alarms don't survive a force stop; opening the app sets the next check again.
+    OnCreate { if (AlertPrefs.isEnabled(context)) CheckAlarm.arm(context) }
+
     Function("isEnabled") { AlertPrefs.isEnabled(context) }
 
     Function("setEnabled") { enabled: Boolean ->
@@ -46,6 +49,11 @@ class InstagramAlertsModule : Module() {
 
     /** JSON from the last check, or null before the first one. */
     Function("getLastResult") { AlertPrefs.lastResult(context) }
+
+    /** When a background check last ran (ms since epoch), or null if none has since install. */
+    Function("getLastBackgroundCheckAt") { AlertPrefs.lastBackgroundAt(context).takeIf { it > 0 }?.toDouble() }
+
+    Function("sendTestNotification") { AlertNotifier.postTest(context) }
 
     /** Runs a check now and returns its JSON summary. Network and cookie work stay off the JS thread. */
     AsyncFunction("checkNow") Coroutine { ->

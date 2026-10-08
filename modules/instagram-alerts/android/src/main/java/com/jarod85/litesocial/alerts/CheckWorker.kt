@@ -11,13 +11,17 @@ import androidx.work.WorkerParameters
 import java.util.concurrent.TimeUnit
 
 /**
- * The periodic background check. WorkManager keeps it scheduled across app
- * restarts, updates and reboots, and only runs it with a network connection.
- * Android decides the exact timing (battery saver and Doze can delay it).
+ * The backup background check (CheckAlarm is the main one). WorkManager keeps
+ * it scheduled across app restarts, updates and reboots, and only runs it with
+ * a network connection. It never runs while the phone dozes, but it does run in
+ * Doze's maintenance windows, which matters without the battery exemption.
  */
 class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
   override fun doWork(): Result {
-    if (AlertPrefs.isEnabled(applicationContext)) InstagramChecker.run(applicationContext)
+    if (AlertPrefs.isEnabled(applicationContext)) {
+      InstagramChecker.runInBackground(applicationContext)
+      CheckAlarm.arm(applicationContext) // In case the alarm got lost (e.g. a force stop clears it).
+    }
     // Always "success": a failed check is retried at the next interval, not in a tight loop.
     return Result.success()
   }
@@ -31,10 +35,12 @@ class CheckWorker(context: Context, params: WorkerParameters) : Worker(context, 
         .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
         .build()
       WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, request)
+      CheckAlarm.arm(context)
     }
 
     fun cancel(context: Context) {
       WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+      CheckAlarm.disarm(context)
     }
   }
 }

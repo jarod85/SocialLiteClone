@@ -316,8 +316,10 @@ Said plainly, so nothing is oversold:
   Instagram's own scripts. CSS is applied a moment later on a cold start, and the Navigation API hook
   covers navigation the history patch might miss.
 - **Pull-to-refresh is iOS-only** (a `react-native-webview` limitation); Android has the toolbar reload button.
-- **Instagram notifications are checked, not pushed.** Every 15 minutes at best, later when Android's battery
-  management holds background work back. They use Instagram's undocumented web API; if Instagram changes it,
+- **Instagram notifications are checked, not pushed.** Every 15 minutes at best. An alarm triggers the check, so it
+  also runs while the phone lies unused (Doze), where WorkManager jobs don't run; there it can only reach Instagram
+  with Settings → "Allow background checks" (battery optimization off). Settings shows when a background check
+  last ran and can send a test notification. They use Instagram's undocumented web API; if Instagram changes it,
   Settings → "Check now" shows the error and the app needs an update. Activity alerts depend on
   `/api/v1/news/inbox/`, the least certain part.
 - **YouTube depends on NewPipe Extractor keeping up with YouTube.** When YouTube changes something, playback or

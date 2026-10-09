@@ -172,7 +172,7 @@ export function PlayerSheet({ details }: { details: VideoDetails }) {
 
   if (open === 'quality') {
     return (
-      <SheetModal title="Quality" note="Also used for the next videos." onClose={close}>
+      <SheetModal title="Quality and speed" note="Both are kept for the next videos." onClose={close}>
         <SpeedRow />
         {[{ height: null, label: auto }, ...details.qualities].map((q) => (
           <Option
@@ -236,7 +236,10 @@ function SpeedRow() {
               accessibilityLabel={`Speed ${rate}x`}
               style={[styles.speedChip, { backgroundColor: selected ? theme.accent : theme.surface }]}
             >
-              <Text style={[styles.speedChipLabel, { color: selected ? '#FFFFFF' : theme.text }]}>{rate === 1 ? 'Normal' : `${rate}×`}</Text>
+              {/* "simple": Android's default line breaking measured "2×" too narrow and clipped the "×". */}
+              <Text style={[styles.speedChipLabel, { color: selected ? '#FFFFFF' : theme.text }]} numberOfLines={1} textBreakStrategy="simple">
+                {rate === 1 ? 'Normal' : `${rate}×`}
+              </Text>
             </Pressable>
           );
         })}

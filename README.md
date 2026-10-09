@@ -44,22 +44,28 @@ With a USB cable you can also run `adb install -r release\LiteSocial-<version>.a
 
 Lite Social can't receive Instagram's push notifications: the site runs in a WebView, and Android's WebView has no
 web push. So Lite Social checks Instagram itself, in the background, with the login from its in-app browser. It
-calls the same web API instagram.com calls (`/api/v1/direct_v2/inbox/` for messages, `/api/v1/news/inbox/` for
-activity), and needs no Instagram app.
+calls the same web API instagram.com calls (its `PolarisDirectInboxQuery` GraphQL query for messages, with the older
+`/api/v1/direct_v2/inbox/` as a second try, `/api/v1/direct_v2/get_badge_count/` for the unread count and
+`/api/v1/news/inbox/` for activity), and needs no Instagram app.
 
 1. Open Instagram in Lite Social and log in.
 2. **Settings → Instagram notifications**: turn it on and allow notifications. "Check now" runs a check right away
    and shows what it found (or what went wrong, e.g. "Not logged in").
 3. Tap **Allow background checks** (battery optimization off), or Android may hold the checks back for hours.
 
-From then on, every new message gets a notification with the sender, a preview and their picture; tapping it opens
-that conversation in Lite Social. Likes, comments, follows and mentions get their own notifications that open your
+From then on, every conversation with new messages gets a notification in Android's chat style: who wrote
+("Full Name (@username)") with their picture, and the text of their last few messages (photos, reels, voice messages
+and the like are described); group chats show the group's name and each sender. Tapping it opens that conversation
+in Lite Social. On the lock screen, Android's "hide content" setting still applies. Likes, comments, follows and mentions get their own notifications that open your
 activity page. Once a conversation is read (anywhere), its notification disappears at the next check.
 
 Limits: Android runs background work at most every **15 minutes** (choose 15/30/60), so alerts aren't instant, and
 Doze can delay them further while the phone lies still. Muted chats and message requests don't alert. If the inbox
-can't be read, the unread-messages count is the fallback ("3 unread messages"). The code is a small native module in
-`modules/instagram-alerts/` (a WorkManager job; the logic is in `InstagramChecker.kt`).
+can't be read either way, the unread-messages count is the fallback ("3 unread messages"), and Settings says why
+("Only the unread count is available. web inbox: …"). The code is a small native module in
+`modules/instagram-alerts/` (an alarm plus a WorkManager job; the logic is in `InstagramChecker.kt`, the inbox
+parsing in `DirectInbox.kt`). The GraphQL query is named by an id (`INBOX_DOC_ID`) that Instagram changes now and
+then; when it goes stale, the older inbox is tried, and failing both, the unread count.
 
 ### YouTube
 
@@ -73,7 +79,7 @@ YouTube account in Lite Social. It's built on [NewPipe Extractor](https://github
 | Subscriptions | Stored on the phone. Add them with Search → Subscribe, or import Google Takeout's `subscriptions.csv` (takeout.google.com → "YouTube and YouTube Music" → subscriptions) or a NewPipe export. |
 | No Shorts | The feed uses each channel's *Videos* tab, which never contains Shorts. Shorts are also dropped from search, and a Shorts link shows "Shorts are hidden". |
 | No ads | The player plays the video's own streams (DASH, up to 1080p H.264). Ads are never requested. |
-| Player options | **Landscape** (full screen sideways; the full-screen button does the same), **quality** (Auto, or any resolution the video has, kept for the next videos; default in Settings) and **Loop** (for the current video). |
+| Player options | Buttons on the video (top right, shown while paused or after a touch) and in the row under it: **Captions** (every caption track the video has, e.g. Chinese (Simplified), English (auto-generated); the language is turned on again in the next videos that have it), **Quality** (Auto, or any resolution the video has, kept for the next videos; default in Settings), **Full screen** (sideways without system bars, with the same buttons; turning the phone upright or Back leaves it) and **Loop** (for the current video). YouTube's auto-translated captions aren't offered: YouTube refuses them to apps like this one. |
 | Background and screen-off play | One shared player keeps playing when you leave the video, the app or turn the screen off, with lock-screen and notification controls. A mini player shows while you browse. |
 | Download MP4 | Best H.264 video up to your chosen quality plus AAC audio, joined on the phone (MediaMuxer), saved to **Movies/Lite Social**. |
 | Download MP3 | AAC audio decoded and encoded to MP3 on the phone (pure-Java LAME), tagged with title, channel and cover art, and saved into your **Musicolet music folder**. You pick that folder once (Android's folder picker, it starts in Music) and choose or create the subfolder for every song. |
@@ -320,8 +326,9 @@ Said plainly, so nothing is oversold:
   also runs while the phone lies unused (Doze), where WorkManager jobs don't run; there it can only reach Instagram
   with Settings → "Allow background checks" (battery optimization off). Settings shows when a background check
   last ran and can send a test notification. They use Instagram's undocumented web API; if Instagram changes it,
-  Settings → "Check now" shows the error and the app needs an update. Activity alerts depend on
-  `/api/v1/news/inbox/`, the least certain part.
+  Settings → "Check now" shows the error and the app needs an update. The messages query's id (`INBOX_DOC_ID` in
+  `DirectInbox.kt`) is the part most likely to go stale; then the older inbox endpoint and finally the unread
+  count take over.
 - **YouTube depends on NewPipe Extractor keeping up with YouTube.** When YouTube changes something, playback or
   downloads can stop until the library (and this app) is updated: bump the version in
   `modules/youtube/android/build.gradle` and rebuild. It's pinned to a dev-branch commit (see the comment there)

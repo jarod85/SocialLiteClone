@@ -2,23 +2,25 @@ package com.jarod85.litesocial.alerts
 
 import android.content.Context
 import android.util.Log
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * One check for new Instagram messages and activity, run by CheckWorker in the
- * background and by "Check now" in Settings.
+ * One check for new Instagram messages and activity, run by CheckAlarm and
+ * CheckWorker in the background and by "Check now" in Settings.
  *
- * Messages come from the inbox the web app uses; each unread conversation with
- * a message newer than the last check gets an alert, which is removed again
- * once the conversation has been read (in Lite Social or anywhere else).
+ * Messages come from the inbox instagram.com reads (DirectInbox); each
+ * conversation with messages newer than the last check gets an alert showing
+ * who wrote what, which is removed again once the conversation has been read
+ * (in Lite Social or anywhere else). Instagram's unread count says when
+ * everything is read, and is the fallback alert if the inbox can't be read.
  * Activity (likes, comments, follows, mentions) comes from the activity feed.
- * If the inbox can't be read, the unread-messages count is the fallback.
  */
 object InstagramChecker {
   private const val TAG = "LiteSocialAlerts"
   /** More new activity items than this in one check become a single summary alert. */
   private const val MAX_ACTIVITY_ALERTS = 5
+  /** Messages shown in one conversation's alert. */
+  private const val MAX_MESSAGE_LINES = 5
   /** CheckAlarm and CheckWorker can fire close together; the second one then skips. */
   private const val MIN_BACKGROUND_GAP_MS = 5 * 60_000L
 
@@ -69,22 +71,39 @@ object InstagramChecker {
       ?: return Result(false, "Not logged in", "Not logged in", 0, 0, 0)
     val canNotify = AlertNotifier.canPost(context)
 
-    var newMessages = 0
-    var unread = 0
-    val messages = try {
-      val counts = checkInbox(context, api, canNotify)
-      newMessages = counts.first
-      unread = counts.second
-      "OK"
+    // Instagram's unread count: cheap, and the fallback when the inbox can't be read.
+    var badgeError: Exception? = null
+    val badge = try {
+      val json = api.getJson("/api/v1/direct_v2/get_badge_count/?no_raven=1")
+      if (json.has("badge_count")) json.optInt("badge_count") else throw InstagramApi.Failure.BadResponse("no badge_count")
     } catch (e: InstagramApi.Failure.NotLoggedIn) {
       return Result(false, describe(e), describe(e), 0, 0, 0)
     } catch (e: Exception) {
-      Log.w(TAG, "Inbox failed, trying the unread count", e)
-      try {
-        newMessages = checkBadge(context, api, canNotify)
-        "Only the unread count is available (${describe(e)})"
-      } catch (badge: Exception) {
-        describe(e)
+      Log.w(TAG, "Unread count failed", e)
+      badgeError = e
+      null
+    }
+
+    var newMessages = 0
+    var unread = 0
+    val messages = try {
+      val (threads, reader) = readInbox(context, api)
+      // The first read only notes where the inbox stands; an unread-count alert stays until then.
+      val baseline = !AlertPrefs.inboxBaselined(context)
+      val counts = handleThreads(context, threads, badge, canNotify && !baseline)
+      newMessages = counts.first
+      unread = counts.second
+      if (baseline) AlertPrefs.setInboxBaselined(context) else AlertNotifier.cancelUnreadCount(context)
+      if (reader == DirectInbox.Reader.GRAPHQL) "OK" else "OK (${reader.label})"
+    } catch (e: InboxUnreadable) {
+      Log.w(TAG, "Inbox failed, using the unread count", e)
+      if (badge == null && e.notLoggedIn) return Result(false, describe(e.failures.first()), describe(e.failures.first()), 0, 0, 0)
+      if (badge != null) {
+        newMessages = alertUnreadCount(context, badge, canNotify)
+        unread = badge
+        "Only the unread count is available. ${e.message}"
+      } else {
+        "${e.message}; unread count: ${describe(badgeError!!)}"
       }
     }
 
@@ -100,59 +119,81 @@ object InstagramChecker {
     return Result(true, messages, activity, newMessages, newActivity, unread)
   }
 
-  /** Returns (new message alerts, unread conversations). */
-  private fun checkInbox(context: Context, api: InstagramApi, canNotify: Boolean): Pair<Int, Int> {
-    val json = api.getJson("/api/v1/direct_v2/inbox/?persistentBadging=true&folder=&limit=20&thread_message_limit=1")
-    val inbox = json.optJSONObject("inbox") ?: throw InstagramApi.Failure.BadResponse("no inbox")
-    val threads = inbox.optJSONArray("threads") ?: JSONArray()
-    val viewer = json.optJSONObject("viewer")?.let { it.optString("pk").ifEmpty { it.optString("pk_id") } }
-      ?.takeIf { it.isNotEmpty() } ?: api.viewerId
+  private class InboxUnreadable(val failures: List<Exception>, message: String) : Exception(message) {
+    val notLoggedIn get() = failures.all { it is InstagramApi.Failure.NotLoggedIn }
+  }
 
+  /** Tries each way of reading the inbox, the one that worked last time first. */
+  private fun readInbox(context: Context, api: InstagramApi): Pair<List<DirectInbox.Thread>, DirectInbox.Reader> {
+    val preferred = DirectInbox.Reader.entries.firstOrNull { it.key == AlertPrefs.inboxReader(context) }
+    val order = listOfNotNull(preferred) + DirectInbox.Reader.entries.filter { it != preferred }
+    val failures = mutableListOf<Exception>()
+    val notes = mutableListOf<String>()
+    for (reader in order) {
+      try {
+        val threads = when (reader) {
+          DirectInbox.Reader.GRAPHQL -> DirectInbox.readGraphql(api)
+          DirectInbox.Reader.REST -> DirectInbox.readRest(api)
+        }
+        AlertPrefs.setInboxReader(context, reader.key)
+        return threads to reader
+      } catch (e: Exception) {
+        Log.w(TAG, "Inbox via ${reader.key} failed", e)
+        failures += e
+        notes += "${reader.label}: ${describe(e)}"
+      }
+    }
+    throw InboxUnreadable(failures, notes.joinToString("; "))
+  }
+
+  /**
+   * Alerts for conversations with messages newer than the last check, and
+   * removes alerts for conversations read since. Returns (alerts, unread).
+   */
+  private fun handleThreads(context: Context, threads: List<DirectInbox.Thread>, badge: Int?, canNotify: Boolean): Pair<Int, Int> {
     val watermark = AlertPrefs.dmWatermark(context)
     var newest = watermark
     val notified = AlertPrefs.notifiedThreads(context).toMutableSet()
     var alerts = 0
-    var unread = 0
+    var unreadThreads = 0
 
-    for (i in 0 until threads.length()) {
-      val thread = threads.optJSONObject(i) ?: continue
-      val threadId = thread.optString("thread_id").takeIf { it.matches(Regex("\\d{1,40}")) } ?: continue
-      val items = thread.optJSONArray("items") ?: JSONArray()
-      val latest = items.optJSONObject(0)
-      latest?.let { newest = maxOf(newest, timestamp(it)) }
-      // Their latest message, if the latest one isn't yours.
-      val incoming = latest?.takeIf { it.optString("user_id") != viewer }
-      val seenAt = viewer?.let { thread.optJSONObject("last_seen_at")?.optJSONObject(it) }?.let { timestamp(it) } ?: 0L
-      val isUnread = incoming != null && timestamp(incoming) > seenAt
-
+    for (thread in threads) {
+      thread.messages.firstOrNull()?.let { newest = maxOf(newest, it.atMs) }
+      val incoming = thread.incoming
+      // A zero unread count means everything is read, whatever a conversation looks like.
+      val isUnread = badge != 0 && incoming.isNotEmpty() && thread.unread != false
       if (!isUnread) {
-        if (notified.remove(threadId)) AlertNotifier.cancelMessage(context, threadId)
+        if (notified.remove(thread.id)) AlertNotifier.cancelMessage(context, thread.id)
         continue
       }
-      unread++
-      if (thread.optBoolean("muted") || timestamp(incoming!!) <= watermark || !canNotify) continue
+      val fresh = incoming.any { it.atMs > watermark }
+      if (thread.unread == true || fresh) unreadThreads++
+      if (!fresh || thread.muted || !canNotify) continue
 
-      val sender = findUser(thread.optJSONArray("users"), incoming.optString("user_id"))
-      val senderName = sender?.let { it.optString("full_name").ifBlank { it.optString("username") } }?.ifBlank { null }
-      val preview = preview(incoming)
-      val isGroup = thread.optBoolean("is_group")
-      val title = if (isGroup) thread.optString("thread_title").ifBlank { "Group chat" } else senderName ?: thread.optString("thread_title").ifBlank { "Instagram" }
-      val text = if (isGroup && senderName != null) "$senderName: $preview" else preview
-      AlertNotifier.postMessage(context, threadId, title, text, sender?.optString("profile_pic_url"), timestamp(incoming) / 1000)
-      notified += threadId
+      // The new messages, plus the earlier unread ones while their alert is still showing.
+      val shown = incoming.filter { it.atMs > watermark || thread.id in notified }.take(MAX_MESSAGE_LINES).reversed()
+      val latestSender = thread.users[incoming.first().senderId]
+      val title = if (thread.isGroup) {
+        thread.title ?: thread.users.values.distinct().joinToString(", ") { it.name }.ifBlank { "Group chat" }
+      } else {
+        latestSender?.name ?: thread.title ?: "Instagram"
+      }
+      val lines = shown.map { message ->
+        val sender = thread.users[message.senderId]?.name ?: if (thread.isGroup) "Someone" else title
+        AlertNotifier.Line(sender, message.text, message.atMs)
+      }
+      AlertNotifier.postConversation(context, thread.id, title, thread.isGroup, lines, latestSender?.picture)
+      notified += thread.id
       alerts++
     }
 
     AlertPrefs.setDmWatermark(context, newest)
     AlertPrefs.setNotifiedThreads(context, notified)
-    if (unread == 0) AlertNotifier.cancelUnreadCount(context)
-    return alerts to unread
+    return alerts to (badge ?: unreadThreads)
   }
 
-  private fun checkBadge(context: Context, api: InstagramApi, canNotify: Boolean): Int {
-    val json = api.getJson("/api/v1/direct_v2/get_badge_count/?no_raven=1")
-    if (!json.has("badge_count")) throw InstagramApi.Failure.BadResponse("no badge_count")
-    val count = json.optInt("badge_count")
+  /** When only Instagram's unread count is known: one alert with the count, when it goes up. */
+  private fun alertUnreadCount(context: Context, count: Int, canNotify: Boolean): Int {
     val previous = AlertPrefs.badge(context)
     AlertPrefs.setBadge(context, count)
     return when {
@@ -168,8 +209,26 @@ object InstagramChecker {
     }
   }
 
+  /** The activity feed; instagram.com itself POSTs for it with its page token, so that's the second try. */
+  private fun activityFeed(api: InstagramApi): JSONObject {
+    val path = "/api/v1/news/inbox/"
+    val referer = "https://www.instagram.com/notifications/"
+    val first = try {
+      api.getJson(path, referer).takeIf { it.has("new_stories") || it.has("old_stories") }
+    } catch (e: InstagramApi.Failure.NotLoggedIn) {
+      throw e
+    } catch (e: Exception) {
+      Log.w(TAG, "Activity via GET failed", e)
+      null
+    }
+    if (first != null) return first
+    val tokens = api.tokens()
+    val fbDtsg = tokens.fbDtsg ?: throw InstagramApi.Failure.BadResponse("no activity")
+    return api.postForm(path, mapOf("fb_dtsg" to fbDtsg, "jazoest" to (tokens.jazoest ?: "")), referer)
+  }
+
   private fun checkActivity(context: Context, api: InstagramApi, canNotify: Boolean): Int {
-    val json = api.getJson("/api/v1/news/inbox/")
+    val json = activityFeed(api)
     if (!json.has("new_stories") && !json.has("old_stories")) throw InstagramApi.Failure.BadResponse("no activity")
     val watermark = AlertPrefs.activityWatermark(context)
     var newest = watermark
@@ -208,38 +267,6 @@ object InstagramChecker {
     }
     distinct.forEach { AlertNotifier.postActivity(context, it.id, it.text, it.picture, it.atMs) }
     return distinct.size
-  }
-
-  /** Instagram timestamps are microseconds, sometimes sent as strings. */
-  private fun timestamp(item: JSONObject): Long = item.optString("timestamp").toLongOrNull() ?: 0L
-
-  private fun findUser(users: JSONArray?, id: String): JSONObject? {
-    if (users == null) return null
-    for (i in 0 until users.length()) {
-      val user = users.optJSONObject(i) ?: continue
-      if (user.optString("pk") == id || user.optString("pk_id") == id || user.optString("strong_id__") == id) return user
-    }
-    return null
-  }
-
-  private fun preview(item: JSONObject): String {
-    val text = when (item.optString("item_type")) {
-      "text" -> item.optString("text")
-      "like" -> "❤️"
-      "link" -> item.optJSONObject("link")?.optString("text")
-      "media" -> if (item.optJSONObject("media")?.optInt("media_type") == 2) "Sent a video" else "Sent a photo"
-      "raven_media", "visual_media" -> "Sent a photo or video"
-      "voice_media" -> "Sent a voice message"
-      "animated_media" -> "Sent a GIF"
-      "media_share", "xma_media_share" -> "Shared a post"
-      "clip", "xma_clip" -> "Shared a reel"
-      "story_share", "xma_story_share" -> "Shared a story"
-      "reel_share" -> item.optJSONObject("reel_share")?.optString("text")?.ifBlank { null } ?: "Replied to your story"
-      "profile" -> "Shared a profile"
-      "action_log" -> item.optJSONObject("action_log")?.optString("description")
-      else -> null
-    }
-    return text?.trim()?.ifEmpty { null } ?: "New message"
   }
 
   private fun describe(e: Exception): String = when (e) {

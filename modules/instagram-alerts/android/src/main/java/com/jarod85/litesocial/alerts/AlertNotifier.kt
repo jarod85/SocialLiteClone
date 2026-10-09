@@ -15,6 +15,8 @@ import android.graphics.Shader
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.Person
+import androidx.core.graphics.drawable.IconCompat
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -60,29 +62,57 @@ object AlertNotifier {
     return messages == null || messages.importance != NotificationManager.IMPORTANCE_NONE
   }
 
+  /** One message in a conversation alert. */
+  data class Line(val sender: String, val text: String, val atMs: Long)
+
   /** A sample message alert, from Settings, to see that alerts show up and how. */
   fun postTest(context: Context) {
     val now = System.currentTimeMillis()
-    val builder = base(context, MESSAGES_CHANNEL, MESSAGES_GROUP, now)
-      .setContentTitle("Lite Social")
-      .setContentText("Instagram alerts will show up like this.")
-      .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-      .setPriority(NotificationCompat.PRIORITY_HIGH)
-      .setContentIntent(open(context, Target.INBOX, null, now))
+    val builder = conversation(
+      context,
+      "Lite Social",
+      isGroup = false,
+      listOf(Line("Lite Social", "Instagram messages will show up like this: who wrote, and what they said.", now)),
+      avatar = null,
+    ).setContentIntent(open(context, Target.INBOX, null, now))
     notify(context, TEST_TAG, builder)
   }
 
-  fun postMessage(context: Context, threadId: String, title: String, text: String, picture: String?, sentAtMs: Long) {
-    val builder = base(context, MESSAGES_CHANNEL, MESSAGES_GROUP, sentAtMs)
+  /**
+   * A conversation's new messages, as Android shows chats: the sender's name
+   * and picture with each message (up to the last few), the group's name for
+   * group chats. Tapping opens the conversation.
+   */
+  fun postConversation(context: Context, threadId: String, title: String, isGroup: Boolean, lines: List<Line>, picture: String?) {
+    if (lines.isEmpty()) return
+    val latest = lines.last()
+    val builder = conversation(context, title, isGroup, lines, loadAvatar(picture))
+      .setContentIntent(open(context, Target.THREAD, threadId, latest.atMs))
+    notify(context, DM_TAG + threadId, builder)
+  }
+
+  private fun conversation(context: Context, title: String, isGroup: Boolean, lines: List<Line>, avatar: Bitmap?): NotificationCompat.Builder {
+    val latest = lines.last()
+    val style = NotificationCompat.MessagingStyle(Person.Builder().setName("You").build())
+    if (isGroup) style.setConversationTitle(title).setGroupConversation(true)
+    val people = mutableMapOf<String, Person>()
+    for (line in lines) {
+      val person = people.getOrPut(line.sender) {
+        Person.Builder().setName(line.sender).apply {
+          // One picture per alert: the latest sender's.
+          if (avatar != null && line.sender == latest.sender) setIcon(IconCompat.createWithBitmap(avatar))
+        }.build()
+      }
+      style.addMessage(line.text, line.atMs, person)
+    }
+    return base(context, MESSAGES_CHANNEL, MESSAGES_GROUP, latest.atMs)
       .setContentTitle(title)
-      .setContentText(text)
-      .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+      .setContentText(if (isGroup) "${latest.sender}: ${latest.text}" else latest.text)
+      .setStyle(style)
       .setCategory(NotificationCompat.CATEGORY_MESSAGE)
       .setPriority(NotificationCompat.PRIORITY_HIGH)
-      .setContentIntent(open(context, Target.THREAD, threadId, sentAtMs))
       .setPublicVersion(publicVersion(context, MESSAGES_CHANNEL, "New message"))
-    loadAvatar(picture)?.let { builder.setLargeIcon(it) }
-    notify(context, DM_TAG + threadId, builder)
+      .apply { if (avatar != null) setLargeIcon(avatar) }
   }
 
   /** Fallback when only the unread count is known. */

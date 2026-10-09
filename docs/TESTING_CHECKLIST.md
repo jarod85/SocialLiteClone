@@ -49,7 +49,8 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
       runs right away; the section shows "Messages: OK (N unread)" and "Activity: OK" (or a clear error).
 - [ ] 20b. Tap **Allow background checks** and confirm Android's dialog. The button disappears.
 - [ ] 20c. Have someone message you, then tap **Check now** (or wait up to 15 minutes with Lite Social closed). A
-      notification shows the sender, the message and their picture.
+      chat-style notification shows "Full Name (@username)", their picture and the text they sent. Two messages in a
+      row both show. In a group chat it shows the group's name and who wrote each message.
 - [ ] 20d. Tap it: Lite Social opens that conversation (not just the inbox). Read it; at the next check the
       notification disappears by itself.
 - [ ] 20e. Have someone like or comment on a post: an "Instagram" activity notification appears; tapping it opens your
@@ -76,11 +77,15 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 - [ ] Y10. In another app (e.g. a chat), tap a YouTube link → "Open with Lite Social" → it plays in Lite Social. A
       Shorts link shows "Shorts are hidden by Lite Social".
 - [ ] Y11. Search → Videos: no Shorts among the results.
-- [ ] Y12. In a video, tap **Landscape**: full screen, phone sideways. The full-screen button of the player does the same.
-      With auto-rotate on, turning the phone upright leaves full screen.
+- [ ] Y12. In a video, tap **Full screen** (row under the video, or the expand button on the video): phone sideways,
+      no status or navigation bar, the captions and quality buttons still on the video. Back leaves full screen; with
+      auto-rotate on, turning the phone upright does too.
 - [ ] Y13. Tap the quality button (shows "Auto · 720p" or similar) → pick 360p: the video carries on from the same spot,
       visibly softer. Open another video: it starts at 360p. Pick **Auto** to go back. Settings → YouTube → Playback
       quality shows the same choice.
+- [ ] Y13b. On a video with captions (e.g. a TED talk), tap the CC button on the video → the list shows every
+      language it has (e.g. "Chinese (Simplified)", "English (auto-generated)") → pick one: captions appear. Open
+      another video with that language: its captions are on. Pick **Off** to stop.
 - [ ] Y14. Tap **Loop**: it turns "Loop on"; at the end the video starts again. Opening another video turns loop off.
 
 ## Settings (open with the sliders icon in the toolbar while Instagram is open)

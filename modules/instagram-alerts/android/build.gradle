@@ -18,4 +18,8 @@ dependencies {
   implementation 'androidx.core:core:1.17.0'
   // Runs the periodic check in the background and survives restarts and reboots.
   implementation 'androidx.work:work-runtime:2.11.2'
+
+  // JVM tests of the inbox parsing (src/test); org.json replaces Android's stub of it there.
+  testImplementation 'junit:junit:4.13.2'
+  testImplementation 'org.json:json:20240303'
 }

@@ -179,6 +179,7 @@ class Browse(private val context: Context) {
       "isLive" to isLive,
       "sources" to Playback.sources(context, info),
       "qualities" to Playback.qualities(context, info),
+      "captions" to Playback.captions(info).map { it.toMap() },
     )
   }
 

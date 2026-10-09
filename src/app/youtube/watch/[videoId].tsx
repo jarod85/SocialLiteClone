@@ -1,15 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { VideoView, type VideoViewProps } from 'expo-video';
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmbeddedPlayer, isEmbeddableId } from '@/features/youtube/components/EmbeddedPlayer';
-import { PlayerControls } from '@/features/youtube/components/PlayerControls';
+import { PlayerControls, PlayerSheet, VideoOverlay } from '@/features/youtube/components/PlayerControls';
 import { Avatar, SubscribeButton } from '@/features/youtube/components/rows';
 import { useDownloadFlow } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatAge, formatCount } from '@/features/youtube/format';
+import { enterFullscreen, exitFullscreen, useFullscreen } from '@/features/youtube/fullscreen';
 import { watchUrl, youtube } from '@/features/youtube/native';
 import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
 import { useSubscriptions } from '@/features/youtube/stores';
@@ -17,8 +18,16 @@ import type { VideoDetails } from '@/features/youtube/types';
 import { Button } from '@/ui/components';
 import { useTheme } from '@/ui/theme';
 
-/** Full screen turns the phone sideways; turning it back upright leaves full screen (with auto-rotate on). */
-const FULLSCREEN: VideoViewProps['fullscreenOptions'] = { enable: true, orientation: 'landscape', autoExitOnRotate: true };
+/**
+ * The player's own full screen has no quality or captions buttons, so the
+ * app's full screen (features/youtube/fullscreen.ts) replaces it.
+ */
+const NATIVE_FULLSCREEN: VideoViewProps['fullscreenOptions'] = { enable: false };
+/**
+ * Captions and speed are in the app's own buttons (captions remember their language), so the player's CC and
+ * settings buttons are hidden: one gear, not two.
+ */
+const BUTTONS: VideoViewProps['buttonOptions'] = { showSubtitles: false, showSettings: false };
 
 /** Errors (codes from modules/youtube Errors.kt) where YouTube's own player may still work. */
 const EMBED_FALLBACK_CODES = new Set(['ERR_YOUTUBE_BLOCKED', 'ERR_YOUTUBE']);
@@ -46,7 +55,9 @@ export default function WatchScreen() {
   const showEmbed = canEmbed && (embedded === videoId || embedChosen);
   const [expanded, setExpanded] = useState(false);
   const { start: download, picker } = useDownloadFlow();
-  const videoView = useRef<VideoView>(null);
+  const playing = details !== null && current?.id === details.id;
+  const fullscreenOn = useFullscreen((s) => s.on);
+  const fullscreen = fullscreenOn && playing;
 
   const isShortLink = short === '1';
   const isSubscribed = useSubscriptions((s) => (details?.channelId ? s.channels.some((c) => c.id === details.channelId) : false));
@@ -77,6 +88,20 @@ export default function WatchScreen() {
     // Never two videos at once: the embed has its own sound.
     if (showEmbed) pause();
   }, [showEmbed]);
+
+  // Back leaves full screen first; so does leaving the screen.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      exitFullscreen();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [fullscreen]);
+  useEffect(() => () => exitFullscreen(), []);
+  useEffect(() => {
+    if (fullscreenOn && !playing) exitFullscreen();
+  }, [fullscreenOn, playing]);
 
   const retry = () => {
     setEmbedded(null);
@@ -119,30 +144,36 @@ export default function WatchScreen() {
         .join(' · ')
     : '';
 
+  // The video keeps its place in the tree in and out of full screen, so the player view isn't recreated.
   return (
-    <View style={styles.screen}>
-      <YouTubeHeader title="" onBack={back} backIcon="chevron-down" />
-      <View style={styles.video}>
-        {details && current?.id === details.id ? (
-          <VideoView
-            ref={videoView}
-            player={getPlayer()}
-            style={StyleSheet.absoluteFill}
-            nativeControls
-            contentFit="contain"
-            fullscreenOptions={FULLSCREEN}
-          />
+    <View style={[styles.screen, fullscreen && styles.fullscreen]}>
+      {fullscreen ? null : <YouTubeHeader title="" onBack={back} backIcon="chevron-down" />}
+      <View style={fullscreen ? styles.videoFull : styles.video}>
+        {details && playing ? (
+          <VideoOverlay details={details} fullscreen={fullscreen} onFullscreen={() => (fullscreen ? exitFullscreen() : enterFullscreen())}>
+            <VideoView
+              player={getPlayer()}
+              style={StyleSheet.absoluteFill}
+              nativeControls
+              contentFit="contain"
+              fullscreenOptions={NATIVE_FULLSCREEN}
+              buttonOptions={BUTTONS}
+            />
+          </VideoOverlay>
         ) : showEmbed ? (
           <EmbeddedPlayer videoId={videoId} />
         ) : error ? null : (
           <ActivityIndicator style={styles.videoLoading} color="#FFFFFF" />
         )}
       </View>
-      {details && current?.id === details.id ? (
-        <PlayerControls details={details} onLandscape={() => void videoView.current?.enterFullscreen()} />
+      {details && playing ? (
+        <>
+          {fullscreen ? null : <PlayerControls details={details} onLandscape={enterFullscreen} />}
+          <PlayerSheet details={details} />
+        </>
       ) : null}
 
-      {showEmbed ? (
+      {fullscreen ? null : showEmbed ? (
         <ScrollView contentContainerStyle={styles.info}>
           <Text style={[styles.stats, { color: theme.textMuted }]}>
             {`This is YouTube's own player. Lite Social's couldn't load the video: ${error}\n\n` +
@@ -207,7 +238,9 @@ export default function WatchScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  fullscreen: { backgroundColor: '#000' },
   video: { width: '100%', aspectRatio: 16 / 9, backgroundColor: '#000' },
+  videoFull: { flex: 1, backgroundColor: '#000' },
   videoLoading: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24 },
   message: { fontSize: 16, textAlign: 'center', lineHeight: 22 },

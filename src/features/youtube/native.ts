@@ -33,7 +33,11 @@ interface YouTubeNativeModule {
   createFolder(tree: string, path: string[], name: string): Promise<string>;
   describeFolder(tree: string, path: string[]): string;
   isMusicoletInstalled(): boolean;
+  /** Sideways without the system bars, or back to normal. */
+  setFullscreen(enabled: boolean): Promise<void>;
   addListener(event: 'onDownloadUpdate', listener: (update: DownloadUpdate) => void): { remove(): void };
+  /** The phone was turned upright while in full screen (with auto-rotate on). */
+  addListener(event: 'onFullscreenExitRequest', listener: () => void): { remove(): void };
 }
 
 const module = Platform.OS === 'android' ? requireOptionalNativeModule<YouTubeNativeModule>('LiteSocialYouTube') : null;

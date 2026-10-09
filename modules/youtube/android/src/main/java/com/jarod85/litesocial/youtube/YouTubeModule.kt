@@ -21,6 +21,7 @@ class YouTubeModule : Module() {
   private val browse by lazy { Browse(context) }
   private var pendingPick: Promise? = null
   private val downloadListener: (Downloads.Update) -> Unit = { sendEvent(DOWNLOAD_EVENT, it.toMap()) }
+  private val fullscreen = Fullscreen { sendEvent(FULLSCREEN_EXIT_EVENT, emptyMap<String, Any>()) }
 
   private class YouTubeException(code: String, message: String, cause: Throwable?) : CodedException(code, message, cause) {
     constructor(message: String, cause: Throwable?) : this(Errors.OTHER, message, cause)
@@ -36,7 +37,7 @@ class YouTubeModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("LiteSocialYouTube")
-    Events(DOWNLOAD_EVENT)
+    Events(DOWNLOAD_EVENT, FULLSCREEN_EXIT_EVENT)
 
     OnCreate { Downloads.listeners += downloadListener }
     OnDestroy { Downloads.listeners -= downloadListener }
@@ -51,6 +52,13 @@ class YouTubeModule : Module() {
     Function("parseVideoId") { url: String ->
       if (url.contains("/shorts/")) null else Extractor.videoId(url)
     }
+
+    // ---- Full screen ----
+
+    /** Sideways without system bars (true) or back to normal (false). See [Fullscreen]. */
+    AsyncFunction("setFullscreen") { enabled: Boolean ->
+      appContext.currentActivity?.let { fullscreen.set(it, enabled) }
+    }.runOnQueue(Queues.MAIN)
 
     // ---- Downloads ----
 
@@ -123,6 +131,8 @@ class YouTubeModule : Module() {
 
   companion object {
     private const val DOWNLOAD_EVENT = "onDownloadUpdate"
+    /** The phone was turned upright in full screen. */
+    private const val FULLSCREEN_EXIT_EVENT = "onFullscreenExitRequest"
     private const val PICK_FOLDER = 7302
   }
 }

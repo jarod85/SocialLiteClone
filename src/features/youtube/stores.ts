@@ -124,11 +124,14 @@ interface YouTubeSettingsState {
   videoMaxHeight: number;
   /** Quality picked in the player, kept for the next videos. Null: automatic. */
   playbackHeight: number | null;
+  /** Language of the captions picked in the player (e.g. "zh-CN"), turned on again where a video has it. Null: off. */
+  captionLanguage: string | null;
   setMusicFolder: (folder: MusicFolder | null) => void;
   setLastFolderPath: (path: string[]) => void;
   setMp3Kbps: (kbps: number) => void;
   setVideoMaxHeight: (height: number) => void;
   setPlaybackHeight: (height: number | null) => void;
+  setCaptionLanguage: (language: string | null) => void;
 }
 
 export const useYouTubeSettings = create<YouTubeSettingsState>()(
@@ -139,11 +142,13 @@ export const useYouTubeSettings = create<YouTubeSettingsState>()(
       mp3Kbps: 192,
       videoMaxHeight: 1080,
       playbackHeight: null,
+      captionLanguage: null,
       setMusicFolder: (musicFolder) => set({ musicFolder, lastFolderPath: [] }),
       setLastFolderPath: (lastFolderPath) => set({ lastFolderPath }),
       setMp3Kbps: (mp3Kbps) => set({ mp3Kbps }),
       setVideoMaxHeight: (videoMaxHeight) => set({ videoMaxHeight }),
       setPlaybackHeight: (playbackHeight) => set({ playbackHeight }),
+      setCaptionLanguage: (captionLanguage) => set({ captionLanguage }),
     }),
     { name: 'lite-social.youtube.settings', version: 1, storage: createJSONStorage(() => AsyncStorage) },
   ),

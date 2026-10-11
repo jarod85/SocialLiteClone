@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 2,
-  "updated": "2026-10-06",
+  "revision": 3,
+  "updated": "2026-10-12",
   "minEngineVersion": 1,
   "platforms": {
     "instagram": {
@@ -78,17 +78,27 @@
           "id": "reel-links",
           "toggle": "blockReels",
           "unless": "allowSharedReels",
+          "paths": ["/*/**"],
           "selectors": ["a[href*=\"/reel/\"]"],
-          "note": "Any link to a single reel: profile grid tiles, reel shelves, reels shared in DMs. '/reel/' (singular) only ever means a reel."
+          "note": "Any link to a single reel: profile grid tiles, reel shelves, reels shared in DMs. '/reel/' (singular) only ever means a reel. '/*/**' is every page except the home feed, which has home-reel-links."
+        },
+        {
+          "id": "home-reel-links",
+          "toggle": "blockReels",
+          "unless": "allowSharedReels",
+          "paths": ["/"],
+          "selectors": ["a[href*=\"/reel/\"]:not(article a)"],
+          "note": "reel-links on the home feed, except inside posts: feed-videos collapses reel posts, and with 'Reels from people you follow' a followed account's reel keeps its links."
         },
         {
           "id": "feed-videos",
           "toggle": "blockReels",
+          "unless": "allowFollowedReels",
           "mode": "collapse",
           "label": "Reel hidden by Lite Social",
           "paths": ["/"],
           "selectors": ["article:has(a[href*=\"/reel/\"])", "article:has(video)"],
-          "note": "Feed posts are <article> elements. A post that links to /reel/ or contains a <video> is a Reel (Instagram turned all feed videos into Reels). :has() is pure CSS, so there's no flash and no JS cost. Home feed only; post-videos covers everywhere else."
+          "note": "Feed posts are <article> elements. A post that links to /reel/ or contains a <video> is a Reel (Instagram turned all feed videos into Reels). :has() is pure CSS, so there's no flash and no JS cost. Home feed only; post-videos covers everywhere else. With 'Reels from people you follow', unfollowed-feed-reels collapses only the reels that aren't from accounts you follow."
         },
         {
           "id": "post-videos",
@@ -96,8 +106,9 @@
           "unless": "allowSharedReels",
           "mode": "collapse",
           "label": "Reel hidden by Lite Social",
+          "paths": ["/*/**"],
           "selectors": ["article:has(a[href*=\"/reel/\"])", "article:has(video)"],
-          "note": "Same as feed-videos, everywhere else: post pages (reels opened via /p/ links), a single reel's page, profiles. 'Watch shared reels' lets these play."
+          "note": "Same as feed-videos, everywhere but the home feed: post pages (reels opened via /p/ links), a single reel's page, profiles. 'Watch shared reels' lets these play."
         },
         {
           "id": "explore-grid",
@@ -125,6 +136,16 @@
           "note": "Suggested posts are ordinary <article>s with a 'Suggested for you' label, so only text gives them away. English only for now; add translations to 'match'."
         },
         {
+          "id": "unfollowed-feed-reels",
+          "toggle": "blockReels",
+          "match": ["Follow", "Sponsored", "Ad", "Suggested for you", "Suggested posts", "Suggested reels", "Suggested"],
+          "containers": ["article:has(a[href*=\"/reel/\"])", "article:has(video)"],
+          "paths": ["/"],
+          "mode": "collapse",
+          "label": "Reel hidden by Lite Social",
+          "note": "Reels in the home feed from accounts you don't follow: their header has a 'Follow' button, ads say 'Sponsored'. Only needed with 'Reels from people you follow' (feed-videos collapses every reel otherwise), but harmless alongside it. English only for now."
+        },
+        {
           "id": "suggested-accounts",
           "toggle": "hideSuggested",
           "match": ["Suggested for you", "Suggestions for you", "Discover people"],
@@ -137,6 +158,15 @@
         "toggle": "limitFeed",
         "itemSelector": "article",
         "paths": ["/"]
+      },
+      "storiesTray": {
+        "id": "following-stories",
+        "toggle": "showStoriesTray",
+        "unless": "hideStories",
+        "paths": ["/"],
+        "query": "variant=following",
+        "anchor": "article",
+        "note": "Instagram's Following feed has no Stories tray. The engine draws one above the first post from Instagram's own tray API; the normal home feed keeps Instagram's tray."
       }
     }
   }

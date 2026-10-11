@@ -9,7 +9,7 @@
  */
 
 /** Bump when the engine learns a rule feature that older apps can't apply. */
-export const ENGINE_VERSION = 2;
+export const ENGINE_VERSION = 3;
 
 export interface RouteRule {
   id: string;
@@ -60,11 +60,29 @@ export interface FeedLimitRule {
   paths: string[];
 }
 
+/**
+ * Adds a Stories tray where the site leaves its own out (Instagram's Following
+ * feed). The engine reads the tray from the site's own API inside the page and
+ * links each entry to the site's story viewer; the rule only says where.
+ */
+export interface StoriesTrayRule {
+  id: string;
+  toggle?: string;
+  unless?: string;
+  /** Pages that get the tray. */
+  paths: string[];
+  /** Query parameters the page must have too, e.g. `variant=following`. Omitted means any. */
+  query?: string;
+  /** Selector for one feed item. The tray goes at the top of the list that holds them. */
+  anchor: string;
+}
+
 export interface PlatformRules {
   routes: RouteRule[];
   hide: HideRule[];
   textHide: TextHideRule[];
   feedLimit?: FeedLimitRule;
+  storiesTray?: StoriesTrayRule;
 }
 
 export interface RulesFile {

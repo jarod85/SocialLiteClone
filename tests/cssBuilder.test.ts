@@ -93,3 +93,27 @@ describe('bundled Instagram rules with "Watch shared reels"', () => {
     expect(css('/direct/t/123/', false)).toContain('a[href*="/reel/"]{display:none!important}');
   });
 });
+
+describe('bundled Instagram rules with "Reels from people you follow"', () => {
+  const result = validateRules(bundled);
+  if (!result.ok) throw new Error(result.error);
+  const ig = platformRules(result.rules, 'instagram');
+  const css = (path: string, allowFollowedReels: boolean, allowSharedReels = false) =>
+    buildCss(ig, { blockReels: true, allowFollowedReels, allowSharedReels }, path, 30);
+
+  it('lets reels play in the home feed, leaving the rest to the text rule', () => {
+    expect(css('/', true)).not.toContain('article:has(video)');
+    expect(css('/', true)).toContain('a[href*="/reel/"]:not(article a){display:none!important}');
+    expect(ig.textHide.find((r) => r.id === 'unfollowed-feed-reels')?.match).toContain('Follow');
+  });
+
+  it('collapses every home feed reel when off, even with "Watch shared reels" on', () => {
+    expect(css('/', false)).toContain(':is(article:has(video))>*');
+    expect(css('/', false, true)).toContain(':is(article:has(video))>*');
+  });
+
+  it('changes nothing outside the home feed', () => {
+    expect(css('/p/abc/', true)).toContain(':is(article:has(video))>*');
+    expect(css('/natgeo/', true)).toContain('a[href*="/reel/"]{display:none!important}');
+  });
+});

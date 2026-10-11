@@ -38,7 +38,14 @@ export const instagram: PlatformConfig = {
       id: 'allowSharedReels',
       label: 'Watch shared reels',
       description:
-        'With Block Reels on, still lets you open a single reel someone sends you, or one on a profile or post. The Reels tab and the swipe-for-more viewer stay blocked, and reels in your home feed stay collapsed.',
+        'With Block Reels on, still lets you open a single reel someone sends you, or one on a profile or post. The Reels tab and the swipe-for-more viewer stay blocked.',
+      default: true,
+    },
+    {
+      id: 'allowFollowedReels',
+      label: 'Reels from people you follow',
+      description:
+        "With Block Reels on, still plays reels in your home feed when they're from accounts you follow. Suggested and sponsored reels stay collapsed, and the Reels tab stays blocked.",
       default: true,
     },
     {
@@ -63,6 +70,13 @@ export const instagram: PlatformConfig = {
       id: 'limitFeed',
       label: 'Stop the feed',
       description: 'Ends the home feed with a "you\'re all caught up" card after a set number of posts.',
+      default: true,
+    },
+    {
+      id: 'showStoriesTray',
+      label: 'Stories at the top',
+      description:
+        "Shows the Stories of people you follow above the Following feed, which Instagram leaves out. Tap a picture to watch. Does nothing while Hide Stories is on.",
       default: true,
     },
     {

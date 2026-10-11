@@ -16,6 +16,7 @@ import {
   type PlatformRules,
   type RouteRule,
   type RulesFile,
+  type StoriesTrayRule,
   type TextHideRule,
 } from '@/core/types';
 
@@ -94,11 +95,21 @@ const feedLimitSchema = z.object({
   paths: z.array(pathPattern).min(1).max(MAX_ITEMS),
 });
 
+const storiesTraySchema = z.object({
+  id,
+  toggle,
+  unless: toggle,
+  paths: z.array(pathPattern).min(1).max(MAX_ITEMS),
+  query: z.string().max(200).regex(/^[A-Za-z0-9_\-.~%=&]*$/).optional(),
+  anchor: z.string().refine(isSafeSelector),
+});
+
 const platformSchema = z.object({
   routes: z.array(z.unknown()).max(MAX_RULES).default([]),
   hide: z.array(z.unknown()).max(MAX_RULES).default([]),
   textHide: z.array(z.unknown()).max(MAX_RULES).default([]),
   feedLimit: z.unknown().optional(),
+  storiesTray: z.unknown().optional(),
 });
 
 const fileSchema = z.object({
@@ -130,6 +141,7 @@ export function validateRules(input: unknown): ValidationResult {
       hide: collect(parsed.data.hide, (r) => sanitizeHide(r, warn)),
       textHide: collect(parsed.data.textHide, (r) => sanitizeTextHide(r, warn)),
       feedLimit: sanitizeFeedLimit(parsed.data.feedLimit, warn),
+      storiesTray: sanitizeStoriesTray(parsed.data.storiesTray, warn),
     };
   }
 
@@ -200,6 +212,16 @@ function sanitizeFeedLimit(raw: unknown, warn: (msg: string) => void): FeedLimit
   const r = feedLimitSchema.safeParse(raw);
   if (!r.success) {
     warn('feedLimit dropped (invalid)');
+    return undefined;
+  }
+  return r.data;
+}
+
+function sanitizeStoriesTray(raw: unknown, warn: (msg: string) => void): StoriesTrayRule | undefined {
+  if (raw === undefined) return undefined;
+  const r = storiesTraySchema.safeParse(raw);
+  if (!r.success) {
+    warn('storiesTray dropped (invalid)');
     return undefined;
   }
   return r.data;

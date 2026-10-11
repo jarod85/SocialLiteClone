@@ -21,10 +21,12 @@
  *      onShouldStartLoadWithRequest, so this is the only layer that sees them.
  *   4. Pauses any video that starts playing inside something it hid. Hiding a
  *      <video> with CSS doesn't stop its sound.
+ *   5. Adds a Stories tray where the site leaves its own out (see storiesTray.ts).
  *
- * Privacy: the engine reads the page only to decide what to hide. All it ever
- * sends to the app is a 'blocked' event (rule id and path, never the query) and,
- * when asked, how many elements each rule matched. No text, cookies or content.
+ * Privacy: the engine reads the page only to decide what to hide, plus the
+ * Stories tray, which it reads from the site's own API inside the page. All it
+ * ever sends to the app is a 'blocked' event (rule id and path, never the query)
+ * and, when asked, how many elements each rule matched. No text, cookies or content.
  *
  * Fail open: every entry point is wrapped in guard(), and each selector is
  * tried on its own. A broken rule or exception leaves the page usable, just
@@ -32,8 +34,9 @@
  */
 import { buildCss, DEFAULT_COLLAPSE_LABEL, MARK } from '../core/cssBuilder';
 import { type CompiledRoutes, compilePathPattern, compileRoutes, decideRoute, pathMatches } from '../core/routeMatcher';
-import { type EnginePayload, isActive, type PageMessage, type TextHideRule } from '../core/types';
-import { hostMatches, normalizePath } from '../core/urls';
+import { type EnginePayload, isActive, type PageMessage, type StoriesTrayRule, type TextHideRule } from '../core/types';
+import { hasQueryParams, hostMatches, normalizePath } from '../core/urls';
+import { createStoriesTray } from './storiesTray';
 
 interface EngineApi {
   apply(payload: EnginePayload): void;
@@ -64,6 +67,8 @@ const MAX_WAIT_MS = 500;
 const MAX_PENDING_ROOTS = 300;
 /** Text-hide phrases are short labels; skipping long text nodes skips scripts, captions and comments. */
 const MAX_TEXT_LENGTH = 80;
+/** Matching texts still waiting for their container to render, re-checked each pass. */
+const MAX_WAITING_TEXTS = 200;
 const MARKED = `[${MARK.hide}],[${MARK.collapse}]`;
 
 if (window.top === window && !window.__liteSocial) {
@@ -76,6 +81,8 @@ function createEngine(): EngineApi {
   let routes: CompiledRoutes | null = null;
   let textRules: CompiledTextRule[] = [];
   let feedPaths: RegExp[] = [];
+  let trayRule: StoriesTrayRule | null = null;
+  let trayPaths: RegExp[] = [];
   let style: HTMLStyleElement | null = null;
   let observer: MutationObserver | null = null;
   let hooksInstalled = false;
@@ -91,10 +98,18 @@ function createEngine(): EngineApi {
 
   /** Container -> the text node that justified hiding it, re-checked on every pass. */
   const textMarks = new Map<Element, { node: Text; rule: CompiledTextRule }>();
+  /**
+   * Text that matched a rule before any container did, e.g. a post's "Follow"
+   * button rendered before its video. Its subtree won't be rescanned when the
+   * video arrives, so it's retried on each pass until it's marked or gone.
+   */
+  const waitingTexts = new Set<Text>();
 
   let feedKey = '';
   let feedSeen = new WeakMap<Element, number>();
   let feedCount = 0;
+
+  const tray = createStoriesTray(() => schedule());
 
   const active = () => payload !== null && hostMatches(location.hostname, payload.siteHosts);
 
@@ -112,6 +127,9 @@ function createEngine(): EngineApi {
         routes = compileRoutes(next.rules.routes, next.neverBlock);
         textRules = next.rules.textHide.filter((r) => isActive(r, next.toggles)).map(compileTextRule);
         feedPaths = next.rules.feedLimit ? next.rules.feedLimit.paths.map(compilePathPattern) : [];
+        const t = next.rules.storiesTray;
+        trayRule = t && isActive(t, next.toggles) ? t : null;
+        trayPaths = trayRule ? trayRule.paths.map(compilePathPattern) : [];
       }
       if (!active()) {
         teardown();
@@ -138,6 +156,7 @@ function createEngine(): EngineApi {
     observer?.disconnect();
     observer = null;
     style?.remove();
+    tray.remove();
     unmarkAll();
   }
 
@@ -304,9 +323,19 @@ function createEngine(): EngineApi {
 
       revalidateTextMarks();
       const rules = textRules.filter((r) => !r.paths || pathMatches(location.pathname, r.paths));
+      retryWaitingTexts(rules);
       if (rules.length > 0) for (const root of roots) if (root.isConnected) scanText(root, rules);
       applyFeedLimit();
+      tray.update(wantsTray() ? trayRule!.anchor : null);
     });
+  }
+
+  function wantsTray(): boolean {
+    return (
+      trayRule !== null &&
+      pathMatches(location.pathname, trayPaths) &&
+      (!trayRule.query || hasQueryParams(location.search.slice(1), trayRule.query))
+    );
   }
 
   // ------------------------------------------------------------ text hide
@@ -327,20 +356,34 @@ function createEngine(): EngineApi {
   function scanText(root: Element, rules: CompiledTextRule[]) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      const key = textKey(node);
-      if (!key) continue;
-      for (const compiled of rules) {
-        if (!compiled.texts.has(key)) continue;
-        const parent = node.parentElement;
-        if (!parent || parent.closest(MARKED)) break; // Already hidden.
-        const container = findContainer(parent, compiled.rule.containers);
-        if (container) {
-          mark(container, compiled.rule);
-          textMarks.set(container, { node: node as Text, rule: compiled });
-          break;
-        }
-      }
+      if (markText(node as Text, rules) === 'waiting' && waitingTexts.size < MAX_WAITING_TEXTS) waitingTexts.add(node as Text);
     }
+  }
+
+  function retryWaitingTexts(rules: CompiledTextRule[]) {
+    waitingTexts.forEach((node) => {
+      if (!node.isConnected || markText(node, rules) !== 'waiting') waitingTexts.delete(node);
+    });
+  }
+
+  /** Hide the container of a matching text. 'waiting': the text matches, but no container (yet). */
+  function markText(node: Text, rules: CompiledTextRule[]): 'done' | 'waiting' | 'no-match' {
+    const key = textKey(node);
+    if (!key) return 'no-match';
+    let waiting = false;
+    for (const compiled of rules) {
+      if (!compiled.texts.has(key)) continue;
+      const parent = node.parentElement;
+      if (!parent || parent.closest(MARKED)) return 'done'; // Already hidden.
+      const container = findContainer(parent, compiled.rule.containers);
+      if (container) {
+        mark(container, compiled.rule);
+        textMarks.set(container, { node, rule: compiled });
+        return 'done';
+      }
+      waiting = true;
+    }
+    return waiting ? 'waiting' : 'no-match';
   }
 
   function findContainer(from: Element, selectors: string[]): Element | null {
@@ -395,6 +438,7 @@ function createEngine(): EngineApi {
     document.querySelectorAll(`[${MARK.rule}]`).forEach(unmark);
     document.querySelectorAll(`[${MARK.limit}]`).forEach((el) => el.removeAttribute(MARK.limit));
     textMarks.clear();
+    waitingTexts.clear();
   }
 
   // ------------------------------------------------------------ feed limit

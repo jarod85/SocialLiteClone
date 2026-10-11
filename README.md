@@ -32,11 +32,13 @@ With a USB cable you can also run `adb install -r release\LiteSocial-<version>.a
 | Setting (Instagram) | Default | What it does |
 | --- | --- | --- |
 | Block Reels | On | Removes the Reels tab, collapses Reels/videos in the feed and on profiles, blocks opening any Reel |
-| Watch shared reels | On | With Block Reels on, a single reel sent to you in a DM, on a profile or in a post still opens and plays. The Reels tab, its swipe-for-more viewer and reels in the home feed stay blocked |
+| Watch shared reels | On | With Block Reels on, a single reel sent to you in a DM, on a profile or in a post still opens and plays. The Reels tab and its swipe-for-more viewer stay blocked |
+| Reels from people you follow | On | With Block Reels on, reels in the home feed from accounts you follow play in the feed. Suggested and sponsored reels stay collapsed |
 | Hide Explore | On | Search keeps working; the grid of recommended posts under it is hidden |
 | Hide suggestions | On | Hides "Suggested for you" posts and the suggested-accounts carousel |
 | Following feed | On | Opens Instagram's chronological feed of accounts you follow |
 | Stop the feed | On, 30 posts | Ends the home feed with a "you're all caught up" card (10/20/30/50) |
+| Stories at the top | On | Adds a Stories tray above the Following feed, which Instagram leaves out (does nothing while Hide Stories is on) |
 | Hide Stories | Off | Blocks opening stories; hides the tray where it can be found |
 | Daily time limit | Off | 15–120 min/day; then a break screen, with one "5 more minutes" per day |
 
@@ -318,6 +320,11 @@ Said plainly, so nothing is oversold:
 - **Hide Stories** reliably blocks *opening* stories. Hiding the tray is best-effort (it has no stable link).
 - **Feed limit:** Instagram may keep loading posts in the background after the limit card (they stay hidden).
 - **Following feed** relies on Instagram's `?variant=following`. If Instagram drops it, you get the normal feed.
+- **Stories at the top** reads the tray from Instagram's own `/api/v1/feed/reels_tray/`, inside the page with its
+  session (nothing reaches the app). If Instagram changes or refuses that request, the tray just doesn't show.
+  Tapping a story opens Instagram's story viewer as a new page, so the feed reloads when you come back.
+- **Reels from people you follow** tells them apart by text: a reel whose post shows a "Follow" button, "Sponsored"
+  or a "Suggested" label stays collapsed. English only, like the suggestion filter.
 - **Android timing:** on Android the script is injected when the page starts loading, which can race
   Instagram's own scripts. CSS is applied a moment later on a cold start, and the Navigation API hook
   covers navigation the history patch might miss.

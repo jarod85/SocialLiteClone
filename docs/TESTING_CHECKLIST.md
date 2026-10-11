@@ -15,7 +15,11 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 ## Feed
 
 - [ ] 6. The feed opens as the **Following** feed (URL ends in `?variant=following`, posts are chronological).
-- [ ] 7. Reels and videos in the feed are collapsed to a thin "Reel hidden by Lite Social" bar.
+- [ ] 7. Reels and videos from accounts you follow play in the feed (**Reels from people you follow**, on by
+      default). Suggested and sponsored reels are collapsed to a thin "Reel hidden by Lite Social" bar.
+- [ ] 7a. Turn **Reels from people you follow** off: every reel and video in the feed is collapsed. Turn it back on.
+- [ ] 7b. A row of Stories (profile pictures, coloured ring = not watched yet) sits above the first post. Tap one:
+      the story plays; when you come back its ring is grey. Turn **Stories at the top** off: the row disappears.
 - [ ] 8. "Suggested for you" posts and the suggested-accounts carousel are hidden or collapsed.
 - [ ] 9. After 30 posts the feed ends with the "That's 30 posts. You're all caught up" card.
 - [ ] 10. Videos don't start playing on their own, and no sound plays from anything hidden.
@@ -27,7 +31,7 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
       Social" screen; "Back to Instagram" returns you.
 - [ ] 12a. **Watch shared reels** (on by default): a reel someone sent you in a DM opens and plays when tapped.
       On a profile, the Reels tab and reel tiles show and play. Swiping up on a reel never turns into the endless
-      Reels viewer. Reels in the home feed are still collapsed.
+      Reels viewer.
 - [ ] 13. Turn **Watch shared reels** off: the profile Reels tab and reel tiles are hidden, and opening a reel
       from a DM shows the blocked screen. Turn it back on.
 - [ ] 14. Tap home in Instagram's own navigation and anywhere a reel might be linked; no Reels viewer opens.
@@ -92,7 +96,8 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 
 - [ ] 21. Turn **Block Reels** off → back in Instagram the Reels tab is visible again *without* reloading. Turn it on again.
 - [ ] 22. Turn **Following feed** off → tapping home shows the normal feed. Turn it back on.
-- [ ] 23. Turn **Hide Stories** on → tapping a story shows the blocked screen.
+- [ ] 23. Turn **Hide Stories** on → the Stories row above the Following feed is gone, and tapping a story ring
+      on a post shows the blocked screen.
 - [ ] 24. Change **Stop the feed** to 10 posts → the card appears after 10.
 - [ ] 25. Force-close and reopen: all settings are as you left them.
 - [ ] 26. Set **Daily time limit** to 15 min (you can test faster by using the app for 15 minutes or leaving it open).

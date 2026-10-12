@@ -49,6 +49,14 @@ export const instagram: PlatformConfig = {
       default: true,
     },
     {
+      id: 'fullscreenReels',
+      label: 'Full-screen reels',
+      description:
+        'Tapping a reel you can watch opens it full screen, like the Instagram app. Tap to pause, hold to pause while you look, ' +
+        'slide a finger up or down along the left side to change the speed (0.5× to 2×), swipe down or press Back to close.',
+      default: true,
+    },
+    {
       id: 'hideExplore',
       label: 'Hide Explore',
       description: 'Search still works, but the grid of recommended posts under it is hidden.',

@@ -108,12 +108,34 @@ export interface EnginePayload {
   rules: PlatformRules;
   toggles: Toggles;
   feedLimit: number;
+  /** Tapping a reel opens the app's full-screen player (injected/reelViewer.ts). Older apps leave it out. */
+  reelViewer?: boolean;
+}
+
+/** A reel for the app's full-screen player. Read in the page from the site's API; the app validates it again. */
+export interface ReelDetails {
+  /** https on the site's CDN. */
+  video: string;
+  /** Cover picture, or ''. */
+  poster: string;
+  /** Pixels, 0 if unknown. */
+  width: number;
+  height: number;
+  /** Account that posted it, or ''. */
+  username: string;
+  avatar: string;
+  caption: string;
+  /** Seconds, 0 if unknown. */
+  duration: number;
 }
 
 /** Messages the page may post to the app. Treated as untrusted: the site's own scripts can post too. */
 export type PageMessage =
   | { type: 'blocked'; ruleId: string; path: string }
-  | { type: 'stats'; requestId: string; counts: Record<string, number> };
+  | { type: 'stats'; requestId: string; counts: Record<string, number> }
+  /** A reel was tapped: 'loading' opens the player right away, then 'ready' (with the reel) or 'failed'. */
+  | { type: 'reel'; requestId: string; state: 'loading' | 'failed' }
+  | { type: 'reel'; requestId: string; state: 'ready'; reel: ReelDetails };
 
 /**
  * A rule is active when it has no toggle or its toggle is on, and its `unless`

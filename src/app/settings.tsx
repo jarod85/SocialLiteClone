@@ -19,6 +19,7 @@ import { useInstagramAlerts } from '@/features/instagramAlerts/useInstagramAlert
 import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
 import { checkForUpdate, installedVersion, installUpdate, updatesSupported, useUpdates } from '@/features/updates/updates';
 import { chooseMusicFolder } from '@/features/youtube/components/useDownloadFlow';
+import { useHistory } from '@/features/youtube/history';
 import { youtubeAvailable } from '@/features/youtube/native';
 import { setQuality } from '@/features/youtube/player';
 import { MP3_BITRATES, PLAYBACK_HEIGHTS, useSubscriptions, useYouTubeSettings, VIDEO_HEIGHTS } from '@/features/youtube/stores';
@@ -230,6 +231,7 @@ function YouTubeSection() {
   const setVideoMaxHeight = useYouTubeSettings((s) => s.setVideoMaxHeight);
   const playbackHeight = useYouTubeSettings((s) => s.playbackHeight);
   const subscriptions = useSubscriptions((s) => s.channels.length);
+  const watched = useHistory((s) => Object.keys(s.entries).length);
   const router = useRouter();
   if (!youtubeAvailable) return null;
 
@@ -239,6 +241,7 @@ function YouTubeSection() {
       footer="MP3s are saved into the music folder you pick (the one Musicolet plays from); you choose the subfolder for each song. Videos go to Movies/Lite Social."
     >
       <LinkRow label="Your channels" detail={String(subscriptions)} onPress={() => router.push('/youtube/subscriptions')} />
+      <LinkRow label="Watch history" detail={String(watched)} onPress={() => router.push('/youtube/history')} />
       <LinkRow
         label="Music folder"
         detail={musicFolder?.name ?? 'Not chosen'}

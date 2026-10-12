@@ -6,14 +6,33 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/ui/theme';
 
 import { formatCount, formatDuration, videoSubtitle } from '../format';
+import { useHistory, watchedFraction } from '../history';
 import type { Channel, Video } from '../types';
 
-export const VideoRow = memo(function VideoRow({ video, onPress }: { video: Video; onPress: (video: Video) => void }) {
+export const VideoRow = memo(function VideoRow({
+  video,
+  onPress,
+  onLongPress,
+  subtitle,
+}: {
+  video: Video;
+  onPress: (video: Video) => void;
+  onLongPress?: (video: Video) => void;
+  /** Replaces the channel/age line (the history screen says when you watched it). */
+  subtitle?: string;
+}) {
   const theme = useTheme();
   const duration = video.isLive ? 'LIVE' : formatDuration(video.durationSeconds);
+  // How much you've watched (watch history), as YouTube shows it: a red bar along the thumbnail.
+  const watched = useHistory((s) => {
+    const entry = s.entries[video.id];
+    if (!entry || video.isLive) return null;
+    return watchedFraction({ position: entry.position, durationSeconds: entry.durationSeconds ?? video.durationSeconds });
+  });
   return (
     <Pressable
       onPress={() => onPress(video)}
+      onLongPress={onLongPress ? () => onLongPress(video) : undefined}
       accessibilityRole="button"
       accessibilityLabel={video.title}
       style={({ pressed }) => [styles.video, pressed && { opacity: 0.7 }]}
@@ -23,8 +42,13 @@ export const VideoRow = memo(function VideoRow({ video, onPress }: { video: Vide
           <Image source={{ uri: video.thumbnail }} style={StyleSheet.absoluteFill} contentFit="cover" recyclingKey={video.id} transition={120} />
         ) : null}
         {duration ? (
-          <View style={[styles.badge, video.isLive && { backgroundColor: '#CC0000' }]}>
+          <View style={[styles.badge, watched !== null && styles.badgeAboveBar, video.isLive && { backgroundColor: '#CC0000' }]}>
             <Text style={styles.badgeText}>{duration}</Text>
+          </View>
+        ) : null}
+        {watched !== null ? (
+          <View style={styles.watchedTrack} accessibilityLabel={`Watched ${Math.round(watched * 100)}%`}>
+            <View style={[styles.watchedFill, { width: `${Math.max(3, watched * 100)}%` }]} />
           </View>
         ) : null}
       </View>
@@ -33,7 +57,7 @@ export const VideoRow = memo(function VideoRow({ video, onPress }: { video: Vide
           {video.title}
         </Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]} numberOfLines={1}>
-          {videoSubtitle(video)}
+          {subtitle ?? videoSubtitle(video)}
         </Text>
       </View>
     </Pressable>
@@ -118,7 +142,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: 'rgba(0,0,0,0.8)',
   },
+  badgeAboveBar: { bottom: 10 },
   badgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: '600' },
+  watchedTrack: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 4, backgroundColor: 'rgba(255,255,255,0.45)' },
+  watchedFill: { height: 4, backgroundColor: '#FF0033' },
   videoText: { gap: 3 },
   title: { fontSize: 15, fontWeight: '600', lineHeight: 20 },
   subtitle: { fontSize: 13 },

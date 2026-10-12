@@ -55,6 +55,7 @@ export default function SubscriptionsFeedScreen() {
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))}
         actions={[
           { icon: 'search', label: 'Search', onPress: () => router.push('/youtube/search') },
+          { icon: 'time-outline', label: 'Watch history', onPress: () => router.push('/youtube/history') },
           { icon: 'people-outline', label: 'Your channels', onPress: () => router.push('/youtube/subscriptions') },
           { icon: 'download-outline', label: 'Downloads', onPress: () => router.push('/youtube/downloads'), badge: activeDownloads },
         ]}

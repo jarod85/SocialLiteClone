@@ -22,11 +22,14 @@
  *   4. Pauses any video that starts playing inside something it hid. Hiding a
  *      <video> with CSS doesn't stop its sound.
  *   5. Adds a Stories tray where the site leaves its own out (see storiesTray.ts).
+ *   6. Opens tapped reels in the app's full-screen player (see reelViewer.ts).
  *
  * Privacy: the engine reads the page only to decide what to hide, plus the
- * Stories tray, which it reads from the site's own API inside the page. All it
- * ever sends to the app is a 'blocked' event (rule id and path, never the query)
- * and, when asked, how many elements each rule matched. No text, cookies or content.
+ * Stories tray and tapped reels, which it reads from the site's own API inside
+ * the page. All it ever sends to the app is a 'blocked' event (rule id and path,
+ * never the query), when asked, how many elements each rule matched, and for a
+ * reel you tap, what the player shows (video and cover address, account name and
+ * picture, caption). No cookies, messages or other page content.
  *
  * Fail open: every entry point is wrapped in guard(), and each selector is
  * tried on its own. A broken rule or exception leaves the page usable, just
@@ -36,6 +39,7 @@ import { buildCss, DEFAULT_COLLAPSE_LABEL, MARK } from '../core/cssBuilder';
 import { type CompiledRoutes, compilePathPattern, compileRoutes, decideRoute, pathMatches } from '../core/routeMatcher';
 import { type EnginePayload, isActive, type PageMessage, type StoriesTrayRule, type TextHideRule } from '../core/types';
 import { hasQueryParams, hostMatches, normalizePath } from '../core/urls';
+import { installReelViewer } from './reelViewer';
 import { createStoriesTray } from './storiesTray';
 
 interface EngineApi {
@@ -69,6 +73,12 @@ const MAX_PENDING_ROOTS = 300;
 const MAX_TEXT_LENGTH = 80;
 /** Matching texts still waiting for their container to render, re-checked each pass. */
 const MAX_WAITING_TEXTS = 200;
+/**
+ * Up to this many new subtrees are scanned for texts right away, before the
+ * browser paints them: a post that gets collapsed then never shows at full
+ * height first, so the feed doesn't jump. Bigger bursts wait for the debounce.
+ */
+const MAX_IMMEDIATE_ROOTS = 40;
 const MARKED = `[${MARK.hide}],[${MARK.collapse}]`;
 
 if (window.top === window && !window.__liteSocial) {
@@ -222,6 +232,12 @@ function createEngine(): EngineApi {
         }),
       true, // 'play' doesn't bubble, but capture listeners on document still see it.
     );
+
+    installReelViewer(() => active() && payload?.reelViewer === true, {
+      allowed: (path) => !!payload && !!routes && decideRoute(path, '', routes, payload.toggles).type === 'allow',
+      hiddenSelector: MARKED,
+      post,
+    });
   }
 
   /**
@@ -299,7 +315,18 @@ function createEngine(): EngineApi {
         else fullScan = true;
       });
     }
+    // Observer callbacks run before the next paint: mark small batches now.
+    if (!fullScan && pending.size <= MAX_IMMEDIATE_ROOTS) guard(scanTextNow);
     schedule();
+  }
+
+  function scanTextNow() {
+    if (!active() || textRules.length === 0) return;
+    const rules = textRules.filter((r) => !r.paths || pathMatches(location.pathname, r.paths));
+    if (rules.length === 0) return;
+    retryWaitingTexts(rules);
+    for (const root of pending) if (root.isConnected) scanText(root, rules);
+    pending.clear();
   }
 
   function schedule() {

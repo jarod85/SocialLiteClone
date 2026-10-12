@@ -4,16 +4,20 @@ import { Alert } from 'react-native';
 
 import { requestNotificationPermission } from '@/features/instagramAlerts/instagramAlerts';
 
+import { pickCaption } from '../captions';
 import { startDownload } from '../downloads';
 import { youtube } from '../native';
 import { useYouTubeSettings } from '../stores';
-import type { MusicFolder } from '../types';
+import type { CaptionTrack, MusicFolder } from '../types';
 
 import { FolderPicker } from './FolderPicker';
+import { Option, SheetModal } from './Sheet';
 
 interface Target {
   url: string;
   title: string;
+  /** The video's caption tracks, offered for MP4 downloads. */
+  captions?: CaptionTrack[];
 }
 
 /** Asks for the music folder (once) and keeps access to it. */
@@ -24,8 +28,9 @@ export async function chooseMusicFolder(): Promise<MusicFolder | null> {
 }
 
 /**
- * Download button flow: MP4 or MP3? For MP3, which Musicolet folder? Returns
- * `start(video)` and the folder picker element to render.
+ * Download button flow: MP4 or MP3? For MP4, which captions (if the video has
+ * any)? For MP3, which Musicolet folder? Returns `start(video)` and the
+ * element to render (folder picker or captions sheet).
  */
 export function useDownloadFlow() {
   const router = useRouter();
@@ -33,6 +38,7 @@ export function useDownloadFlow() {
   const lastFolderPath = useYouTubeSettings((s) => s.lastFolderPath);
   const setLastFolderPath = useYouTubeSettings((s) => s.setLastFolderPath);
   const [mp3Target, setMp3Target] = useState<Target | null>(null);
+  const [mp4Target, setMp4Target] = useState<Target | null>(null);
 
   const started = useCallback(
     (format: string) => {
@@ -67,6 +73,14 @@ export function useDownloadFlow() {
     setMp3Target(target);
   }, []);
 
+  const downloadMp4 = useCallback(
+    (target: Target, caption: CaptionTrack | null) => {
+      startDownload(target, 'mp4', [], caption);
+      started(caption ? `video with ${caption.label} captions` : 'video');
+    },
+    [started],
+  );
+
   const start = useCallback(
     (target: Target) => {
       Alert.alert('Download', target.title, [
@@ -74,18 +88,19 @@ export function useDownloadFlow() {
         {
           text: 'Video (MP4)',
           onPress: () => {
-            startDownload(target, 'mp4');
-            started('video');
+            if (target.captions?.length) setMp4Target(target);
+            else downloadMp4(target, null);
           },
         },
         { text: 'Audio (MP3)', onPress: () => void askForMp3Folder(target) },
       ]);
     },
-    [askForMp3Folder, started],
+    [askForMp3Folder, downloadMp4],
   );
 
-  const picker =
-    mp3Target && musicFolder ? (
+  let element = null;
+  if (mp3Target && musicFolder) {
+    element = (
       <FolderPicker
         visible
         root={musicFolder}
@@ -102,7 +117,38 @@ export function useDownloadFlow() {
           void chooseMusicFolder();
         }}
       />
-    ) : null;
+    );
+  } else if (mp4Target) {
+    element = <CaptionChoice target={mp4Target} onClose={() => setMp4Target(null)} onPick={(caption) => downloadMp4(mp4Target, caption)} />;
+  }
 
-  return { start, picker };
+  return { start, picker: element };
+}
+
+/** "Captions in the video": none, or one of the video's languages. The choice is offered first next time. */
+function CaptionChoice({ target, onClose, onPick }: { target: Target; onClose: () => void; onPick: (caption: CaptionTrack | null) => void }) {
+  const captions = target.captions ?? [];
+  const { downloadCaptionLanguage, captionLanguage, setDownloadCaptionLanguage } = useYouTubeSettings.getState();
+  const remembered = downloadCaptionLanguage ?? captionLanguage;
+  const preselected = remembered === 'off' ? null : pickCaption(captions, remembered);
+  const pick = (caption: CaptionTrack | null) => {
+    setDownloadCaptionLanguage(caption ? caption.language : 'off');
+    onClose();
+    onPick(caption);
+  };
+  return (
+    <SheetModal
+      title="Captions in the video"
+      note={
+        "Pick a language to add its captions to the MP4. They're saved in the video and as an .srt file next to it in " +
+        "Movies/Lite Social, which Samsung's video player and most others show (turn on subtitles in the player if they don't)."
+      }
+      onClose={onClose}
+    >
+      <Option label="No captions" checked={preselected === null} onPress={() => pick(null)} />
+      {captions.map((c) => (
+        <Option key={c.id} label={c.label} checked={c.id === preselected?.id} onPress={() => pick(c)} />
+      ))}
+    </SheetModal>
+  );
 }

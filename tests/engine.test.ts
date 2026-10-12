@@ -263,7 +263,8 @@ describe('Stories tray', () => {
     await settle();
 
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/feed/reels_tray/', expect.objectContaining({ credentials: 'include' }));
-    expect(feed.firstChild).toBe(host());
+    // Above the feed's list, not inside it (the site re-renders and pads that list as you scroll).
+    expect(feed.previousSibling).toBe(host());
     const links = Array.from(host()!.shadowRoot!.querySelectorAll('a'));
     expect(links.map((a) => a.getAttribute('href'))).toEqual(['/stories/alice/', '/stories/bob/']);
     expect(links.map((a) => a.className)).toEqual(['unseen', 'seen']);

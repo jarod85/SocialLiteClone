@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { VideoView, type VideoViewProps } from 'expo-video';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmbeddedPlayer, isEmbeddableId } from '@/features/youtube/components/EmbeddedPlayer';
@@ -15,6 +15,7 @@ import { watchUrl, youtube } from '@/features/youtube/native';
 import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
 import { useSubscriptions } from '@/features/youtube/stores';
 import type { VideoDetails } from '@/features/youtube/types';
+import { attachZoom, resetZoom } from '@/features/youtube/zoom';
 import { Button } from '@/ui/components';
 import { useTheme } from '@/ui/theme';
 
@@ -99,6 +100,12 @@ export default function WatchScreen() {
     return () => subscription.remove();
   }, [fullscreen]);
   useEffect(() => () => exitFullscreen(), []);
+  // Each video starts unzoomed.
+  useEffect(() => {
+    resetZoom();
+    return resetZoom;
+  }, [videoId]);
+  const zoomable = useCallback((view: VideoView | null) => attachZoom(view), []);
   useEffect(() => {
     if (fullscreenOn && !playing) exitFullscreen();
   }, [fullscreenOn, playing]);
@@ -152,8 +159,11 @@ export default function WatchScreen() {
         {details && playing ? (
           <VideoOverlay details={details} fullscreen={fullscreen} onFullscreen={() => (fullscreen ? exitFullscreen() : enterFullscreen())}>
             <VideoView
+              ref={zoomable}
               player={getPlayer()}
               style={StyleSheet.absoluteFill}
+              // A texture surface scales with the view around it, which pinch to zoom needs (features/youtube/zoom.ts).
+              surfaceType="textureView"
               nativeControls
               contentFit="contain"
               fullscreenOptions={NATIVE_FULLSCREEN}
@@ -219,7 +229,7 @@ export default function WatchScreen() {
             {details.channelId ? <SubscribeButton subscribed={isSubscribed} onPress={toggleSubscription} /> : null}
           </View>
 
-          <Button label="Download (MP4 or MP3)" variant="secondary" onPress={() => download({ url: details.url, title: details.title })} />
+          <Button label="Download (MP4 or MP3)" variant="secondary" onPress={() => download({ url: details.url, title: details.title, captions: details.captions })} />
 
           {details.description ? (
             <Pressable onPress={() => setExpanded((e) => !e)} style={[styles.description, { backgroundColor: theme.surface }]}>

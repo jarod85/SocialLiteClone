@@ -35,6 +35,7 @@ With a USB cable you can also run `adb install -r release\LiteSocial-<version>.a
 | Watch shared reels | On | With Block Reels on, a single reel sent to you in a DM, on a profile or in a post still opens and plays. The Reels tab and its swipe-for-more viewer stay blocked |
 | Reels from people you follow | On | With Block Reels on, reels in the home feed from accounts you follow play in the feed. Suggested and sponsored reels stay collapsed |
 | Full-screen reels | On | Tapping a reel you can watch (in the feed, on a post, or a reel link in a DM or on a profile) opens it full screen, like the Instagram app: tap to pause, hold to pause while you look, slide a finger up or down along the left side for 0.5× to 2× speed, drag the bottom bar to seek, swipe down or Back to close. The page underneath stays where it was |
+| Pinch to zoom | On | Two fingers on a photo or video (in the feed, on a post, a profile or in a DM) zoom it up to 5×, like the Instagram app: it follows your fingers, one finger keeps moving it, and it springs back when you let go. Instagram's site otherwise can't be zoomed at all |
 | Hide Explore | On | Search keeps working; the grid of recommended posts under it is hidden |
 | Hide suggestions | On | Hides "Suggested for you" posts and the suggested-accounts carousel |
 | Following feed | On | Opens Instagram's chronological feed of accounts you follow |
@@ -337,6 +338,10 @@ Said plainly, so nothing is oversold:
   `/p/<code>/?__a=1` as a second try) inside the page. If both fail, the tap does what it did before (the reel's
   page opens, or the video in the feed plays). It never opens the swipe-for-more Reels viewer, and with
   "Watch shared reels" off, reel links stay blocked as before.
+- **Pinch to zoom** works in the page only: it lays a copy of the photo (the file the page already loaded), or a
+  live drawing of the video's frames, over everything while your fingers are down, and hides the original under it.
+  Nothing is fetched or sent to the app. Pictures smaller than 120 points (avatars) and hidden posts aren't zoomed,
+  and the tap right after a pinch is ignored so it can't like the post by accident.
 - **Reels from people you follow** tells them apart by text: a reel whose post shows a "Follow" button, "Sponsored"
   or a "Suggested" label stays collapsed. English only, like the suggestion filter.
 - **Android timing:** on Android the script is injected when the page starts loading, which can race

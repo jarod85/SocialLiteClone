@@ -29,6 +29,10 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
       resets to 1×. Drag along the bottom bar: it seeks. Swipe down or Back: closes, the feed is where it was.
 - [ ] 7e. A reel someone sent in a DM, and a reel tile on a profile: both open in the same full-screen player.
       Turn **Full-screen reels** off: they open as before.
+- [ ] 7f. Pinch out on a photo in the feed: it grows over the page (which darkens), stays under your fingers, follows
+      them, and springs back when you let go; the post isn't liked and nothing opens. Same on a carousel photo (it
+      doesn't swipe), a playing video (keeps playing while zoomed), a post's own page and a photo in a DM. Pinching
+      an avatar does nothing. Turn **Pinch to zoom** off: pinching does nothing.
 - [ ] 8. "Suggested for you" posts and the suggested-accounts carousel are hidden or collapsed.
 - [ ] 9. After 30 posts the feed ends with the "That's 30 posts. You're all caught up" card.
 - [ ] 10. Videos don't start playing on their own, and no sound plays from anything hidden.

@@ -110,6 +110,8 @@ export interface EnginePayload {
   feedLimit: number;
   /** Tapping a reel opens the app's full-screen player (injected/reelViewer.ts). Older apps leave it out. */
   reelViewer?: boolean;
+  /** Two fingers on a photo or video zoom it, like the Instagram app (injected/pinchZoom.ts). Older apps leave it out. */
+  pinchZoom?: boolean;
 }
 
 /** A reel for the app's full-screen player. Read in the page from the site's API; the app validates it again. */

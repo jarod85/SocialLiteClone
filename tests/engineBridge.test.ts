@@ -39,7 +39,7 @@ describe('parsePageMessage', () => {
 describe('buildPayload', () => {
   it('carries only data the engine needs', () => {
     const payload = buildPayload(instagram, rules, { blockReels: true }, 30, instagram.baseUrl);
-    expect(Object.keys(payload).sort()).toEqual(['feedLimit', 'homeUrl', 'neverBlock', 'reelViewer', 'rules', 'siteHosts', 'toggles']);
+    expect(Object.keys(payload).sort()).toEqual(['feedLimit', 'homeUrl', 'neverBlock', 'pinchZoom', 'reelViewer', 'rules', 'siteHosts', 'toggles']);
     expect(() => JSON.parse(JSON.stringify(payload))).not.toThrow();
   });
 

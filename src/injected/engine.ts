@@ -23,6 +23,7 @@
  *      <video> with CSS doesn't stop its sound.
  *   5. Adds a Stories tray where the site leaves its own out (see storiesTray.ts).
  *   6. Opens tapped reels in the app's full-screen player (see reelViewer.ts).
+ *   7. Zooms photos and videos under a pinch, like the Instagram app (see pinchZoom.ts).
  *
  * Privacy: the engine reads the page only to decide what to hide, plus the
  * Stories tray and tapped reels, which it reads from the site's own API inside
@@ -39,6 +40,7 @@ import { buildCss, DEFAULT_COLLAPSE_LABEL, MARK } from '../core/cssBuilder';
 import { type CompiledRoutes, compilePathPattern, compileRoutes, decideRoute, pathMatches } from '../core/routeMatcher';
 import { type EnginePayload, isActive, type PageMessage, type StoriesTrayRule, type TextHideRule } from '../core/types';
 import { hasQueryParams, hostMatches, normalizePath } from '../core/urls';
+import { installPinchZoom } from './pinchZoom';
 import { installReelViewer } from './reelViewer';
 import { createStoriesTray } from './storiesTray';
 
@@ -238,6 +240,7 @@ function createEngine(): EngineApi {
       hiddenSelector: MARKED,
       post,
     });
+    installPinchZoom(() => active() && payload?.pinchZoom === true, { hiddenSelector: MARKED });
   }
 
   /**

@@ -57,6 +57,13 @@ export const instagram: PlatformConfig = {
       default: true,
     },
     {
+      id: 'pinchZoom',
+      label: 'Pinch to zoom',
+      description:
+        'Put two fingers on a photo or video and spread them to zoom in, like the Instagram app. It follows your fingers and goes back when you let go.',
+      default: true,
+    },
+    {
       id: 'hideExplore',
       label: 'Hide Explore',
       description: 'Search still works, but the grid of recommended posts under it is hidden.',

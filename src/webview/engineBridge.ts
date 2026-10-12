@@ -22,6 +22,7 @@ export function buildPayload(
     toggles,
     feedLimit,
     reelViewer: toggles.fullscreenReels === true,
+    pinchZoom: toggles.pinchZoom === true,
   };
 }
 

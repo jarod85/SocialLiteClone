@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -8,12 +9,22 @@ import { useTheme } from '@/ui/theme';
 import { formatCount, formatDuration, videoSubtitle } from '../format';
 import type { Channel, Video } from '../types';
 
-export const VideoRow = memo(function VideoRow({ video, onPress }: { video: Video; onPress: (video: Video) => void }) {
+/** A video in a list. With `onSave`, a "Save to playlist" button (holding the row does the same). */
+export const VideoRow = memo(function VideoRow({
+  video,
+  onPress,
+  onSave,
+}: {
+  video: Video;
+  onPress: (video: Video) => void;
+  onSave?: (video: Video) => void;
+}) {
   const theme = useTheme();
   const duration = video.isLive ? 'LIVE' : formatDuration(video.durationSeconds);
   return (
     <Pressable
       onPress={() => onPress(video)}
+      onLongPress={onSave ? () => onSave(video) : undefined}
       accessibilityRole="button"
       accessibilityLabel={video.title}
       style={({ pressed }) => [styles.video, pressed && { opacity: 0.7 }]}
@@ -28,13 +39,26 @@ export const VideoRow = memo(function VideoRow({ video, onPress }: { video: Vide
           </View>
         ) : null}
       </View>
-      <View style={styles.videoText}>
-        <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>
-          {video.title}
-        </Text>
-        <Text style={[styles.subtitle, { color: theme.textMuted }]} numberOfLines={1}>
-          {videoSubtitle(video)}
-        </Text>
+      <View style={styles.videoInfo}>
+        <View style={styles.videoText}>
+          <Text style={[styles.title, { color: theme.text }]} numberOfLines={2}>
+            {video.title}
+          </Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]} numberOfLines={1}>
+            {videoSubtitle(video)}
+          </Text>
+        </View>
+        {onSave ? (
+          <Pressable
+            onPress={() => onSave(video)}
+            accessibilityRole="button"
+            accessibilityLabel="Save to playlist"
+            hitSlop={8}
+            style={({ pressed }) => [styles.save, pressed && { opacity: 0.5 }]}
+          >
+            <MaterialIcons name="playlist-add" size={24} color={theme.textMuted} />
+          </Pressable>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -119,7 +143,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.8)',
   },
   badgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: '600' },
-  videoText: { gap: 3 },
+  videoInfo: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  videoText: { flex: 1, gap: 3 },
+  save: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 15, fontWeight: '600', lineHeight: 20 },
   subtitle: { fontSize: 13 },
   channel: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 10 },

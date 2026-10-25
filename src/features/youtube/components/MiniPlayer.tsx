@@ -6,7 +6,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '@/ui/theme';
 
-import { getPlayer, stop, usePlayer } from '../player';
+import { getPlayer, skip, stop, usePlayer } from '../player';
+
+import { useQueuePosition } from './PlaylistPanel';
 
 /**
  * Bar at the bottom of the YouTube screens while something is playing and the
@@ -25,6 +27,8 @@ function MiniPlayerBar() {
   const current = usePlayer((s) => s.current)!;
   const player = getPlayer();
   const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+  // Playing a playlist: its next video, one tap away.
+  const hasNext = (useQueuePosition()?.next ?? null) !== null;
 
   return (
     <Pressable
@@ -53,6 +57,11 @@ function MiniPlayerBar() {
       >
         <Ionicons name={isPlaying ? 'pause' : 'play'} size={26} color={theme.text} />
       </Pressable>
+      {hasNext ? (
+        <Pressable onPress={() => void skip(1)} accessibilityRole="button" accessibilityLabel="Next in playlist" hitSlop={8} style={styles.button}>
+          <Ionicons name="play-skip-forward" size={22} color={theme.text} />
+        </Pressable>
+      ) : null}
       <Pressable onPress={stop} accessibilityRole="button" accessibilityLabel="Stop and close player" hitSlop={8} style={styles.button}>
         <Ionicons name="close" size={24} color={theme.text} />
       </Pressable>

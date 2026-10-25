@@ -3,6 +3,7 @@ import { useCallback, useEffect } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { VideoRow } from '@/features/youtube/components/rows';
+import { openSaveToPlaylist } from '@/features/youtube/components/SaveToPlaylist';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { useDownloads } from '@/features/youtube/downloads';
 import { formatAge } from '@/features/youtube/format';
@@ -55,6 +56,7 @@ export default function SubscriptionsFeedScreen() {
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))}
         actions={[
           { icon: 'search', label: 'Search', onPress: () => router.push('/youtube/search') },
+          { icon: 'list', label: 'Playlists', onPress: () => router.push('/youtube/playlists') },
           { icon: 'people-outline', label: 'Your channels', onPress: () => router.push('/youtube/subscriptions') },
           { icon: 'download-outline', label: 'Downloads', onPress: () => router.push('/youtube/downloads'), badge: activeDownloads },
         ]}
@@ -73,7 +75,7 @@ export default function SubscriptionsFeedScreen() {
         <FlatList
           data={items}
           keyExtractor={(v) => v.id}
-          renderItem={({ item }) => <VideoRow video={item} onPress={open} />}
+          renderItem={({ item }) => <VideoRow video={item} onPress={open} onSave={openSaveToPlaylist} />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void refresh()} />}
           ListHeaderComponent={
             <Text style={[styles.status, { color: error ? theme.danger : theme.textMuted }]}>

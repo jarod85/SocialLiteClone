@@ -3,6 +3,7 @@ import { FEED_LIMIT, mergeFeed } from '@/features/youtube/feed';
 import { formatAge, formatCount, formatDuration, videoSubtitle } from '@/features/youtube/format';
 import { parseCsvLine, parseSubscriptionsExport } from '@/features/youtube/importSubscriptions';
 import { parseYouTubeLink, routeForLink } from '@/features/youtube/links';
+import { moveItem, stepInPlaylist, usePlaylists } from '@/features/youtube/playlists';
 import { pickQuality } from '@/features/youtube/quality';
 import type { CaptionTrack, Video, VideoQuality } from '@/features/youtube/types';
 
@@ -185,5 +186,66 @@ describe('captions', () => {
     expect(pickCaption(tracks, null)).toBeNull();
     expect(pickCaption(tracks, 'ja')).toBeNull();
     expect(pickCaption([], 'en')).toBeNull();
+  });
+});
+
+describe('playlists', () => {
+  const ids = ['a', 'b', 'c'];
+  const video = (id: string): Video => ({ type: 'video', id, url: `https://www.youtube.com/watch?v=${id}`, title: id });
+
+  it('steps to the next and previous video, stopping at the ends', () => {
+    expect(stepInPlaylist(ids, 'a', 0, 1, false)).toBe(1);
+    expect(stepInPlaylist(ids, 'b', 1, -1, false)).toBe(0);
+    expect(stepInPlaylist(ids, 'c', 2, 1, false)).toBeNull();
+    expect(stepInPlaylist(ids, 'a', 0, -1, false)).toBeNull();
+    expect(stepInPlaylist([], 'a', 0, 1, true)).toBeNull();
+  });
+
+  it('wraps around with Loop playlist', () => {
+    expect(stepInPlaylist(ids, 'c', 2, 1, true)).toBe(0);
+    expect(stepInPlaylist(ids, 'a', 0, -1, true)).toBe(2);
+    expect(stepInPlaylist(['a'], 'a', 0, 1, true)).toBe(0);
+  });
+
+  it('follows the playing video after it was moved', () => {
+    expect(stepInPlaylist(['b', 'c', 'a'], 'a', 0, 1, false)).toBeNull();
+    expect(stepInPlaylist(['b', 'a', 'c'], 'a', 0, 1, false)).toBe(2);
+  });
+
+  it('goes on from the place of a video taken out while it played', () => {
+    // "b" was at 1 and is gone: "c" moved into its place.
+    expect(stepInPlaylist(['a', 'c'], 'b', 1, 1, false)).toBe(1);
+    expect(stepInPlaylist(['a', 'c'], 'b', 1, -1, false)).toBe(0);
+    expect(stepInPlaylist(['a'], 'b', 1, 1, false)).toBeNull();
+    expect(stepInPlaylist(['a'], 'b', 1, 1, true)).toBe(0);
+  });
+
+  it('moves items', () => {
+    expect(moveItem(ids, 0, 2)).toEqual(['b', 'c', 'a']);
+    expect(moveItem(ids, 2, 0)).toEqual(['c', 'a', 'b']);
+    expect(moveItem(ids, 0, 3)).toBe(ids);
+  });
+
+  it('makes, fills, reorders and deletes playlists', () => {
+    const store = usePlaylists.getState();
+    const id = store.create('  Road trip  ', video('a'));
+    store.addVideo(id, video('b'));
+    store.addVideo(id, video('a'));
+    store.addVideo(id, video('c'));
+    const find = () => usePlaylists.getState().playlists.find((p) => p.id === id)!;
+    expect(find().title).toBe('Road trip');
+    expect(find().videos.map((v) => v.id)).toEqual(['a', 'b', 'c']);
+
+    store.moveVideo(id, 2, 0);
+    store.removeVideo(id, 'a');
+    expect(find().videos.map((v) => v.id)).toEqual(['c', 'b']);
+
+    store.rename(id, ' ');
+    expect(find().title).toBe('Playlist');
+    const other = store.create('Newer');
+    expect(usePlaylists.getState().playlists[0].id).toBe(other);
+
+    store.remove(id);
+    expect(usePlaylists.getState().playlists.map((p) => p.id)).toEqual([other]);
   });
 });

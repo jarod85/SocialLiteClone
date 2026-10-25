@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar, SubscribeButton, VideoRow } from '@/features/youtube/components/rows';
+import { openSaveToPlaylist } from '@/features/youtube/components/SaveToPlaylist';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatCount } from '@/features/youtube/format';
 import { videoPage, youtube } from '@/features/youtube/native';
@@ -89,7 +90,7 @@ export default function ChannelScreen() {
         <FlatList
           data={videos}
           keyExtractor={(v) => v.id}
-          renderItem={({ item }) => <VideoRow video={item} onPress={openVideo} />}
+          renderItem={({ item }) => <VideoRow video={item} onPress={openVideo} onSave={openSaveToPlaylist} />}
           onEndReached={() => void loadMore()}
           onEndReachedThreshold={0.6}
           ListHeaderComponent={

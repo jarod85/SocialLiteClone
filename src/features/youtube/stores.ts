@@ -126,12 +126,18 @@ interface YouTubeSettingsState {
   playbackHeight: number | null;
   /** Language of the captions picked in the player (e.g. "zh-CN"), turned on again where a video has it. Null: off. */
   captionLanguage: string | null;
+  /** Playing a playlist: start its next video when one ends. Only ever the playlist's own videos. */
+  autoplay: boolean;
+  /** Playing a playlist: after its last video, start again from the first (and Previous on the first goes to the last). */
+  loopPlaylist: boolean;
   setMusicFolder: (folder: MusicFolder | null) => void;
   setLastFolderPath: (path: string[]) => void;
   setMp3Kbps: (kbps: number) => void;
   setVideoMaxHeight: (height: number) => void;
   setPlaybackHeight: (height: number | null) => void;
   setCaptionLanguage: (language: string | null) => void;
+  setAutoplay: (autoplay: boolean) => void;
+  setLoopPlaylist: (loopPlaylist: boolean) => void;
 }
 
 export const useYouTubeSettings = create<YouTubeSettingsState>()(
@@ -143,12 +149,16 @@ export const useYouTubeSettings = create<YouTubeSettingsState>()(
       videoMaxHeight: 1080,
       playbackHeight: null,
       captionLanguage: null,
+      autoplay: true,
+      loopPlaylist: false,
       setMusicFolder: (musicFolder) => set({ musicFolder, lastFolderPath: [] }),
       setLastFolderPath: (lastFolderPath) => set({ lastFolderPath }),
       setMp3Kbps: (mp3Kbps) => set({ mp3Kbps }),
       setVideoMaxHeight: (videoMaxHeight) => set({ videoMaxHeight }),
       setPlaybackHeight: (playbackHeight) => set({ playbackHeight }),
       setCaptionLanguage: (captionLanguage) => set({ captionLanguage }),
+      setAutoplay: (autoplay) => set({ autoplay }),
+      setLoopPlaylist: (loopPlaylist) => set({ loopPlaylist }),
     }),
     { name: 'lite-social.youtube.settings', version: 1, storage: createJSONStorage(() => AsyncStorage) },
   ),

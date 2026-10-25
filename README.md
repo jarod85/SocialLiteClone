@@ -75,11 +75,12 @@ YouTube account in Lite Social. It's built on [NewPipe Extractor](https://github
 
 | Feature | How |
 | --- | --- |
-| Only your subscriptions | The home screen is the newest uploads of channels you subscribe to *in Lite Social*. No home page, trending, related videos or autoplay. Search exists so you can find channels (and a specific video). |
+| Only your subscriptions | The home screen is the newest uploads of channels you subscribe to *in Lite Social*. No home page, trending, related videos or autoplay (except through your own playlists). Search exists so you can find channels (and a specific video). |
 | Subscriptions | Stored on the phone. Add them with Search → Subscribe, or import Google Takeout's `subscriptions.csv` (takeout.google.com → "YouTube and YouTube Music" → subscriptions) or a NewPipe export. |
 | No Shorts | The feed uses each channel's *Videos* tab, which never contains Shorts. Shorts are also dropped from search, and a Shorts link shows "Shorts are hidden". |
 | No ads | The player plays the video's own streams (DASH, up to 1080p H.264). Ads are never requested. |
 | Player options | Buttons on the video (top right, shown while paused or after a touch) and in the row under it: **Captions** (every caption track the video has, e.g. Chinese (Simplified), English (auto-generated); the language is turned on again in the next videos that have it), **Quality** (Auto, or any resolution the video has, kept for the next videos; default in Settings), **Full screen** (sideways without system bars, with the same buttons; turning the phone upright or Back leaves it) and **Loop** (for the current video). YouTube's auto-translated captions aren't offered: YouTube refuses them to apps like this one. |
+| Playlists | Your own, stored on the phone (not YouTube's: there's no account). Save a video with the playlist button next to it in any list (or hold the video), or **Save to playlist** under the player. A playlist plays its videos in order: **Autoplay** starts the next one when one ends, **Loop playlist** goes from the last back to the first, both kept for every playlist. Previous / Next under the video and Next in the mini player; reorder, remove, rename and delete on the playlist's screen. |
 | Background and screen-off play | One shared player keeps playing when you leave the video, the app or turn the screen off, with lock-screen and notification controls. A mini player shows while you browse. |
 | Download MP4 | Best H.264 video up to your chosen quality plus AAC audio, joined on the phone (MediaMuxer), saved to **Movies/Lite Social**. |
 | Download MP3 | AAC audio decoded and encoded to MP3 on the phone (pure-Java LAME), tagged with title, channel and cover art, and saved into your **Musicolet music folder**. You pick that folder once (Android's folder picker, it starts in Music) and choose or create the subfolder for every song. |
@@ -137,7 +138,7 @@ up rather than reloading forever.
   rule X on path Y" (path only, no query) and, for leak reports, how many elements each rule matched.
 - Besides the platforms, the app itself only downloads the public rules file and checks GitHub for app updates.
   Neither request carries account or browsing data. No analytics.
-- Stored on the phone: settings, today's total minutes, leak reports, YouTube subscriptions and feed cache.
+- Stored on the phone: settings, today's total minutes, leak reports, YouTube subscriptions, playlists and feed cache.
 - Instagram notifications (off by default) are the one place the app reads the in-app browser's cookies: the
   background check sends your Instagram login cookies to instagram.com (and only there) to ask for new messages and
   activity, as the site itself would. Sender names, previews and activity texts go straight into notifications.

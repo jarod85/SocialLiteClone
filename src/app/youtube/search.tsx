@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ChannelRow, VideoRow } from '@/features/youtube/components/rows';
+import { openSaveToPlaylist } from '@/features/youtube/components/SaveToPlaylist';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { routeForLink } from '@/features/youtube/links';
 import { youtube } from '@/features/youtube/native';
@@ -134,7 +135,7 @@ export default function SearchScreen() {
                 onToggleSubscription={() => toggle(item)}
               />
             ) : (
-              <VideoRow video={item} onPress={openVideo} />
+              <VideoRow video={item} onPress={openVideo} onSave={openSaveToPlaylist} />
             )
           }
           onEndReached={() => void loadMore()}

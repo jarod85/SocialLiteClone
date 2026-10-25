@@ -87,6 +87,18 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
       language it has (e.g. "Chinese (Simplified)", "English (auto-generated)") → pick one: captions appear. Open
       another video with that language: its captions are on. Pick **Off** to stop.
 - [ ] Y14. Tap **Loop**: it turns "Loop on"; at the end the video starts again. Opening another video turns loop off.
+- [ ] Y15. In the feed, tap the playlist button next to a video → **New playlist** → name it → Create: it's ticked.
+      Tick it for two more videos (or hold a video, or **Save to playlist** under the player). Subscriptions → list
+      icon → Playlists shows it with 3 videos.
+- [ ] Y16. Open the playlist → **Play all**: the first video plays, and under the player the playlist shows "1 / 3 ·
+      Next: …". Seek near the end: the second video starts by itself and the screen shows it. **Next** and
+      **Previous** move along the playlist; tapping a video in the opened list plays it.
+- [ ] Y17. Turn **Autoplay** off: at the end of a video nothing else starts. Turn it back on. At the end of the last
+      video nothing starts; turn **Loop playlist** on and the first video starts after the last.
+- [ ] Y18. Press Home with a playlist playing and the screen off: the next video still starts by itself (listen
+      for it). Back in the app, the mini player has a Next button.
+- [ ] Y19. On the playlist's screen, the swap icon: move a video up and down, remove one; Rename; Delete asks first.
+      Opening a video from the feed while a playlist plays leaves the playlist (no Next under it).
 
 ## Settings (open with the sliders icon in the toolbar while Instagram is open)
 

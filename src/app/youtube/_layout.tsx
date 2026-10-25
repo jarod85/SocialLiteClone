@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DailyLimitGate } from '@/features/timeLimit/DailyLimitGate';
 import { MiniPlayer } from '@/features/youtube/components/MiniPlayer';
+import { SaveToPlaylistSheet } from '@/features/youtube/components/SaveToPlaylist';
 import { useFullscreen } from '@/features/youtube/fullscreen';
 import { listenToDownloads } from '@/features/youtube/downloads';
 import { youtubeAvailable } from '@/features/youtube/native';
@@ -47,6 +48,7 @@ export default function YouTubeLayout() {
         <DailyLimitGate active onLock={pause} onClose={() => router.replace('/')} />
       </View>
       <MiniPlayer />
+      <SaveToPlaylistSheet />
     </SafeAreaView>
   );
 }

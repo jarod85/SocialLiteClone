@@ -6,13 +6,16 @@ import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, Text
 
 import { EmbeddedPlayer, isEmbeddableId } from '@/features/youtube/components/EmbeddedPlayer';
 import { PlayerControls, PlayerSheet, VideoOverlay } from '@/features/youtube/components/PlayerControls';
+import { PlaylistPanel } from '@/features/youtube/components/PlaylistPanel';
 import { Avatar, SubscribeButton } from '@/features/youtube/components/rows';
+import { openSaveToPlaylist } from '@/features/youtube/components/SaveToPlaylist';
 import { useDownloadFlow } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatAge, formatCount } from '@/features/youtube/format';
 import { enterFullscreen, exitFullscreen, useFullscreen } from '@/features/youtube/fullscreen';
 import { watchUrl, youtube } from '@/features/youtube/native';
 import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
+import { videoFromDetails } from '@/features/youtube/playlists';
 import { useSubscriptions } from '@/features/youtube/stores';
 import type { VideoDetails } from '@/features/youtube/types';
 import { Button } from '@/ui/components';
@@ -38,6 +41,8 @@ let embedChosen = false;
 /**
  * The player: the video, its title, channel and description, and Download.
  * No related videos, no comments, no autoplay of anything else, no ads.
+ * Playing one of your playlists, the next video in it can start by itself
+ * (Autoplay), and the screen goes on to show it.
  */
 export default function WatchScreen() {
   const theme = useTheme();
@@ -45,11 +50,15 @@ export default function WatchScreen() {
   const { videoId, short } = useLocalSearchParams<{ videoId: string; short?: string }>();
   const current = usePlayer((s) => s.current);
   const playerError = usePlayer((s) => s.error);
+  const queue = usePlayer((s) => s.queue);
+  // The playlist went on from the video this screen shows to its next one: show that instead.
+  const followed = current !== null && current.id !== videoId && queue?.videoId === current.id && queue.from === videoId;
+  const shownId = followed && current ? current.id : videoId;
   // What was fetched for which video id, so a new id never shows the previous video's details.
   const [loaded, setLoaded] = useState<{ id: string; details?: VideoDetails; error?: string; code?: string } | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [embedded, setEmbedded] = useState<string | null>(null);
-  const details = current?.id === videoId ? current : loaded?.id === videoId ? (loaded.details ?? null) : null;
+  const details = current?.id === shownId ? current : loaded?.id === videoId ? (loaded.details ?? null) : null;
   const error = loaded?.id === videoId ? (loaded.error ?? null) : null;
   const canEmbed = error !== null && EMBED_FALLBACK_CODES.has(loaded?.code ?? '') && isEmbeddableId(videoId);
   const showEmbed = canEmbed && (embedded === videoId || embedChosen);
@@ -83,6 +92,10 @@ export default function WatchScreen() {
       active = false;
     };
   }, [videoId, isShortLink, attempt]);
+
+  useEffect(() => {
+    if (followed) router.setParams({ videoId: shownId });
+  }, [followed, shownId, router]);
 
   useEffect(() => {
     // Never two videos at once: the embed has its own sound.
@@ -197,6 +210,7 @@ export default function WatchScreen() {
         </View>
       ) : details ? (
         <ScrollView contentContainerStyle={styles.info}>
+          {playing ? <PlaylistPanel /> : null}
           <Text style={[styles.title, { color: theme.text }]}>{details.title}</Text>
           {stats ? <Text style={[styles.stats, { color: theme.textMuted }]}>{stats}</Text> : null}
           {playerError && current?.id === details.id ? (
@@ -219,6 +233,7 @@ export default function WatchScreen() {
             {details.channelId ? <SubscribeButton subscribed={isSubscribed} onPress={toggleSubscription} /> : null}
           </View>
 
+          <Button label="Save to playlist" variant="secondary" onPress={() => openSaveToPlaylist(videoFromDetails(details))} />
           <Button label="Download (MP4 or MP3)" variant="secondary" onPress={() => download({ url: details.url, title: details.title })} />
 
           {details.description ? (

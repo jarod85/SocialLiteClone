@@ -43,5 +43,5 @@ yarn-error.*
 # Claude Code per-user settings
 .claude/settings.local.json
 
-# APKs built by scripts/build-android.ps1
+# APKs built by scripts/build-android.ps1 and scripts/build-android.sh
 /release

@@ -7,6 +7,9 @@
  * path is in the LITESOCIAL_SIGNING environment variable (storeFile,
  * storePassword, keyAlias, keyPassword). scripts/build-android.ps1 sets it;
  * the file and keystore live outside the repository and are never committed.
+ * scripts/build-android.sh (macOS, Linux) sets it too. A properties file copied
+ * from another computer may name the keystore by that computer's path; then the
+ * keystore of that name next to the properties file is used.
  *
  * Without LITESOCIAL_SIGNING, release builds fall back to the debug key, as
  * before (the build script refuses that unless asked to).
@@ -27,6 +30,12 @@ def liteSocialSigning = new Properties()
 def liteSocialSigningPath = System.getenv('LITESOCIAL_SIGNING')
 if (liteSocialSigningPath && new File(liteSocialSigningPath).exists()) {
     new File(liteSocialSigningPath).withInputStream { liteSocialSigning.load(it) }
+    // Copied from another computer (Windows to Mac, say), storeFile can be that computer's path:
+    // then it's the keystore of that name next to the properties file.
+    if (liteSocialSigning.storeFile && !new File(liteSocialSigning.storeFile).exists()) {
+        def keystoreName = liteSocialSigning.storeFile.tokenize('/\\\\').last()
+        liteSocialSigning.storeFile = new File(new File(liteSocialSigningPath).parentFile, keystoreName).path
+    }
 }
 `;
     if (!/\nandroid\s*\{/.test(gradle)) throw new Error('withReleaseSigning: no android block in app/build.gradle');

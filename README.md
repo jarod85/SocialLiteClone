@@ -165,8 +165,8 @@ modules/instagram-alerts/ Native Android module: background Instagram check (Wor
 modules/youtube/       Native Android module: NewPipe Extractor, DASH playback manifests, downloads, MP3 encoding
 modules/app-updater/   Native Android module: downloads, verifies and installs app updates
 rules/rules.json       Blocking rules: bundled with the app AND fetched remotely
-scripts/               build-engine.js (bundles the injected script), build-android.ps1 (builds the APK),
-                       publish-release.ps1 (publishes it as an update)
+scripts/               build-engine.js (bundles the injected script), build-android.ps1 / .sh (builds the APK
+                       on Windows / macOS), publish-release.ps1 / .sh (publishes it as an update)
 tests/                 Jest tests (route matching, navigation policy, CSS, rules validation, engine in jsdom)
 docs/TESTING_CHECKLIST.md
 ```
@@ -204,12 +204,41 @@ so the script mirrors the source into a short folder (`%USERPROFILE%\lsb`) and b
 writes `release\LiteSocial-<version>.apk`, signed with your private release key (below). Bump
 `version`/`android.versionCode` in `app.json` for each release.
 
+On macOS (or Linux), also without Android Studio:
+
+```sh
+scripts/build-android.sh
+```
+
+It does the same as the Windows script (mirrors the source into `~/lsb`, Expo prebuild, Gradle release build,
+`release/LiteSocial-<version>.apk`) and takes `--architectures`, `--build-dir`, `--signing` and `--debug-signing`.
+It finds JDK 17 with `/usr/libexec/java_home -v 17` (or `JAVA_HOME`) and the SDK at `~/Library/Android/sdk` (or
+`ANDROID_HOME`). To set those up on a Mac with Apple silicon, once:
+
+1. JDK 17: download Temurin 17 for macOS aarch64 (`.tar.gz`) from adoptium.net and unpack it into
+   `~/Library/Java/JavaVirtualMachines/` (rename the folder to `temurin-17.jdk`).
+2. Android SDK: download the "Command line tools only" zip for Mac from developer.android.com/studio and unpack it
+   so that `~/Library/Android/sdk/cmdline-tools/latest/bin/sdkmanager` exists.
+3. Install the packages the build needs (about 2.5 GB). Installing them accepts Google's Android SDK License
+   Agreement (developer.android.com/studio/terms):
+
+```sh
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+~/Library/Android/sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+```
+
 ### Signing key
 
 Release builds are signed with your own key, not Expo's public debug key (anyone could sign an APK with that one
 and your phone would accept it as an update). `plugins/withReleaseSigning.js` reads the key from the properties
 file in `LITESOCIAL_SIGNING`; the build script points it at `%USERPROFILE%\.litesocial\signing.properties`
 (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`), next to `release.keystore`. Neither is in the repository.
+On macOS the build script uses `~/.litesocial/signing.properties`.
+
+**Building on a second computer:** copy the whole `.litesocial` folder from the first one (e.g. from
+`%USERPROFILE%\.litesocial\` on Windows to `~/.litesocial/` on a Mac) instead of making a new key, or phones won't take
+the update. If `storeFile` still names the old computer's path, the keystore of that name next to
+`signing.properties` is used. On a Mac, `chmod 700 ~/.litesocial` so only you can read it.
 
 **Back up `%USERPROFILE%\.litesocial\`.** Android only installs an update signed with the same key. Lose it and
 the next version can only be installed after uninstalling (losing logins and settings).
@@ -230,15 +259,17 @@ won't install over a release-signed app).
 New versions go out as GitHub Releases, and the app installs them itself:
 
 1. Make the change, bump `version` and `android.versionCode` in `app.json`, commit and `git push`.
-2. `powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1`
+2. `powershell -ExecutionPolicy Bypass -File scripts\build-android.ps1` (macOS: `scripts/build-android.sh`)
 3. `powershell -ExecutionPolicy Bypass -File scripts\publish-release.ps1 -Notes "What changed"`
+   (macOS: `scripts/publish-release.sh --notes "What changed"`)
 
 On the phone, Lite Social checks GitHub a few times a day (and from **Settings → App updates → Check for updates**).
 When there's a newer version, the start screen shows "Lite Social X is available" → **Install update**: it downloads
 the APK, checks it's a newer Lite Social signed with the same key, and opens Android's installer. The first time,
 Android asks to allow Lite Social to install apps. Logins, settings and YouTube channels stay.
 
-`publish-release.ps1` uses `GITHUB_TOKEN` if set, otherwise the GitHub login Git already has for this repository.
+`publish-release.ps1` (and `.sh`) uses `GITHUB_TOKEN` if set, otherwise the GitHub login Git already has for this
+repository (on a Mac, the one in the keychain).
 The update check reads `https://api.github.com/repos/jarod85/SocialLiteClone/releases/latest` (override with
 `EXPO_PUBLIC_RELEASES_URL`); it needs the repository to be public. When that API refuses (it allows 60 calls an hour
 per network), the app reads the version from where `github.com/<repo>/releases/latest` redirects instead, so the

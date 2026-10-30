@@ -8,7 +8,7 @@
 #      (build it first with scripts/build-android.sh).
 #   2. Checks the APK is signed with your release key (only those install as updates).
 #   3. Creates the release "v<version>" on the commit you're on, which must be pushed.
-#   4. Uploads the APK to it.
+#   4. Uploads the APK to it. If that fails, run again: it reuses the release.
 #
 # GitHub access: the GITHUB_TOKEN environment variable if set, otherwise the
 # GitHub login Git already uses for this repository (on macOS, the keychain).
@@ -72,25 +72,34 @@ trap 'rm -f "$headers" "$response"' EXIT
 chmod 600 "$headers"
 printf 'Authorization: Bearer %s\nAccept: application/vnd.github+json\nX-GitHub-Api-Version: 2022-11-28\nUser-Agent: lite-social-publish\n' "$token" > "$headers"
 
-status="$(curl -sS -o "$response" -w '%{http_code}' -H "@$headers" "https://api.github.com/repos/$repository/releases/tags/$tag")"
-[[ "$status" == 200 ]] && fail "Release $tag already exists. Bump version and android.versionCode in app.json, rebuild, then publish."
-[[ "$status" == 404 ]] || fail "GitHub answered $status: $(cat "$response")"
+# Evaluates a JavaScript expression on GitHub's last answer, parsed as `r`. (Not require(): the temp file has no
+# .json extension, so require() would read it as JavaScript.)
+json() { RESPONSE="$response" node -p "const r = JSON.parse(require('fs').readFileSync(process.env.RESPONSE, 'utf8')); $1"; }
 
-step "3/4 Creating release $tag..."
-body="$(TAG="$tag" COMMIT="$commit" VERSION="$version" NOTES="$notes" node -e '
-  const { TAG, COMMIT, VERSION, NOTES } = process.env;
-  console.log(JSON.stringify({ tag_name: TAG, target_commitish: COMMIT, name: `Lite Social ${VERSION}`,
-    body: NOTES || `Lite Social ${VERSION}`, draft: false, prerelease: false, make_latest: "true" }));')"
-status="$(curl -sS -o "$response" -w '%{http_code}' -X POST -H "@$headers" -H 'Content-Type: application/json; charset=utf-8' \
-  --data-binary "$body" "https://api.github.com/repos/$repository/releases")"
-[[ "$status" == 201 ]] || fail "Creating the release failed ($status): $(cat "$response")"
-release_id="$(node -p "require('$response').id")"
-release_url="$(node -p "require('$response').html_url")"
+name="$(basename "$apk")"
+status="$(curl -sS -o "$response" -w '%{http_code}' -H "@$headers" "https://api.github.com/repos/$repository/releases/tags/$tag")"
+if [[ "$status" == 200 ]]; then
+  # A run that stopped before the upload leaves the release without its APK: finish that one.
+  [[ "$(NAME="$name" json 'r.assets.some((a) => a.name === process.env.NAME)')" == false ]] ||
+    fail "Release $tag already exists. Bump version and android.versionCode in app.json, rebuild, then publish."
+  step "3/4 Release $tag exists without its APK, adding it there..."
+else
+  [[ "$status" == 404 ]] || fail "GitHub answered $status: $(cat "$response")"
+  step "3/4 Creating release $tag..."
+  body="$(TAG="$tag" COMMIT="$commit" VERSION="$version" NOTES="$notes" node -e '
+    const { TAG, COMMIT, VERSION, NOTES } = process.env;
+    console.log(JSON.stringify({ tag_name: TAG, target_commitish: COMMIT, name: `Lite Social ${VERSION}`,
+      body: NOTES || `Lite Social ${VERSION}`, draft: false, prerelease: false, make_latest: "true" }));')"
+  status="$(curl -sS -o "$response" -w '%{http_code}' -X POST -H "@$headers" -H 'Content-Type: application/json; charset=utf-8' \
+    --data-binary "$body" "https://api.github.com/repos/$repository/releases")"
+  [[ "$status" == 201 ]] || fail "Creating the release failed ($status): $(cat "$response")"
+fi
+release_id="$(json 'r.id')"
+release_url="$(json 'r.html_url')"
 
 step '4/4 Uploading the APK (this takes a minute)...'
-name="$(basename "$apk")"
 status="$(curl -sS -o "$response" -w '%{http_code}' -X POST -H "@$headers" -H 'Content-Type: application/vnd.android.package-archive' \
   --max-time 1800 --data-binary "@$apk" "https://uploads.github.com/repos/$repository/releases/$release_id/assets?name=$name")"
 [[ "$status" == 201 ]] || fail "Uploading the APK failed ($status): $(cat "$response")"
 printf '\033[32mPublished: %s\033[0m\n' "$release_url"
-printf '\033[32mAPK: %s\033[0m\n' "$(node -p "require('$response').browser_download_url")"
+printf '\033[32mAPK: %s\033[0m\n' "$(json 'r.browser_download_url')"

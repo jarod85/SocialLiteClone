@@ -53,6 +53,15 @@ export function parseQuery(query: string): Map<string, string> {
   return params;
 }
 
+/** True if `query` has every parameter `required` sets, with the same value. Both without '?'. */
+export function hasQueryParams(query: string, required: string): boolean {
+  const have = parseQuery(query);
+  for (const [key, value] of parseQuery(required)) {
+    if (have.get(key) !== value) return false;
+  }
+  return true;
+}
+
 function decode(component: string): string {
   try {
     return decodeURIComponent(component.replace(/\+/g, ' '));

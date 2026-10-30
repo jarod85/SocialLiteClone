@@ -32,11 +32,15 @@ With a USB cable you can also run `adb install -r release\LiteSocial-<version>.a
 | Setting (Instagram) | Default | What it does |
 | --- | --- | --- |
 | Block Reels | On | Removes the Reels tab, collapses Reels/videos in the feed and on profiles, blocks opening any Reel |
-| Watch shared reels | On | With Block Reels on, a single reel sent to you in a DM, on a profile or in a post still opens and plays. The Reels tab, its swipe-for-more viewer and reels in the home feed stay blocked |
+| Watch shared reels | On | With Block Reels on, a single reel sent to you in a DM, on a profile or in a post still opens and plays. The Reels tab and its swipe-for-more viewer stay blocked |
+| Reels from people you follow | On | With Block Reels on, reels in the home feed from accounts you follow play in the feed. Suggested and sponsored reels stay collapsed |
+| Full-screen reels | On | Tapping a reel you can watch (in the feed, on a post, or a reel link in a DM or on a profile) opens it full screen, like the Instagram app: tap to pause, hold to pause while you look, slide a finger up or down along the left side for 0.5× to 2× speed, drag the bottom bar to seek, swipe down or Back to close. The page underneath stays where it was |
+| Pinch to zoom | On | Two fingers on a photo or video (in the feed, on a post, a profile or in a DM) zoom it up to 5×, like the Instagram app: it follows your fingers, one finger keeps moving it, and it springs back when you let go. Instagram's site otherwise can't be zoomed at all |
 | Hide Explore | On | Search keeps working; the grid of recommended posts under it is hidden |
 | Hide suggestions | On | Hides "Suggested for you" posts and the suggested-accounts carousel |
 | Following feed | On | Opens Instagram's chronological feed of accounts you follow |
 | Stop the feed | On, 30 posts | Ends the home feed with a "you're all caught up" card (10/20/30/50) |
+| Stories at the top | On | Adds a Stories tray above the Following feed, which Instagram leaves out, laid out like Instagram's: "Your story" first (with + to add one), coloured rings for unwatched stories, green for Close Friends, grey for watched (does nothing while Hide Stories is on) |
 | Hide Stories | Off | Blocks opening stories; hides the tray where it can be found |
 | Daily time limit | Off | 15–120 min/day; then a break screen, with one "5 more minutes" per day |
 
@@ -79,10 +83,12 @@ YouTube account in Lite Social. It's built on [NewPipe Extractor](https://github
 | Subscriptions | Stored on the phone. Add them with Search → Subscribe, or import Google Takeout's `subscriptions.csv` (takeout.google.com → "YouTube and YouTube Music" → subscriptions) or a NewPipe export. |
 | No Shorts | The feed uses each channel's *Videos* tab, which never contains Shorts. Shorts are also dropped from search, and a Shorts link shows "Shorts are hidden". |
 | No ads | The player plays the video's own streams (DASH, up to 1080p H.264). Ads are never requested. |
+| Watch history | Every video you open, newest first (Today, Yesterday, This week, Earlier), with how far you got: a red bar on its thumbnail in every list, and the video continues where you stopped. The clock button on the Subscriptions screen, or Settings → YouTube → Watch history. Press and hold to remove one; the bin clears it all. Stored on the phone only (last 500 videos). |
+| Zoom | Pinch the video to zoom in (up to 5×), in the normal view and full screen; drag to look around. Pinch back or tap the "2.0× · Reset" chip to see all of it. The controls and captions keep their size. |
 | Player options | Buttons on the video (top right, shown while paused or after a touch) and in the row under it: **Captions** (every caption track the video has, e.g. Chinese (Simplified), English (auto-generated); the language is turned on again in the next videos that have it), **Quality** (Auto, or any resolution the video has, kept for the next videos; default in Settings), **Full screen** (sideways without system bars, with the same buttons; turning the phone upright or Back leaves it) and **Loop** (for the current video). YouTube's auto-translated captions aren't offered: YouTube refuses them to apps like this one. |
 | Playlists | Your own, stored on the phone (not YouTube's: there's no account). Save a video with the playlist button next to it in any list (or hold the video), or **Save to playlist** under the player. A playlist plays its videos in order: **Autoplay** starts the next one when one ends, **Loop playlist** goes from the last back to the first, both kept for every playlist. Previous / Next under the video and Next in the mini player; reorder, remove, rename and delete on the playlist's screen. |
 | Background and screen-off play | One shared player keeps playing when you leave the video, the app or turn the screen off, with lock-screen and notification controls. A mini player shows while you browse. |
-| Download MP4 | Best H.264 video up to your chosen quality plus AAC audio, joined on the phone (MediaMuxer), saved to **Movies/Lite Social**. |
+| Download MP4 | Best H.264 video up to your chosen quality plus AAC audio, joined on the phone (MediaMuxer), saved to **Movies/Lite Social**. If the video has captions, you pick a language (or none) first; the last choice is offered next time. They go into the MP4 as a subtitle track (3GPP timed text, what ffmpeg calls mov_text) and next to it as an `.srt` with the same name, which Samsung's video player and most others pick up. |
 | Download MP3 | AAC audio decoded and encoded to MP3 on the phone (pure-Java LAME), tagged with title, channel and cover art, and saved into your **Musicolet music folder**. You pick that folder once (Android's folder picker, it starts in Music) and choose or create the subfolder for every song. |
 | YouTube links | Tapping a YouTube link in another app offers "Open with Lite Social". |
 
@@ -135,10 +141,13 @@ up rather than reloading forever.
 - The app never reads, stores or transmits credentials, messages or page content. The session lives in the
   WebView's own cookie store (Instagram notifications below are the one exception).
 - The injected script reads the page only to decide what to hide. All it sends back to the app is "blocked
-  rule X on path Y" (path only, no query) and, for leak reports, how many elements each rule matched.
+  rule X on path Y" (path only, no query), for leak reports, how many elements each rule matched, and for a reel
+  you tap (Full-screen reels), what the player shows: the video and cover addresses on Instagram's CDN, the
+  account's name and picture, and the caption. The app plays only videos from Instagram's CDN.
 - Besides the platforms, the app itself only downloads the public rules file and checks GitHub for app updates.
   Neither request carries account or browsing data. No analytics.
-- Stored on the phone: settings, today's total minutes, leak reports, YouTube subscriptions, playlists and feed cache.
+- Stored on the phone: settings, today's total minutes, leak reports, YouTube subscriptions, playlists, feed cache
+  and watch history.
 - Instagram notifications (off by default) are the one place the app reads the in-app browser's cookies: the
   background check sends your Instagram login cookies to instagram.com (and only there) to ask for new messages and
   activity, as the site itself would. Sender names, previews and activity texts go straight into notifications.
@@ -350,6 +359,23 @@ Said plainly, so nothing is oversold:
 - **Hide Stories** reliably blocks *opening* stories. Hiding the tray is best-effort (it has no stable link).
 - **Feed limit:** Instagram may keep loading posts in the background after the limit card (they stay hidden).
 - **Following feed** relies on Instagram's `?variant=following`. If Instagram drops it, you get the normal feed.
+- **Stories at the top** reads the tray from Instagram's own `/api/v1/feed/reels_tray/` (and your name and picture
+  for "Your story" from `/api/v1/users/<id>/info/`), inside the page with its session (nothing reaches the app). If
+  Instagram changes or refuses that request, the tray just doesn't show. Tapping a story opens Instagram's story
+  viewer as a new page, so the feed reloads when you come back. "Your story" without a story opens Instagram's
+  `/create/story/` page. The tray sits just above Instagram's feed list rather than inside it: Instagram only renders
+  the posts near the screen and pads that list for the rest, so anything inside it moved with the posts and made
+  the feed jump.
+- **Full-screen reels** reads the tapped reel from Instagram's media API (`/api/v1/media/<id>/info/`, with
+  `/p/<code>/?__a=1` as a second try) inside the page. If both fail, the tap does what it did before (the reel's
+  page opens, or the video in the feed plays). It never opens the swipe-for-more Reels viewer, and with
+  "Watch shared reels" off, reel links stay blocked as before.
+- **Pinch to zoom** works in the page only: it lays a copy of the photo (the file the page already loaded), or a
+  live drawing of the video's frames, over everything while your fingers are down, and hides the original under it.
+  Nothing is fetched or sent to the app. Pictures smaller than 120 points (avatars) and hidden posts aren't zoomed,
+  and the tap right after a pinch is ignored so it can't like the post by accident.
+- **Reels from people you follow** tells them apart by text: a reel whose post shows a "Follow" button, "Sponsored"
+  or a "Suggested" label stays collapsed. English only, like the suggestion filter.
 - **Android timing:** on Android the script is injected when the page starts loading, which can race
   Instagram's own scripts. CSS is applied a moment later on a cold start, and the Navigation API hook
   covers navigation the history patch might miss.
@@ -369,7 +395,8 @@ Said plainly, so nothing is oversold:
   works). The app retries once, then offers **Play in YouTube's player**: YouTube's own embedded player in a
   WebView, which passes the checks a real browser passes. It can show ads and doesn't download or play in the
   background. Once chosen, blocked videos open in it until the app restarts.
-  There's no account: no watch history, likes, comments or members-only videos. Age-restricted videos don't play.
+  There's no account: no likes, comments or members-only videos, and the watch history is Lite Social's own (it doesn't
+  sync with YouTube's). Age-restricted videos don't play.
 - **MP3 conversion takes a moment.** It runs on the phone's CPU (a 4-minute song takes roughly 10–30 seconds).
 - **It's not a device-level blocker.** The Instagram and YouTube apps and websites still work outside Lite Social. Blocking
   those needs Screen Time (iOS) or Accessibility/VPN (Android) APIs, a separate project.

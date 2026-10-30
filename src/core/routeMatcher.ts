@@ -5,7 +5,7 @@
  * navigation that never reaches the app), so both layers always agree.
  */
 import { isActive, type RouteRule, type Toggles } from './types';
-import { normalizePath, parseQuery, parseUrl } from './urls';
+import { hasQueryParams, normalizePath, parseUrl } from './urls';
 
 export type RouteDecision =
   | { type: 'allow' }
@@ -75,11 +75,7 @@ export function decideRoute(path: string, query: string, compiled: CompiledRoute
 function redirectSatisfied(normalizedPath: string, query: string, to: string): boolean {
   const target = parseUrl(`x://h${to.startsWith('/') ? '' : '/'}${to}`);
   if (!target || normalizePath(target.path).toLowerCase() !== normalizedPath.toLowerCase()) return false;
-  const have = parseQuery(query);
-  for (const [key, value] of parseQuery(target.query)) {
-    if (have.get(key) !== value) return false;
-  }
-  return true;
+  return hasQueryParams(query, target.query);
 }
 
 function escapeRegExp(text: string): string {

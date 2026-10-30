@@ -12,6 +12,7 @@ import type {
 
 import { decideNavigation, initialUrl, type NavigationContext, resolveSitePath } from '@/core/navigationPolicy';
 import { compileRoutes } from '@/core/routeMatcher';
+import type { PageMessage } from '@/core/types';
 import { hostMatches, parseUrl, stripQueryAndHash } from '@/core/urls';
 import { DailyLimitGate } from '@/features/timeLimit/DailyLimitGate';
 import type { PlatformConfig } from '@/platforms/types';
@@ -33,6 +34,7 @@ import {
   statsScript,
 } from './engineBridge';
 import { LoadErrorView } from './LoadErrorView';
+import { ReelViewer, type ReelState } from './ReelViewer';
 import { useAndroidBack } from './useAndroidBack';
 import { useBrowserUserAgent } from './useBrowserUserAgent';
 
@@ -146,6 +148,17 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     }
   }, []);
 
+  // ---- Full-screen reels (injected/reelViewer.ts) ---------------------------
+  const [reel, setReel] = useState<ReelState | null>(null);
+  const onReelMessage = useCallback((message: Extract<PageMessage, { type: 'reel' }>) => {
+    if (message.state === 'loading') setReel({ requestId: message.requestId, state: 'loading' });
+    else
+      // Only for the reel being opened: one closed meanwhile stays closed.
+      setReel((current) =>
+        current?.requestId !== message.requestId ? current : message.state === 'ready' ? { requestId: message.requestId, state: 'ready', reel: message.reel } : null,
+      );
+  }, []);
+
   // ---- Messages from the page (layer 3 reports) ----------------------------
   const pendingStatsRef = useRef(new Map<string, StatsCallback>());
   const onMessage = useCallback(
@@ -156,8 +169,9 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
       const message = parsePageMessage(event.nativeEvent.data, knownRuleIdsRef.current);
       if (message?.type === 'blocked') setBlockedRuleId(message.ruleId);
       else if (message?.type === 'stats') pendingStatsRef.current.get(message.requestId)?.(message.counts);
+      else if (message?.type === 'reel' && toggles.fullscreenReels) onReelMessage(message);
     },
-    [platform.siteHosts],
+    [platform.siteHosts, onReelMessage, toggles.fullscreenReels],
   );
 
   const requestStats = useCallback(
@@ -341,7 +355,15 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
             }}
           />
         )}
-        <DailyLimitGate active={isFocused} onLock={pauseMedia} onClose={onClose} />
+        <DailyLimitGate
+          active={isFocused}
+          onLock={() => {
+            pauseMedia();
+            setReel(null);
+          }}
+          onClose={onClose}
+        />
+        {reel !== null && isFocused ? <ReelViewer reel={reel} onClose={() => setReel(null)} /> : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -192,3 +192,102 @@ it('pauses a video that starts playing while hidden', () => {
   expect(video.muted).toBe(true);
   pause.mockRestore();
 });
+
+it('collapses a reel once its video arrives after the text that marks it', async () => {
+  engine.apply(
+    payload({
+      rules: {
+        ...payload().rules,
+        textHide: [
+          {
+            id: 'unfollowed-feed-reels',
+            match: ['Follow'],
+            containers: ['article:has(video)'],
+            mode: 'collapse',
+            label: 'Reel hidden',
+          },
+        ],
+      },
+    }),
+  );
+  const post = article('Follow');
+  const followed = article('A friend');
+  feed.append(post, followed);
+  await settle();
+  expect(post.hasAttribute(MARK.collapse)).toBe(false); // No video yet: a photo from someone you don't follow stays.
+
+  post.querySelector('div')!.appendChild(document.createElement('video'));
+  followed.querySelector('div')!.appendChild(document.createElement('video'));
+  await settle();
+  expect(post.getAttribute(MARK.collapse)).toBe('Reel hidden');
+  expect(followed.hasAttribute(MARK.collapse)).toBe(false);
+});
+
+describe('Stories tray', () => {
+  const trayRule = {
+    id: 'following-stories',
+    toggle: 'showStoriesTray',
+    unless: 'hideStories',
+    paths: ['/'],
+    query: 'variant=following',
+    anchor: 'article',
+  };
+  const trayPayload = (toggles: Record<string, boolean> = {}) =>
+    payload({
+      toggles: { showStoriesTray: true, ...toggles },
+      rules: { ...payload().rules, storiesTray: trayRule },
+    });
+  const reel = (username: string, latest: number, seen: number) => ({
+    user: { username, profile_pic_url: `https://scontent.cdninstagram.com/${username}.jpg` },
+    latest_reel_media: latest,
+    seen,
+  });
+  const host = () => document.getElementById('__lite-social-stories');
+  let fetchMock: jest.Mock;
+
+  beforeEach(() => {
+    fetchMock = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({ tray: [reel('alice', 20, 10), reel('bob', 20, 20), { user: { username: 'bad"name' } }] }),
+    }));
+    (window as unknown as { fetch: unknown }).fetch = fetchMock;
+  });
+
+  it('draws the tray above the Following feed from Instagram\'s tray API', async () => {
+    window.history.replaceState(null, '', '/?variant=following');
+    feed.append(article('one'), article('two'));
+    engine.apply(trayPayload());
+    await settle();
+    await settle();
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/feed/reels_tray/', expect.objectContaining({ credentials: 'include' }));
+    // Above the feed's list, not inside it (the site re-renders and pads that list as you scroll).
+    expect(feed.previousSibling).toBe(host());
+    const links = Array.from(host()!.shadowRoot!.querySelectorAll('a'));
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/stories/alice/', '/stories/bob/']);
+    expect(links.map((a) => a.className)).toEqual(['unseen', 'seen']);
+    expect(posted).toEqual([]); // Nothing about the tray goes to the app.
+  });
+
+  it('stays off the normal feed, other pages and with Hide Stories on', async () => {
+    feed.append(article('one'), article('two'));
+    engine.apply(trayPayload());
+    await settle();
+    expect(host()).toBeNull(); // '/' without variant=following has Instagram's own tray.
+
+    window.history.replaceState(null, '', '/?variant=following');
+    engine.apply(trayPayload({ hideStories: true }));
+    await settle();
+    expect(host()).toBeNull();
+
+    engine.apply(trayPayload());
+    await settle();
+    await settle();
+    expect(host()).not.toBeNull();
+    engine.apply(trayPayload({ showStoriesTray: false }));
+    await settle();
+    expect(host()).toBeNull();
+  });
+});

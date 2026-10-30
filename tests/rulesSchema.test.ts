@@ -20,7 +20,8 @@ describe('bundled rules.json', () => {
       const known = new Set(platform.toggles.map((t) => t.id));
       const r = result.rules.platforms[platform.id];
       expect(r).toBeDefined();
-      const used = [...r.routes, ...r.hide, ...r.textHide, ...(r.feedLimit ? [r.feedLimit] : [])]
+      const extras = [...(r.feedLimit ? [r.feedLimit] : []), ...(r.storiesTray ? [r.storiesTray] : [])];
+      const used = [...r.routes, ...r.hide, ...r.textHide, ...extras]
         .flatMap((rule) => [rule.toggle, 'unless' in rule ? rule.unless : undefined])
         .filter((t): t is string => t !== undefined);
       for (const toggle of used) expect(known).toContain(toggle);
@@ -30,7 +31,7 @@ describe('bundled rules.json', () => {
   it('has unique rule ids per platform', () => {
     if (!result.ok) return;
     for (const r of Object.values(result.rules.platforms)) {
-      const ids = [...r.routes, ...r.hide, ...r.textHide].map((x) => x.id);
+      const ids = [...r.routes, ...r.hide, ...r.textHide, ...(r.storiesTray ? [r.storiesTray] : [])].map((x) => x.id);
       expect(new Set(ids).size).toBe(ids.length);
     }
   });
@@ -130,4 +131,22 @@ describe('isSafeSelector', () => {
     'rejects %p',
     (selector) => expect(isSafeSelector(selector)).toBe(false),
   );
+});
+
+describe('storiesTray', () => {
+  const file = (storiesTray: unknown) => ({ ...base, platforms: { instagram: { storiesTray } } });
+  const tray = { id: 'tray', toggle: 'showStoriesTray', paths: ['/'], query: 'variant=following', anchor: 'article' };
+
+  it('keeps a valid tray rule', () => {
+    const result = validateRules(file({ ...tray, note: 'docs' }));
+    expect(result.ok && result.rules.platforms.instagram.storiesTray).toEqual(tray);
+  });
+
+  it.each([{ anchor: 'a{}' }, { query: 'x=<script>' }, { paths: [] }])('drops it with a warning when invalid: %j', (bad) => {
+    const result = validateRules(file({ ...tray, ...bad }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rules.platforms.instagram.storiesTray).toBeUndefined();
+    expect(result.warnings).toEqual(['instagram: storiesTray dropped (invalid)']);
+  });
 });

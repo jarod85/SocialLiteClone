@@ -25,4 +25,7 @@ dependencies {
   // LAME MP3 encoder ported to Java (LGPL). Only its encoder core is used; the
   // javax.sound-based wrapper class it also ships is never loaded on Android.
   implementation 'de.sciss:jump3r:1.0.5'
+
+  // JVM tests of the caption parsing and the MP4 subtitle track (src/test).
+  testImplementation 'junit:junit:4.13.2'
 }

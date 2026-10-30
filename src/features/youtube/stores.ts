@@ -130,6 +130,11 @@ interface YouTubeSettingsState {
   autoplay: boolean;
   /** Playing a playlist: after its last video, start again from the first (and Previous on the first goes to the last). */
   loopPlaylist: boolean;
+  /**
+   * Captions picked for the last MP4 download (a language tag), offered first next time. "off": none.
+   * Null: never asked, so the player's captions language is offered.
+   */
+  downloadCaptionLanguage: string | null;
   setMusicFolder: (folder: MusicFolder | null) => void;
   setLastFolderPath: (path: string[]) => void;
   setMp3Kbps: (kbps: number) => void;
@@ -138,6 +143,7 @@ interface YouTubeSettingsState {
   setCaptionLanguage: (language: string | null) => void;
   setAutoplay: (autoplay: boolean) => void;
   setLoopPlaylist: (loopPlaylist: boolean) => void;
+  setDownloadCaptionLanguage: (language: string | null) => void;
 }
 
 export const useYouTubeSettings = create<YouTubeSettingsState>()(
@@ -151,6 +157,7 @@ export const useYouTubeSettings = create<YouTubeSettingsState>()(
       captionLanguage: null,
       autoplay: true,
       loopPlaylist: false,
+      downloadCaptionLanguage: null,
       setMusicFolder: (musicFolder) => set({ musicFolder, lastFolderPath: [] }),
       setLastFolderPath: (lastFolderPath) => set({ lastFolderPath }),
       setMp3Kbps: (mp3Kbps) => set({ mp3Kbps }),
@@ -159,6 +166,7 @@ export const useYouTubeSettings = create<YouTubeSettingsState>()(
       setCaptionLanguage: (captionLanguage) => set({ captionLanguage }),
       setAutoplay: (autoplay) => set({ autoplay }),
       setLoopPlaylist: (loopPlaylist) => set({ loopPlaylist }),
+      setDownloadCaptionLanguage: (downloadCaptionLanguage) => set({ downloadCaptionLanguage }),
     }),
     { name: 'lite-social.youtube.settings', version: 1, storage: createJSONStorage(() => AsyncStorage) },
   ),

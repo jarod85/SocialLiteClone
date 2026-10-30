@@ -9,7 +9,7 @@
  */
 
 /** Bump when the engine learns a rule feature that older apps can't apply. */
-export const ENGINE_VERSION = 2;
+export const ENGINE_VERSION = 3;
 
 export interface RouteRule {
   id: string;
@@ -60,11 +60,29 @@ export interface FeedLimitRule {
   paths: string[];
 }
 
+/**
+ * Adds a Stories tray where the site leaves its own out (Instagram's Following
+ * feed). The engine reads the tray from the site's own API inside the page and
+ * links each entry to the site's story viewer; the rule only says where.
+ */
+export interface StoriesTrayRule {
+  id: string;
+  toggle?: string;
+  unless?: string;
+  /** Pages that get the tray. */
+  paths: string[];
+  /** Query parameters the page must have too, e.g. `variant=following`. Omitted means any. */
+  query?: string;
+  /** Selector for one feed item. The tray goes at the top of the list that holds them. */
+  anchor: string;
+}
+
 export interface PlatformRules {
   routes: RouteRule[];
   hide: HideRule[];
   textHide: TextHideRule[];
   feedLimit?: FeedLimitRule;
+  storiesTray?: StoriesTrayRule;
 }
 
 export interface RulesFile {
@@ -90,12 +108,36 @@ export interface EnginePayload {
   rules: PlatformRules;
   toggles: Toggles;
   feedLimit: number;
+  /** Tapping a reel opens the app's full-screen player (injected/reelViewer.ts). Older apps leave it out. */
+  reelViewer?: boolean;
+  /** Two fingers on a photo or video zoom it, like the Instagram app (injected/pinchZoom.ts). Older apps leave it out. */
+  pinchZoom?: boolean;
+}
+
+/** A reel for the app's full-screen player. Read in the page from the site's API; the app validates it again. */
+export interface ReelDetails {
+  /** https on the site's CDN. */
+  video: string;
+  /** Cover picture, or ''. */
+  poster: string;
+  /** Pixels, 0 if unknown. */
+  width: number;
+  height: number;
+  /** Account that posted it, or ''. */
+  username: string;
+  avatar: string;
+  caption: string;
+  /** Seconds, 0 if unknown. */
+  duration: number;
 }
 
 /** Messages the page may post to the app. Treated as untrusted: the site's own scripts can post too. */
 export type PageMessage =
   | { type: 'blocked'; ruleId: string; path: string }
-  | { type: 'stats'; requestId: string; counts: Record<string, number> };
+  | { type: 'stats'; requestId: string; counts: Record<string, number> }
+  /** A reel was tapped: 'loading' opens the player right away, then 'ready' (with the reel) or 'failed'. */
+  | { type: 'reel'; requestId: string; state: 'loading' | 'failed' }
+  | { type: 'reel'; requestId: string; state: 'ready'; reel: ReelDetails };
 
 /**
  * A rule is active when it has no toggle or its toggle is on, and its `unless`

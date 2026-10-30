@@ -3,7 +3,8 @@
  * validates what the page posts back.
  */
 import type { PlatformConfig } from '@/platforms/types';
-import type { EnginePayload, PageMessage, PlatformRules, Toggles } from '@/core/types';
+import type { EnginePayload, PageMessage, PlatformRules, ReelDetails, Toggles } from '@/core/types';
+import { parseUrl } from '@/core/urls';
 import { ENGINE_SOURCE } from '@/injected/generated/engineSource';
 
 export function buildPayload(
@@ -13,7 +14,16 @@ export function buildPayload(
   feedLimit: number,
   homeUrl: string,
 ): EnginePayload {
-  return { siteHosts: platform.siteHosts, homeUrl, neverBlock: platform.neverBlock, rules, toggles, feedLimit };
+  return {
+    siteHosts: platform.siteHosts,
+    homeUrl,
+    neverBlock: platform.neverBlock,
+    rules,
+    toggles,
+    feedLimit,
+    reelViewer: toggles.fullscreenReels === true,
+    pinchZoom: toggles.pinchZoom === true,
+  };
 }
 
 /** JSON is valid JavaScript, so data goes into the page as a literal: no string-building of code. */
@@ -42,7 +52,8 @@ export const PAUSE_MEDIA_SCRIPT = `${callEngine('pauseMedia')}true;`;
  * Parse a message from the page. The site's own scripts can call
  * ReactNativeWebView.postMessage too, so anything that isn't exactly one of our
  * message shapes, naming one of our rules, is ignored. A valid message can only
- * show the "blocked" notice or answer a stats request; it can never change settings.
+ * show the "blocked" notice, answer a stats request or play a reel from the
+ * site's own CDN in the full-screen player; it can never change settings.
  */
 export function parsePageMessage(data: string, knownRuleIds: ReadonlySet<string>): PageMessage | null {
   let message: unknown;
@@ -67,7 +78,47 @@ export function parsePageMessage(data: string, knownRuleIds: ReadonlySet<string>
     }
     return { type: 'stats', requestId: m.requestId, counts };
   }
+  if (m.type === 'reel') {
+    if (typeof m.requestId !== 'string' || !/^r\d{1,9}$/.test(m.requestId)) return null;
+    if (m.state === 'loading' || m.state === 'failed') return { type: 'reel', requestId: m.requestId, state: m.state };
+    if (m.state !== 'ready') return null;
+    const reel = parseReel(m.reel);
+    return reel ? { type: 'reel', requestId: m.requestId, state: 'ready', reel } : null;
+  }
   return null;
+}
+
+/** Instagram's image and video CDN. The player only ever loads from there. */
+const MEDIA_HOST = /(^|\.)(cdninstagram\.com|fbcdn\.net)$/i;
+
+function mediaUrl(value: unknown, required: boolean): string | null {
+  if (value === '' && !required) return '';
+  if (typeof value !== 'string' || value.length > 4000) return null;
+  const url = parseUrl(value);
+  // No credentials or spaces: a plain https address on the CDN.
+  return url && url.scheme === 'https' && MEDIA_HOST.test(url.host) && !/[\s@\\]/.test(value.split('?')[0]) ? value : null;
+}
+
+function parseReel(value: unknown): ReelDetails | null {
+  if (typeof value !== 'object' || value === null) return null;
+  const r = value as Record<string, unknown>;
+  const video = mediaUrl(r.video, true);
+  const poster = mediaUrl(r.poster, false);
+  const avatar = mediaUrl(r.avatar, false);
+  if (video === null || poster === null || avatar === null) return null;
+  const number = (n: unknown, max: number) => (typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= max ? n : 0);
+  const username = typeof r.username === 'string' && /^[A-Za-z0-9._]{0,30}$/.test(r.username) ? r.username : '';
+  const caption = typeof r.caption === 'string' ? r.caption.slice(0, 2200) : '';
+  return {
+    video,
+    poster,
+    avatar,
+    username,
+    caption,
+    width: number(r.width, 10_000),
+    height: number(r.height, 10_000),
+    duration: number(r.duration, 24 * 3600),
+  };
 }
 
 export function ruleIds(rules: PlatformRules): Set<string> {

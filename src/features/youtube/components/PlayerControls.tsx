@@ -2,14 +2,16 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEvent } from 'expo';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { create } from 'zustand';
 
 import { useTheme } from '@/ui/theme';
 
 import { getPlayer, setCaption, setLoop, setQuality, usePlayer } from '../player';
 import type { VideoDetails } from '../types';
+import { resetZoom, useZoom } from '../zoom';
+
+import { Option, SheetModal } from './Sheet';
 
 type Sheet = 'quality' | 'captions';
 
@@ -117,6 +119,7 @@ export function VideoOverlay({
   const visible = touched || !isPlaying;
   const hasCaptions = details.captions.length > 0;
   const hasQualities = details.qualities.length > 0;
+  const zoom = useZoom((s) => s.scale);
 
   return (
     // onTouchStart only watches touches; the video and its controls still get them.
@@ -138,6 +141,19 @@ export function VideoOverlay({
             <Ionicons name={fullscreen ? 'contract' : 'expand'} size={22} color="#FFFFFF" />
           </OverlayButton>
         </View>
+      ) : null}
+      {zoom > 1.01 ? (
+        // Pinch to zoom (modules/youtube VideoZoom.kt); this is the way back besides pinching in.
+        <Pressable
+          onPress={resetZoom}
+          accessibilityRole="button"
+          accessibilityLabel={`Zoomed ${zoom.toFixed(1)} times. Reset zoom`}
+          hitSlop={6}
+          style={({ pressed }) => [styles.zoomChip, fullscreen && styles.zoomChipFullscreen, pressed && { opacity: 0.6 }]}
+        >
+          <Ionicons name="scan-outline" size={16} color="#FFFFFF" />
+          <Text style={styles.zoomText} textBreakStrategy="simple">{`${zoom.toFixed(1)}× · Reset`}</Text>
+        </Pressable>
       ) : null}
     </View>
   );
@@ -248,38 +264,6 @@ function SpeedRow() {
   );
 }
 
-function SheetModal({ title, note, onClose, children }: { title: string; note: string; onClose: () => void; children: ReactNode }) {
-  const theme = useTheme();
-  return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
-        <SafeAreaView edges={['bottom']} style={[styles.sheet, { backgroundColor: theme.background }]}>
-          <Text style={[styles.sheetTitle, { color: theme.text }]}>{title}</Text>
-          <Text style={[styles.sheetNote, { color: theme.textMuted }]}>{note}</Text>
-          <ScrollView>{children}</ScrollView>
-        </SafeAreaView>
-      </View>
-    </Modal>
-  );
-}
-
-function Option({ label, checked, disabled = false, onPress }: { label: string; checked: boolean; disabled?: boolean; onPress: () => void }) {
-  const theme = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="radio"
-      accessibilityState={{ checked, disabled }}
-      style={({ pressed }) => [styles.option, (pressed || disabled) && { opacity: disabled ? 0.4 : 0.6 }]}
-    >
-      <Text style={[styles.optionLabel, { color: theme.text }]}>{label}</Text>
-      {checked ? <Ionicons name="checkmark" size={22} color={theme.accent} /> : null}
-    </Pressable>
-  );
-}
-
 function Control({
   icon,
   label,
@@ -330,6 +314,20 @@ const styles = StyleSheet.create({
   controlLabel: { flexShrink: 1, fontSize: 13, fontWeight: '600' },
   overlay: { position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 8 },
   overlayFullscreen: { top: 16, right: 24 },
+  zoomChip: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  zoomChipFullscreen: { top: 20, left: 24 },
+  zoomText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
   overlayButton: {
     width: 40,
     height: 40,
@@ -338,15 +336,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
-  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
-  sheet: { maxHeight: '70%', borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingTop: 16, paddingBottom: 8 },
-  sheetTitle: { fontSize: 17, fontWeight: '700', paddingHorizontal: 20 },
-  sheetNote: { fontSize: 13, paddingHorizontal: 20, paddingTop: 2, paddingBottom: 8 },
   speed: { paddingBottom: 8 },
   speedLabel: { fontSize: 13, fontWeight: '600', paddingHorizontal: 20, paddingBottom: 6 },
   speedChips: { flexDirection: 'row', gap: 8, paddingHorizontal: 20 },
   speedChip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16 },
   speedChipLabel: { fontSize: 14, fontWeight: '600' },
-  option: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14 },
-  optionLabel: { flex: 1, fontSize: 16 },
 });

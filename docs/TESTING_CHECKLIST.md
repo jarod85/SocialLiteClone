@@ -15,7 +15,24 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 ## Feed
 
 - [ ] 6. The feed opens as the **Following** feed (URL ends in `?variant=following`, posts are chronological).
-- [ ] 7. Reels and videos in the feed are collapsed to a thin "Reel hidden by Lite Social" bar.
+- [ ] 7. Reels and videos from accounts you follow play in the feed (**Reels from people you follow**, on by
+      default). Suggested and sponsored reels are collapsed to a thin "Reel hidden by Lite Social" bar.
+- [ ] 7a. Turn **Reels from people you follow** off: every reel and video in the feed is collapsed. Turn it back on.
+- [ ] 7b. A row of Stories sits above the first post, like Instagram's: "Your story" first (your picture, a blue +
+      if you have none), then coloured rings (not watched yet; green = Close Friends) and grey ones. Tap one: the
+      story plays; when you come back its ring is grey. Turn **Stories at the top** off: the row disappears.
+- [ ] 7c. Scroll the Following feed down 20+ posts and back up, slowly and with a fling: it scrolls smoothly, posts
+      don't jump, and the Stories row stays at the very top (it never shows up between posts).
+- [ ] 7d. Tap a reel in the feed: it opens full screen with sound, looping, the account and caption at the bottom.
+      Tap: pauses (big play button), tap again: plays. Hold: pauses while held, everything but the video hides.
+      Slide a finger up along the left side: "1.5×", "2×" (never more); down: slower, to 0.5×; the chip at the top
+      resets to 1×. Drag along the bottom bar: it seeks. Swipe down or Back: closes, the feed is where it was.
+- [ ] 7e. A reel someone sent in a DM, and a reel tile on a profile: both open in the same full-screen player.
+      Turn **Full-screen reels** off: they open as before.
+- [ ] 7f. Pinch out on a photo in the feed: it grows over the page (which darkens), stays under your fingers, follows
+      them, and springs back when you let go; the post isn't liked and nothing opens. Same on a carousel photo (it
+      doesn't swipe), a playing video (keeps playing while zoomed), a post's own page and a photo in a DM. Pinching
+      an avatar does nothing. Turn **Pinch to zoom** off: pinching does nothing.
 - [ ] 8. "Suggested for you" posts and the suggested-accounts carousel are hidden or collapsed.
 - [ ] 9. After 30 posts the feed ends with the "That's 30 posts. You're all caught up" card.
 - [ ] 10. Videos don't start playing on their own, and no sound plays from anything hidden.
@@ -27,7 +44,7 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
       Social" screen; "Back to Instagram" returns you.
 - [ ] 12a. **Watch shared reels** (on by default): a reel someone sent you in a DM opens and plays when tapped.
       On a profile, the Reels tab and reel tiles show and play. Swiping up on a reel never turns into the endless
-      Reels viewer. Reels in the home feed are still collapsed.
+      Reels viewer.
 - [ ] 13. Turn **Watch shared reels** off: the profile Reels tab and reel tiles are hidden, and opening a reel
       from a DM shows the blocked screen. Turn it back on.
 - [ ] 14. Tap home in Instagram's own navigation and anywhere a reel might be linked; no Reels viewer opens.
@@ -70,6 +87,16 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 - [ ] Y6. Back in the app, go back to the feed: the mini player shows; play/pause and × work; tapping it reopens the video.
 - [ ] Y7. Download → **Video (MP4)**: a progress notification, then "Saved MP4"; the video is in Gallery → Movies/Lite Social
       and plays with sound.
+- [ ] Y7b. On a video with captions: Download → Video (MP4) → "Captions in the video" lists **No captions** and each
+      language → pick one. "Saved MP4 … with English captions"; Movies/Lite Social has the MP4 and an .srt of the same
+      name. Play it in Gallery (Samsung's player): captions show (turn on Subtitles in its menu if not). VLC lists a
+      subtitle track. The next download offers the same language first.
+- [ ] Y7c. History: open two videos, watch a minute of one. The clock button on Subscriptions lists both under
+      Today, the watched one with "stopped at 1:0x" and a red bar; that bar also shows in the feed. Open it: it
+      continues there. Press and hold → Remove; the bin → Clear.
+- [ ] Y7d. Zoom: pinch out on the playing video: it zooms (the controls don't), "1.8× · Reset" shows; drag with one
+      finger: it pans, never past the video's edges. Tap the chip: back to normal. Same in full screen. A tap still
+      shows the controls and the seek bar still works while zoomed.
 - [ ] Y8. Download → **Audio (MP3)**: first time it asks for the music folder (pick Musicolet's folder, e.g. Music). Then
       the folder screen: open a subfolder or create one, "Save in …". "Saved MP3" notification; tapping it opens
       Musicolet; the song is in that folder with title, channel and cover art.
@@ -104,7 +131,8 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
 
 - [ ] 21. Turn **Block Reels** off → back in Instagram the Reels tab is visible again *without* reloading. Turn it on again.
 - [ ] 22. Turn **Following feed** off → tapping home shows the normal feed. Turn it back on.
-- [ ] 23. Turn **Hide Stories** on → tapping a story shows the blocked screen.
+- [ ] 23. Turn **Hide Stories** on → the Stories row above the Following feed is gone, and tapping a story ring
+      on a post shows the blocked screen.
 - [ ] 24. Change **Stop the feed** to 10 posts → the card appears after 10.
 - [ ] 25. Force-close and reopen: all settings are as you left them.
 - [ ] 26. Set **Daily time limit** to 15 min (you can test faster by using the app for 15 minutes or leaving it open).

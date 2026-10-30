@@ -14,6 +14,7 @@ import { createVideoPlayer, type SubtitleTrack, type VideoPlayer, type VideoSour
 import { create } from 'zustand';
 
 import { pickCaption } from './captions';
+import { resumePosition, useHistory } from './history';
 import { watchUrl, youtube } from './native';
 import { findPlaylist, stepInPlaylist, type Playlist } from './playlists';
 import { pickQuality } from './quality';
@@ -93,9 +94,31 @@ export function getPlayer(): VideoPlayer {
     if (status === 'error') void recover(error?.message);
   });
   p.addListener('availableSubtitleTracksChange', ({ availableSubtitleTracks }) => applyCaption(availableSubtitleTracks));
-  p.addListener('playToEnd', () => void playedToEnd());
+  // Watch history: how far you got, so the video resumes there and lists show it.
+  p.addListener('timeUpdate', ({ currentTime }) => {
+    if (Math.abs(currentTime - lastSavedAt) >= SAVE_EVERY_S) savePosition(currentTime);
+  });
+  p.addListener('playingChange', ({ isPlaying }) => {
+    if (!isPlaying) savePosition(p.currentTime);
+  });
+  p.addListener('playToEnd', () => {
+    savePosition(p.duration);
+    void playedToEnd();
+  });
   player = p;
   return p;
+}
+
+/** Seconds between saved positions while a video plays (also saved on pause and at the end). */
+const SAVE_EVERY_S = 5;
+let lastSavedAt = 0;
+let switching = false;
+
+function savePosition(seconds: number): void {
+  const { current } = usePlayer.getState();
+  if (switching || !current || current.isLive || !Number.isFinite(seconds) || seconds <= 0) return;
+  lastSavedAt = seconds;
+  useHistory.getState().savePosition(current.id, seconds);
 }
 
 function sourceFor(details: VideoDetails, source: PlaybackSource): VideoSource {
@@ -115,8 +138,14 @@ async function load(details: VideoDetails, source: PlaybackSource, position = 0,
   const p = getPlayer();
   loaded = source;
   generation++;
-  await p.replaceAsync(sourceFor(details, source));
-  if (position > 0) p.currentTime = position;
+  // While the source changes, the player reports the old position (or 0): not worth keeping.
+  switching = true;
+  try {
+    await p.replaceAsync(sourceFor(details, source));
+    if (position > 0) p.currentTime = position;
+  } finally {
+    switching = false;
+  }
   if (playAfter) p.play();
   usePlayer.setState({ captionsAvailable: source.contentType === 'dash' && details.captions.length > 0 && !details.isLive });
   applyCaption(p.availableSubtitleTracks);
@@ -159,6 +188,7 @@ export async function play(details: VideoDetails): Promise<void> {
     p.play();
     return;
   }
+  if (current) savePosition(p.currentTime); // The video you're leaving, before the next one replaces it.
   p.loop = false;
   const inPlaylist = queue?.videoId === details.id ? { queue, queueError } : {};
   if (details.sources.length === 0) {
@@ -169,8 +199,12 @@ export async function play(details: VideoDetails): Promise<void> {
   const quality = pickQuality(details.qualities, settings.playbackHeight);
   const video = { ...details, captions: details.captions ?? [] };
   wantedCaption = pickCaption(video.captions, settings.captionLanguage)?.id ?? null;
+  const history = useHistory.getState();
+  const start = video.isLive ? 0 : resumePosition(history.entries[video.id]);
+  history.record(video);
+  lastSavedAt = start;
   usePlayer.setState({ ...idle, ...inPlaylist, current: video, quality: quality?.height ?? null });
-  await load(video, quality ? { uri: quality.uri, contentType: 'dash' } : video.sources[0]);
+  await load(video, quality ? { uri: quality.uri, contentType: 'dash' } : video.sources[0], start);
 }
 
 /**
@@ -327,6 +361,7 @@ async function playAt(playlist: Playlist, index: number, step: 1 | -1, tried = 0
 /** Stops playback and removes the mini player and notification. */
 export function stop(): void {
   if (player) {
+    savePosition(player.currentTime);
     player.pause();
     player.loop = false;
     void player.replaceAsync(null);

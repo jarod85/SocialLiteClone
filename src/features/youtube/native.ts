@@ -56,6 +56,18 @@ export function youtube(): YouTubeNativeModule {
   return module;
 }
 
+/**
+ * The readable part of an error from the native module. Expo puts "Call to function
+ * 'LiteSocialYouTube.video' has been rejected." and "→ Caused by: " in front of the module's
+ * own message (modules/youtube Errors.kt); only that message is kept.
+ */
+export function errorText(e: unknown): string {
+  const message = e instanceof Error ? e.message : String(e);
+  const marker = '→ Caused by: ';
+  const at = message.lastIndexOf(marker);
+  return at === -1 ? message : message.slice(at + marker.length).trim();
+}
+
 export const watchUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 
 export function videoPage(items: SearchItem[]): Video[] {

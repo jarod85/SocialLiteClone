@@ -6,7 +6,7 @@ import { ChannelRow, VideoRow } from '@/features/youtube/components/rows';
 import { openSaveToPlaylist } from '@/features/youtube/components/SaveToPlaylist';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { routeForLink } from '@/features/youtube/links';
-import { youtube } from '@/features/youtube/native';
+import { errorText, youtube } from '@/features/youtube/native';
 import { useSubscriptions } from '@/features/youtube/stores';
 import type { Channel, SearchItem, Video } from '@/features/youtube/types';
 import { useTheme } from '@/ui/theme';
@@ -46,7 +46,7 @@ export default function SearchScreen() {
       setItems(page.items);
       setNextPage(page.nextPage);
     } catch (e) {
-      if (request === requestRef.current) setError(e instanceof Error ? e.message : String(e));
+      if (request === requestRef.current) setError(errorText(e));
     } finally {
       if (request === requestRef.current) setLoading(false);
     }

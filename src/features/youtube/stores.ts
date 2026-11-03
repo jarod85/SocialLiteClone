@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { mergeFeed } from './feed';
-import { youtube } from './native';
+import { errorText, youtube } from './native';
 import type { MusicFolder, Subscription, Video } from './types';
 
 // ---------------------------------------------------------------- subscriptions
@@ -95,7 +95,7 @@ export const useFeed = create<FeedState>()(
             refreshing: false,
           });
         } catch (e) {
-          set({ refreshing: false, error: e instanceof Error ? e.message : String(e) });
+          set({ refreshing: false, error: errorText(e) });
         }
       },
     }),

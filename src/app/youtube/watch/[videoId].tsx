@@ -13,7 +13,7 @@ import { useDownloadFlow } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatAge, formatCount } from '@/features/youtube/format';
 import { enterFullscreen, exitFullscreen, useFullscreen } from '@/features/youtube/fullscreen';
-import { watchUrl, youtube } from '@/features/youtube/native';
+import { errorText, watchUrl, youtube } from '@/features/youtube/native';
 import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
 import { videoFromDetails } from '@/features/youtube/playlists';
 import { useSubscriptions } from '@/features/youtube/stores';
@@ -62,7 +62,8 @@ export default function WatchScreen() {
   const details = current?.id === shownId ? current : loaded?.id === videoId ? (loaded.details ?? null) : null;
   const error = loaded?.id === videoId ? (loaded.error ?? null) : null;
   const canEmbed = error !== null && EMBED_FALLBACK_CODES.has(loaded?.code ?? '') && isEmbeddableId(videoId);
-  const showEmbed = canEmbed && (embedded === videoId || embedChosen);
+  // A network YouTube blocks opens YouTube's own player without asking first.
+  const showEmbed = canEmbed && (embedded === videoId || embedChosen || loaded?.code === 'ERR_YOUTUBE_BLOCKED');
   const [expanded, setExpanded] = useState(false);
   const { start: download, picker } = useDownloadFlow();
   const playing = details !== null && current?.id === details.id;
@@ -87,7 +88,7 @@ export default function WatchScreen() {
       .catch((e) => {
         if (!active) return;
         const code = (e as { code?: unknown }).code;
-        setLoaded({ id: videoId, error: e instanceof Error ? e.message : String(e), code: typeof code === 'string' ? code : undefined });
+        setLoaded({ id: videoId, error: errorText(e), code: typeof code === 'string' ? code : undefined });
       });
     return () => {
       active = false;

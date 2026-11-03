@@ -6,7 +6,7 @@ import { Avatar, SubscribeButton, VideoRow } from '@/features/youtube/components
 import { openSaveToPlaylist } from '@/features/youtube/components/SaveToPlaylist';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatCount } from '@/features/youtube/format';
-import { videoPage, youtube } from '@/features/youtube/native';
+import { errorText, videoPage, youtube } from '@/features/youtube/native';
 import { useSubscriptions } from '@/features/youtube/stores';
 import type { ChannelPage, Video } from '@/features/youtube/types';
 import { Button } from '@/ui/components';
@@ -39,7 +39,7 @@ export default function ChannelScreen() {
         setVideos(page.videos);
         setNextPage(page.nextPage);
       })
-      .catch((e) => active && setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => active && setError(errorText(e)));
     return () => {
       active = false;
     };

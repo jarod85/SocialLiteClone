@@ -15,7 +15,7 @@ import { create } from 'zustand';
 
 import { pickCaption } from './captions';
 import { resumePosition, useHistory } from './history';
-import { watchUrl, youtube } from './native';
+import { errorText, watchUrl, youtube } from './native';
 import { findPlaylist, stepInPlaylist, type Playlist } from './playlists';
 import { pickQuality } from './quality';
 import { useYouTubeSettings } from './stores';
@@ -349,7 +349,7 @@ async function playAt(playlist: Playlist, index: number, step: 1 | -1, tried = 0
     problem = details.isShort ? 'Shorts are hidden' : 'no playable version was found';
   } catch (e) {
     if (usePlayer.getState().queue !== queue) return;
-    problem = e instanceof Error ? e.message : String(e);
+    problem = errorText(e);
   }
   usePlayer.setState({ queueError: `Skipped "${video.title}": ${problem}` });
   const latest = findPlaylist(playlist.id);

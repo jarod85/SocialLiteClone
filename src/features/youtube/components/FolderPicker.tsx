@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/ui/components';
 import { useTheme } from '@/ui/theme';
 
-import { youtube } from '../native';
+import { errorText, youtube } from '../native';
 import type { MusicFolder } from '../types';
 
 interface Listing {
@@ -22,7 +22,7 @@ async function listFolders(root: string, path: string[]): Promise<Omit<Listing, 
     return { path, folders: await youtube().listFolders(root, path), error: null };
   } catch (e) {
     if (path.length > 0) return listFolders(root, []);
-    return { path, folders: [], error: e instanceof Error ? e.message : String(e) };
+    return { path, folders: [], error: errorText(e) };
   }
 }
 
@@ -87,7 +87,7 @@ export function FolderPicker({
       setNewName('');
       go([...path, created]);
     } catch (e) {
-      setCreateError(e instanceof Error ? e.message : String(e));
+      setCreateError(errorText(e));
     }
   };
 

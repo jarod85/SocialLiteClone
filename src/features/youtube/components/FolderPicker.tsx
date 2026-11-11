@@ -27,13 +27,14 @@ async function listFolders(root: string, path: string[]): Promise<Omit<Listing, 
 }
 
 /**
- * "Where should this MP3 go?" Browses the subfolders of the chosen Musicolet
- * music folder; you can go into any of them, make a new one, and save there.
+ * "Where should this MP3 go?" Opens on all the folders in the chosen Musicolet
+ * music folder (the last one saved to is a tap away at the top); you can go
+ * into any of them, make a new one, and save there.
  */
 export function FolderPicker({
   visible,
   root,
-  initialPath,
+  lastPath,
   title,
   onCancel,
   onSave,
@@ -41,7 +42,8 @@ export function FolderPicker({
 }: {
   visible: boolean;
   root: MusicFolder;
-  initialPath: string[];
+  /** Where the last MP3 was saved (below `root`). */
+  lastPath: string[];
   title: string;
   onCancel: () => void;
   onSave: (path: string[]) => void;
@@ -50,7 +52,7 @@ export function FolderPicker({
   const theme = useTheme();
   // The folder asked for (by tapping), and what was last listed. Listing falls back to the top
   // when a remembered folder was moved or deleted, so the two can differ.
-  const [requested, setRequested] = useState<string[]>(initialPath);
+  const [requested, setRequested] = useState<string[]>([]);
   const [listing, setListing] = useState<Listing | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
@@ -126,6 +128,25 @@ export function FolderPicker({
           <FlatList
             data={folders}
             keyExtractor={(name) => name}
+            ListHeaderComponent={
+              path.length === 0 && lastPath.length > 0 ? (
+                <Pressable
+                  onPress={() => go(lastPath)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Last used: ${lastPath.join(' / ')}`}
+                  style={({ pressed }) => [styles.folder, { borderBottomColor: theme.border }, pressed && { opacity: 0.6 }]}
+                >
+                  <Ionicons name="time-outline" size={22} color={theme.accent} />
+                  <View style={styles.lastText}>
+                    <Text style={[styles.lastLabel, { color: theme.textMuted }]}>Last used</Text>
+                    <Text style={[styles.folderName, { color: theme.text }]} numberOfLines={1}>
+                      {lastPath.join(' / ')}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+                </Pressable>
+              ) : null
+            }
             ListEmptyComponent={
               <Text style={[styles.empty, { color: theme.textMuted }]}>{error ?? 'No folders here. Save here, or make one below.'}</Text>
             }
@@ -188,6 +209,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   folderName: { flex: 1, fontSize: 16 },
+  lastText: { flex: 1 },
+  lastLabel: { fontSize: 12, fontWeight: '600' },
   footer: { padding: 16, gap: 12, borderTopWidth: StyleSheet.hairlineWidth },
   newFolder: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   input: { flex: 1, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15 },

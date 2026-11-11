@@ -7,6 +7,7 @@ import { create } from 'zustand';
 
 import { useTheme } from '@/ui/theme';
 
+import { useSwipeLevel } from '../fullscreen';
 import { getPlayer, setCaption, setLoop, setQuality, usePlayer } from '../player';
 import type { VideoDetails } from '../types';
 import { resetZoom, useZoom } from '../zoom';
@@ -120,6 +121,7 @@ export function VideoOverlay({
   const hasCaptions = details.captions.length > 0;
   const hasQualities = details.qualities.length > 0;
   const zoom = useZoom((s) => s.scale);
+  const swipe = useSwipeLevel((s) => s.swipe);
 
   return (
     // onTouchStart only watches touches; the video and its controls still get them.
@@ -154,6 +156,17 @@ export function VideoOverlay({
           <Ionicons name="scan-outline" size={16} color="#FFFFFF" />
           <Text style={styles.zoomText} textBreakStrategy="simple">{`${zoom.toFixed(1)}× · Reset`}</Text>
         </Pressable>
+      ) : null}
+      {swipe ? (
+        // Full screen's brightness (left) and volume (right) swipes, while they last.
+        <View style={styles.swipeLevel} pointerEvents="none">
+          <Ionicons
+            name={swipe.kind === 'brightness' ? 'sunny' : swipe.level === 0 ? 'volume-mute' : 'volume-high'}
+            size={20}
+            color="#FFFFFF"
+          />
+          <Text style={styles.zoomText}>{`${swipe.kind === 'brightness' ? 'Brightness' : 'Volume'} ${Math.round(swipe.level * 100)}%`}</Text>
+        </View>
       ) : null}
     </View>
   );
@@ -328,6 +341,18 @@ const styles = StyleSheet.create({
   },
   zoomChipFullscreen: { top: 20, left: 24 },
   zoomText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
+  swipeLevel: {
+    position: 'absolute',
+    top: 20,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 36,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
   overlayButton: {
     width: 40,
     height: 40,

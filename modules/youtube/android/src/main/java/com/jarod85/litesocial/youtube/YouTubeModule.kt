@@ -23,6 +23,9 @@ class YouTubeModule : Module() {
   private val downloadListener: (Downloads.Update) -> Unit = { sendEvent(DOWNLOAD_EVENT, it.toMap()) }
   private val fullscreen = Fullscreen { sendEvent(FULLSCREEN_EXIT_EVENT, emptyMap<String, Any>()) }
   private val zoom = VideoZoom { scale -> sendEvent(ZOOM_EVENT, mapOf("scale" to scale.toDouble())) }
+  private val swipe = SwipeAdjust({ appContext.currentActivity }) { kind, level ->
+    sendEvent(SWIPE_EVENT, mapOf("kind" to kind, "level" to level.toDouble()))
+  }
 
   private class YouTubeException(code: String, message: String, cause: Throwable?) : CodedException(code, message, cause) {
     constructor(message: String, cause: Throwable?) : this(Errors.OTHER, message, cause)
@@ -38,7 +41,7 @@ class YouTubeModule : Module() {
 
   override fun definition() = ModuleDefinition {
     Name("LiteSocialYouTube")
-    Events(DOWNLOAD_EVENT, FULLSCREEN_EXIT_EVENT, ZOOM_EVENT)
+    Events(DOWNLOAD_EVENT, FULLSCREEN_EXIT_EVENT, ZOOM_EVENT, SWIPE_EVENT)
 
     OnCreate { Downloads.listeners += downloadListener }
     OnDestroy { Downloads.listeners -= downloadListener }
@@ -56,9 +59,13 @@ class YouTubeModule : Module() {
 
     // ---- Full screen ----
 
-    /** Sideways without system bars (true) or back to normal (false). See [Fullscreen]. */
+    /** Sideways without system bars (true) or back to normal (false). See [Fullscreen]; its swipes, [SwipeAdjust]. */
     AsyncFunction("setFullscreen") { enabled: Boolean ->
-      appContext.currentActivity?.let { fullscreen.set(it, enabled) }
+      zoom.swipe = if (enabled) swipe else null
+      appContext.currentActivity?.let {
+        fullscreen.set(it, enabled)
+        if (!enabled) swipe.resetBrightness(it)
+      }
     }.runOnQueue(Queues.MAIN)
 
     // ---- Pinch to zoom ----
@@ -148,6 +155,8 @@ class YouTubeModule : Module() {
     private const val FULLSCREEN_EXIT_EVENT = "onFullscreenExitRequest"
     /** The video's zoom changed (pinch, or back to 1×). */
     private const val ZOOM_EVENT = "onZoomChange"
+    /** A full-screen swipe set the brightness or volume. */
+    private const val SWIPE_EVENT = "onSwipeAdjust"
     private const val PICK_FOLDER = 7302
   }
 }

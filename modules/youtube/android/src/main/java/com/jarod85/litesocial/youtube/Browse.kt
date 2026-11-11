@@ -2,6 +2,7 @@ package com.jarod85.litesocial.youtube
 
 import android.content.Context
 import android.text.Html
+import android.text.style.URLSpan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -162,6 +163,7 @@ class Browse(private val context: Context) {
     }
     val id = info.id
     val isLive = info.streamType == StreamType.LIVE_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM
+    val (description, descriptionLinks) = withLinks(info.description)
     mapOf(
       "id" to id,
       "url" to Extractor.watchUrl(id),
@@ -170,7 +172,8 @@ class Browse(private val context: Context) {
       "channelId" to info.uploaderUrl?.let { Extractor.channelId(it) },
       "channelAvatar" to Extractor.pickImage(info.uploaderAvatars, 88)?.let(Extractor::absolute),
       "thumbnail" to Extractor.pickImage(info.thumbnails, 720),
-      "description" to plainText(info.description),
+      "description" to description,
+      "descriptionLinks" to descriptionLinks,
       "durationSeconds" to info.duration.takeIf { it > 0 },
       "uploadedAt" to Extractor.millis(info.uploadDate),
       "viewCount" to info.viewCount.takeIf { it >= 0 },
@@ -183,13 +186,24 @@ class Browse(private val context: Context) {
     )
   }
 
-  private fun plainText(description: Description?): String {
-    val content = description?.content ?: return ""
-    return if (description.type == Description.Type.HTML) {
-      Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY).toString().trim()
-    } else {
-      content.trim()
+  /**
+   * The description as plain text, and where its links are in that text
+   * (start, end, url): YouTube shows long links shortened, and timestamps and
+   * hashtags as links, so the text alone loses where they go.
+   */
+  private fun withLinks(description: Description?): Pair<String, List<Map<String, Any>>> {
+    val content = description?.content ?: return "" to emptyList()
+    if (description.type != Description.Type.HTML) return content.trim() to emptyList()
+    val spanned = Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY)
+    val full = spanned.toString()
+    val text = full.trim()
+    val lead = full.length - full.trimStart().length
+    val links = spanned.getSpans(0, spanned.length, URLSpan::class.java).mapNotNull { span ->
+      val start = (spanned.getSpanStart(span) - lead).coerceAtLeast(0)
+      val end = (spanned.getSpanEnd(span) - lead).coerceAtMost(text.length)
+      if (end > start && !span.url.isNullOrBlank()) Triple(start, end, span.url) else null
     }
+    return text to links.sortedBy { it.first }.map { (start, end, url) -> mapOf("start" to start, "end" to end, "url" to url) }
   }
 
   private fun page(items: List<Map<String, Any?>>, next: String?) = mapOf("items" to items, "nextPage" to next)

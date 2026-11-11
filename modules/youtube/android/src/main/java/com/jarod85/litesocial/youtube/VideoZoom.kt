@@ -23,7 +23,8 @@ import kotlin.math.hypot
  * can't be scaled with the views around it.
  *
  * Touches the zoom doesn't use (a tap to show the controls, the seek bar)
- * reach the player as before.
+ * reach the player as before. In full screen, one-finger up-and-down drags
+ * at 1× go to [swipe] (brightness and volume).
  */
 class VideoZoom(private val onChange: (Float) -> Unit) {
   private var playerView: ViewGroup? = null
@@ -32,8 +33,14 @@ class VideoZoom(private val onChange: (Float) -> Unit) {
   private var tx = 0f
   private var ty = 0f
 
+  /** Full screen's brightness and volume swipes; null outside full screen. */
+  var swipe: SwipeAdjust? = null
+
   /** A pinch or a drag is under way: its touches are the zoom's, not the player's. */
   private var gesture = false
+  /** The gesture is a brightness or volume swipe, which started at [swipeY]. */
+  private var swiping = false
+  private var swipeY = 0f
   private var downX = 0f
   private var downY = 0f
   private var lastX = 0f
@@ -107,6 +114,7 @@ class VideoZoom(private val onChange: (Float) -> Unit) {
     when (event.actionMasked) {
       MotionEvent.ACTION_DOWN -> {
         gesture = false
+        swiping = false
         downX = x
         downY = y
         lastX = x
@@ -116,14 +124,26 @@ class VideoZoom(private val onChange: (Float) -> Unit) {
       }
       MotionEvent.ACTION_POINTER_DOWN -> {
         gesture = true
+        swiping = false // A second finger makes it a pinch.
         lastX = x
         lastY = y
         lastPointers = counted
         return true
       }
       MotionEvent.ACTION_MOVE -> {
+        val swipe = swipe
+        if (!gesture && swipe != null && scale == 1f && counted == 1 && abs(y - downY) > slop && abs(y - downY) > abs(x - downX)) {
+          gesture = true
+          swiping = true
+          swipeY = y
+          playerView?.let { swipe.begin(downX, it.width, it.height) }
+        }
         if (!gesture && scale > 1f && hypot(x - downX, y - downY) > slop) gesture = true
         if (!gesture) return false
+        if (swiping) {
+          if (counted == 1) swipe?.move(swipeY - y)
+          return true
+        }
         if (counted == lastPointers && !detector.isInProgress) set(scale, tx + x - lastX, ty + y - lastY)
         lastX = x
         lastY = y
@@ -139,6 +159,7 @@ class VideoZoom(private val onChange: (Float) -> Unit) {
       MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
         val consumed = gesture
         gesture = false
+        swiping = false
         if (scale < 1.05f && scale != 1f) set(1f, 0f, 0f)
         return consumed // After a pinch or drag, lifting the finger isn't a tap.
       }

@@ -104,7 +104,7 @@ export function useDownloadFlow() {
       <FolderPicker
         visible
         root={musicFolder}
-        initialPath={lastFolderPath}
+        lastPath={lastFolderPath}
         title={mp3Target.title}
         onCancel={() => setMp3Target(null)}
         onSave={(path) => {

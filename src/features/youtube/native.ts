@@ -5,7 +5,7 @@
 import { requireOptionalNativeModule } from 'expo';
 import { Platform } from 'react-native';
 
-import type { ChannelPage, DownloadFormat, DownloadUpdate, FeedResult, MusicFolder, Page, SearchItem, Video, VideoDetails } from './types';
+import type { ChannelPage, DownloadFormat, DownloadUpdate, FeedResult, MusicFolder, Page, SearchItem, SwipeLevel, Video, VideoDetails } from './types';
 
 interface YouTubeNativeModule {
   search(query: string, kind: 'all' | 'videos' | 'channels'): Promise<Page<SearchItem>>;
@@ -45,6 +45,8 @@ interface YouTubeNativeModule {
   /** The phone was turned upright while in full screen (with auto-rotate on). */
   addListener(event: 'onFullscreenExitRequest', listener: () => void): { remove(): void };
   addListener(event: 'onZoomChange', listener: (event: { scale: number }) => void): { remove(): void };
+  /** A swipe in full screen set the brightness (left half) or the media volume (right half), 0–1. */
+  addListener(event: 'onSwipeAdjust', listener: (event: SwipeLevel) => void): { remove(): void };
 }
 
 const module = Platform.OS === 'android' ? requireOptionalNativeModule<YouTubeNativeModule>('LiteSocialYouTube') : null;

@@ -2,7 +2,7 @@ import { captionKey, pickCaption } from '@/features/youtube/captions';
 import { FEED_LIMIT, mergeFeed } from '@/features/youtube/feed';
 import { formatAge, formatCount, formatDuration, videoSubtitle } from '@/features/youtube/format';
 import { parseCsvLine, parseSubscriptionsExport } from '@/features/youtube/importSubscriptions';
-import { parseYouTubeLink, routeForLink } from '@/features/youtube/links';
+import { parseYouTubeLink, routeForLink, splitLinks, startSeconds, withTimestamps } from '@/features/youtube/links';
 import { moveItem, stepInPlaylist, usePlaylists } from '@/features/youtube/playlists';
 import { pickQuality } from '@/features/youtube/quality';
 import type { CaptionTrack, Video, VideoQuality } from '@/features/youtube/types';
@@ -247,5 +247,62 @@ describe('playlists', () => {
 
     store.remove(id);
     expect(usePlaylists.getState().playlists.map((p) => p.id)).toEqual([other]);
+  });
+});
+
+describe('description links', () => {
+  it('cuts the text around its links', () => {
+    const text = 'Shop: amzn.to/x… and 1:30 here';
+    const links = [
+      { start: 6, end: 16, url: 'https://amzn.to/xyz' },
+      { start: 21, end: 25, url: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ&t=90' },
+    ];
+    expect(splitLinks(text, links)).toEqual([
+      { text: 'Shop: ' },
+      { text: 'amzn.to/x…', url: 'https://amzn.to/xyz' },
+      { text: ' and ' },
+      { text: '1:30', url: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ&t=90' },
+      { text: ' here' },
+    ]);
+  });
+
+  it('leaves overlapping or out-of-range links as text', () => {
+    expect(splitLinks('abcdef', [{ start: 0, end: 3, url: 'a' }, { start: 2, end: 4, url: 'b' }, { start: 5, end: 9, url: 'c' }])).toEqual([
+      { text: 'abc', url: 'a' },
+      { text: 'def' },
+    ]);
+    expect(splitLinks('plain')).toEqual([{ text: 'plain' }]);
+  });
+
+  it.each([
+    ['https://www.youtube.com/watch?v=aqz-KE-bpKQ&t=90', 90],
+    ['https://youtu.be/aqz-KE-bpKQ?t=90s', 90],
+    ['https://www.youtube.com/watch?v=aqz-KE-bpKQ&t=1h2m3s&si=x', 3723],
+    ['https://www.youtube.com/watch?v=aqz-KE-bpKQ', null],
+    ['https://example.com/?at=5', null],
+  ])('reads the start time of %s', (url, seconds) => {
+    expect(startSeconds(url)).toBe(seconds);
+  });
+});
+
+describe('withTimestamps', () => {
+  const url = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ';
+
+  it('links timestamps YouTube left as text, up to the video length', () => {
+    const text = 'Intro 0:00\n13:59 Part two\n1:02:03 end, 16:9 at 2:00:00';
+    expect(withTimestamps(text, [], url, 3800)).toEqual([
+      { start: 6, end: 10, url: `${url}&t=0` },
+      { start: 11, end: 16, url: `${url}&t=839` },
+      { start: 26, end: 33, url: `${url}&t=3723` },
+    ]);
+  });
+
+  it('keeps YouTube\'s own links and adds no second link over them', () => {
+    const own = { start: 0, end: 5, url: `${url}&t=839` };
+    expect(withTimestamps('13:59 and 1:00', [own], url)).toEqual([own, { start: 10, end: 14, url: `${url}&t=60` }]);
+  });
+
+  it('skips digits that only look like times', () => {
+    expect(withTimestamps('12:345 or 1:2 or 1:60 or 123:45', [], url)).toEqual([]);
   });
 });

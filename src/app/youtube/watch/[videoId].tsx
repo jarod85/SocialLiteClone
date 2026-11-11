@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { VideoView, type VideoViewProps } from 'expo-video';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmbeddedPlayer, isEmbeddableId } from '@/features/youtube/components/EmbeddedPlayer';
 import { PlayerControls, PlayerSheet, VideoOverlay } from '@/features/youtube/components/PlayerControls';
@@ -13,6 +13,7 @@ import { useDownloadFlow } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatAge, formatCount } from '@/features/youtube/format';
 import { enterFullscreen, exitFullscreen, useFullscreen } from '@/features/youtube/fullscreen';
+import { parseYouTubeLink, routeForLink, splitLinks, startSeconds, withTimestamps } from '@/features/youtube/links';
 import { errorText, watchUrl, youtube } from '@/features/youtube/native';
 import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
 import { videoFromDetails } from '@/features/youtube/playlists';
@@ -155,6 +156,21 @@ export default function WatchScreen() {
     else subscribe({ id: details.channelId, title: details.channelName ?? 'Channel', thumbnail: details.channelAvatar });
   };
 
+  // Description links: a timestamp in this video plays it from there, YouTube links open here, anything else in its app or the browser.
+  const openLink = (url: string) => {
+    const link = parseYouTubeLink(url);
+    const at = startSeconds(url);
+    if (details && link?.kind === 'video' && link.id === details.id && at !== null) {
+      void play(details).then(() => {
+        getPlayer().currentTime = at;
+      });
+      return;
+    }
+    const route = routeForLink(url);
+    if (route) router.push(route as never);
+    else Linking.openURL(url).catch(() => undefined);
+  };
+
   const stats = details
     ? [
         details.viewCount != null ? `${formatCount(details.viewCount)} views` : '',
@@ -250,7 +266,18 @@ export default function WatchScreen() {
           {details.description ? (
             <Pressable onPress={() => setExpanded((e) => !e)} style={[styles.description, { backgroundColor: theme.surface }]}>
               <Text style={[styles.descriptionText, { color: theme.text }]} numberOfLines={expanded ? undefined : 4}>
-                {details.description}
+                {splitLinks(
+                  details.description,
+                  withTimestamps(details.description, details.descriptionLinks, details.url, details.durationSeconds),
+                ).map(({ text, url }, i) =>
+                  url ? (
+                    <Text key={i} style={{ color: theme.accent }} onPress={() => openLink(url)} accessibilityRole="link">
+                      {text}
+                    </Text>
+                  ) : (
+                    text
+                  ),
+                )}
               </Text>
               <Text style={[styles.more, { color: theme.textMuted }]}>{expanded ? 'Show less' : 'Show more'}</Text>
             </Pressable>

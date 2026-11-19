@@ -1,4 +1,10 @@
-import { FALLBACK_USER_AGENTS, toMobileBrowserUserAgent } from '@/webview/userAgent';
+import { instagram } from '@/platforms/instagram';
+import {
+  FALLBACK_USER_AGENTS,
+  toMobileBrowserUserAgent,
+  toTabletUserAgent,
+  wantsTabletUserAgent,
+} from '@/webview/userAgent';
 
 describe('toMobileBrowserUserAgent', () => {
   describe('android', () => {
@@ -63,5 +69,40 @@ describe('toMobileBrowserUserAgent', () => {
       expect(toMobileBrowserUserAgent(iPad, 'ios')).toBe(FALLBACK_USER_AGENTS.ios);
       expect(toMobileBrowserUserAgent(undefined, 'ios')).toBe(FALLBACK_USER_AGENTS.ios);
     });
+  });
+});
+
+describe('toTabletUserAgent', () => {
+  it('drops the Mobile token, as Chrome on a tablet sends it', () => {
+    expect(
+      toTabletUserAgent(
+        'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+      ),
+    ).toBe('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36');
+    expect(toTabletUserAgent(FALLBACK_USER_AGENTS.android)).not.toContain('Mobile');
+  });
+});
+
+describe('wantsTabletUserAgent (Instagram calls)', () => {
+  const wants = (url: string) => wantsTabletUserAgent(url, instagram.siteHosts, instagram.tabletUserAgentPaths ?? []);
+
+  it('is on for DM and call pages', () => {
+    expect(wants('https://www.instagram.com/direct/inbox/')).toBe(true);
+    expect(wants('https://www.instagram.com/direct/t/111859033546039/')).toBe(true);
+    expect(wants('https://www.instagram.com/direct')).toBe(true);
+    expect(wants('https://www.instagram.com/call/?has_video=true&ig_thread_id=1')).toBe(true);
+  });
+
+  it("is off for the site's other pages, including look-alike paths", () => {
+    expect(wants('https://www.instagram.com/')).toBe(false);
+    expect(wants('https://www.instagram.com/?variant=following')).toBe(false);
+    expect(wants('https://www.instagram.com/directory/')).toBe(false);
+    expect(wants('https://www.instagram.com/someone/')).toBe(false);
+  });
+
+  it('keeps the current one off the site', () => {
+    expect(wants('https://call.instagram.com/?has_video=true')).toBeNull();
+    expect(wants('https://www.facebook.com/login/')).toBeNull();
+    expect(wants('about:blank')).toBeNull();
   });
 });

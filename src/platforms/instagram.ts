@@ -27,6 +27,8 @@ export const instagram: PlatformConfig = {
     '/oauth/**',
     '/direct/**', // messages
   ],
+  // Audio and video calls: offered on DM pages, run on /call/ or in a popup window.
+  tabletUserAgentPaths: ['/direct', '/call'],
   toggles: [
     {
       id: 'blockReels',

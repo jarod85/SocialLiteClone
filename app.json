@@ -10,11 +10,20 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.jarod85.litesocial",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Lite Social uses the camera only for Instagram video calls you start or answer.",
+        "NSMicrophoneUsageDescription": "Lite Social uses the microphone only for Instagram calls you start or answer."
+      }
     },
     "android": {
       "package": "com.jarod85.litesocial",
       "versionCode": 16,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",

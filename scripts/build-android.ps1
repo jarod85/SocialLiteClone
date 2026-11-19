@@ -10,7 +10,7 @@
      short: even with plugins/withCMakeObjectPathMax.js shortening CMake's
      object paths, the deepest ones are about 220 characters plus the folder,
      and Windows (without the admin-only long-path setting) stops at 260.
-  2. Installs dependencies there when package-lock.json changed.
+  2. Installs dependencies there when package-lock.json or patches/ changed.
   3. Generates the native android/ project from app.json (Expo prebuild).
   4. Runs Gradle's release build.
   5. Copies the APK to release\LiteSocial-<version>.apk in this project.
@@ -72,7 +72,8 @@ if ($LASTEXITCODE -ge 8) { throw "Copying the project failed (robocopy exit $LAS
 
 Push-Location $BuildDir
 try {
-  $lockHash = (Get-FileHash package-lock.json).Hash
+  # patches/ too: npm ci's postinstall (patch-package) is what applies them.
+  $lockHash = (Get-FileHash package-lock.json).Hash + ((Get-ChildItem patches -Filter *.patch | Get-FileHash).Hash -join '')
   $stamp = 'node_modules\.lite-social-lock-hash'
   if (-not (Test-Path $stamp) -or (Get-Content $stamp) -ne $lockHash) {
     Write-Host '2/5 Installing dependencies...' -ForegroundColor Cyan

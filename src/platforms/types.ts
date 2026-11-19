@@ -44,6 +44,12 @@ export interface PlatformConfig {
    * which is the right choice for nearly every site.
    */
   userAgent?: Partial<Record<MobileOS, string>>;
+  /**
+   * Android only: site paths (and everything under them) loaded with a tablet user
+   * agent, for features the site keeps from phones. Instagram decides from the user
+   * agent at page load whether to offer calls. See webview/userAgent.ts.
+   */
+  tabletUserAgentPaths?: string[];
   /** Accent color for the platform's card on the picker. */
   accentColor: string;
 }

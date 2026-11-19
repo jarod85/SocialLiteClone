@@ -44,6 +44,13 @@ With a USB cable you can also run `adb install -r release\LiteSocial-<version>.a
 | Hide Stories | Off | Blocks opening stories; hides the tray where it can be found |
 | Daily time limit | Off | 15–120 min/day; then a break screen, with one "5 more minutes" per day |
 
+**Calls (Android).** Instagram's audio and video call buttons show at the top of a DM conversation. Instagram only
+offers calls to browsers it doesn't take for a phone, so DM pages (`/direct/…`, `/call/…`) load with the same
+browser identity minus its "Mobile" token, the way Chrome on a tablet sends it, and the page reloads once when you
+go in or out of DMs. A call opens in a full-screen window (Back hangs up). The first call asks for camera and
+microphone access. Incoming calls only ring while a DM page is open. This comes from a small patch to
+react-native-webview (`patches/`, applied by `npm install`).
+
 ### Instagram notifications (Android)
 
 Lite Social can't receive Instagram's push notifications: the site runs in a WebView, and Android's WebView has no
@@ -152,6 +159,8 @@ up rather than reloading forever.
   background check sends your Instagram login cookies to instagram.com (and only there) to ask for new messages and
   activity, as the site itself would. Sender names, previews and activity texts go straight into notifications.
   Nothing is stored or sent anywhere else.
+- Camera and microphone are used only for Instagram calls, and only after you allow them when the first call
+  starts.
 - YouTube needs no account. Searches, channels, feeds and videos are requested from YouTube directly by the phone;
   the subscription list, cached feed and downloads stay on the phone.
 
@@ -357,6 +366,9 @@ Said plainly, so nothing is oversold:
 - **Reels opened through `/p/` links** look like normal posts by URL; the in-page video check catches them,
   routing doesn't.
 - **Hide Stories** reliably blocks *opening* stories. Hiding the tray is best-effort (it has no stable link).
+- **Calls** work on Android only: iOS would need its own popup window, which isn't built. Incoming calls ring
+  only while a DM page is open, since the website gets no call notifications. If Instagram changes how its site
+  decides who may call, the buttons disappear again.
 - **Feed limit:** Instagram may keep loading posts in the background after the limit card (they stay hidden).
 - **Following feed** relies on Instagram's `?variant=following`. If Instagram drops it, you get the normal feed.
 - **Stories at the top** reads the tray from Instagram's own `/api/v1/feed/reels_tray/` (and your name and picture

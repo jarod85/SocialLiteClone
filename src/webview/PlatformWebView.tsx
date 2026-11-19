@@ -7,6 +7,7 @@ import type {
   ShouldStartLoadRequest,
   WebViewErrorEvent,
   WebViewNavigation,
+  WebViewOpenWindowEvent,
   WebViewProgressEvent,
 } from 'react-native-webview/lib/WebViewTypes';
 
@@ -37,6 +38,7 @@ import { LoadErrorView } from './LoadErrorView';
 import { ReelViewer, type ReelState } from './ReelViewer';
 import { useAndroidBack } from './useAndroidBack';
 import { useBrowserUserAgent } from './useBrowserUserAgent';
+import { toTabletUserAgent, wantsTabletUserAgent } from './userAgent';
 
 interface Props {
   platform: PlatformConfig;
@@ -113,6 +115,36 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
   const [canGoBack, setCanGoBack] = useState(false);
   const canGoBackRef = useRef(false);
   const currentUrlRef = useRef(startUrl);
+
+  // ---- Tablet user agent (Android) -------------------------------------------
+  // Instagram only offers calls to browsers it doesn't take for a phone, judged from the
+  // user agent when a page loads, so DM pages load as Chrome on a tablet. The call window
+  // they open is shown by the patched react-native-webview (patches/).
+  const tabletPaths = Platform.OS === 'android' ? platform.tabletUserAgentPaths : undefined;
+  const tabletUserAgent = useMemo(
+    () => (userAgent && tabletPaths ? toTabletUserAgent(userAgent) : null),
+    [userAgent, tabletPaths],
+  );
+  const [tabletMode, setTabletMode] = useState(
+    () => !!tabletPaths && wantsTabletUserAgent(startUrl, platform.siteHosts, tabletPaths) === true,
+  );
+  const appliedTabletModeRef = useRef(tabletMode);
+  useEffect(() => {
+    if (appliedTabletModeRef.current === tabletMode) return;
+    appliedTabletModeRef.current = tabletMode;
+    // A new user agent only applies to later requests: load the page again so the site sees it.
+    // Not reload(): mid-navigation that would reload the page being left.
+    webViewRef.current?.injectJavaScript(`window.location.replace(${JSON.stringify(currentUrlRef.current)});true;`);
+  }, [tabletMode]);
+
+  // In tablet mode the WebView opens new windows. Sized popups (the call window) are shown by
+  // the patched library; plain new tabs (target="_blank" links) load here, through the policy.
+  const onOpenWindow = useCallback((event: WebViewOpenWindowEvent) => {
+    const url = event.nativeEvent.targetUrl;
+    if (/^(https?|mailto|tel|sms):/i.test(url))
+      webViewRef.current?.injectJavaScript(`window.location.assign(${JSON.stringify(url)});true;`);
+  }, []);
+
   const [progress, setProgress] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [blockedRuleId, setBlockedRuleId] = useState<string | null>(null);
@@ -125,7 +157,11 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     canGoBackRef.current = nav.canGoBack;
     setCanGoBack(nav.canGoBack);
     currentUrlRef.current = nav.url;
-  }, []);
+    if (tabletPaths) {
+      const wanted = wantsTabletUserAgent(nav.url, platform.siteHosts, tabletPaths);
+      if (wanted !== null) setTabletMode(wanted);
+    }
+  }, [platform.siteHosts, tabletPaths]);
 
   // ---- Layer 1: navigation interception -----------------------------------
   const onShouldStartLoadWithRequest = useCallback((request: ShouldStartLoadRequest) => {
@@ -296,7 +332,7 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
             key={instanceKey}
             ref={webViewRef}
             source={{ uri: startUrl }}
-            userAgent={userAgent}
+            userAgent={tabletMode && tabletUserAgent ? tabletUserAgent : userAgent}
             style={{ backgroundColor: theme.background }}
             // --- Blocking ---
             // Send every URL through our policy. The default whitelist hands non-http
@@ -320,7 +356,10 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
             pullToRefreshEnabled // iOS only. Android uses the toolbar's reload button.
             allowsBackForwardNavigationGestures // iOS: edge swipe goes back.
             contentMode="mobile" // iOS: never fall back to requesting the desktop site.
-            setSupportMultipleWindows={false} // Android: open target="_blank" links here (and through our policy).
+            // Android: open target="_blank" links here (and through our policy). In tablet mode
+            // through onOpenWindow, so the call window can open as a real popup.
+            setSupportMultipleWindows={tabletMode}
+            onOpenWindow={tabletMode ? onOpenWindow : undefined}
             allowsInlineMediaPlayback // iOS: otherwise every video forces the fullscreen player.
             mediaPlaybackRequiresUserAction // Videos need a tap to play: no autoplay.
             webviewDebuggingEnabled={__DEV__ || webInspection} // chrome://inspect / Safari Web Inspector.

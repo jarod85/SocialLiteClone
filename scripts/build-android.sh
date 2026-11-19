@@ -7,7 +7,7 @@
 #   1. Mirrors the project's source into a build folder with no spaces (React
 #      Native's native build can't cope with spaces). It also keeps the
 #      generated android/ folder and the build's node_modules out of the project.
-#   2. Installs dependencies there when package-lock.json changed.
+#   2. Installs dependencies there when package-lock.json or patches/ changed.
 #   3. Generates the native android/ project from app.json (Expo prebuild).
 #   4. Runs Gradle's release build.
 #   5. Copies the APK to release/LiteSocial-<version>.apk in this project.
@@ -83,7 +83,8 @@ rsync -a --delete \
   "$project_root/" "$build_dir/"
 
 cd "$build_dir"
-lock_hash="$(shasum -a 256 package-lock.json | cut -d' ' -f1)"
+# patches/ too: npm ci's postinstall (patch-package) is what applies them.
+lock_hash="$(cat package-lock.json patches/*.patch | shasum -a 256 | cut -d' ' -f1)"
 stamp='node_modules/.lite-social-lock-hash'
 if [[ ! -f "$stamp" || "$(cat "$stamp")" != "$lock_hash" ]]; then
   step '2/5 Installing dependencies...'

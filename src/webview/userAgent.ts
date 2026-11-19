@@ -16,6 +16,8 @@
  * device's default UA lives in useBrowserUserAgent.ts.
  */
 
+import { hostMatches, normalizePath, parseUrl } from '@/core/urls';
+
 export type MobileOS = 'ios' | 'android';
 
 /**
@@ -64,4 +66,29 @@ function toMobileChrome(ua: string): string {
     .replace(/Version\/\d+(?:\.\d+)* /, '') // WebView's fake Version/4.0 token
     .replace(/\s{2,}/g, ' ')
     .trim();
+}
+
+/**
+ * Android Chrome without its "Mobile" token is what Chrome sends on a tablet.
+ * Instagram then treats the browser as a big screen and offers calls; the page
+ * still lays itself out for the screen's width.
+ */
+export function toTabletUserAgent(mobileUserAgent: string): string {
+  return mobileUserAgent.replace(' Mobile Safari/', ' Safari/');
+}
+
+/**
+ * Whether `url` should load with the tablet user agent: true on the site's pages
+ * at or under one of `paths`, false on its other pages, and null off the site
+ * (login providers, call hosts), where the current user agent is kept.
+ */
+export function wantsTabletUserAgent(
+  url: string,
+  siteHosts: readonly string[],
+  paths: readonly string[],
+): boolean | null {
+  const parsed = parseUrl(url);
+  if (!parsed || !hostMatches(parsed.host, siteHosts)) return null;
+  const path = normalizePath(parsed.path);
+  return paths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }

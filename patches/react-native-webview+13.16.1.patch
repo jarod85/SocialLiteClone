@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java b/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
-index 07f73fd..f870f7b 100644
+index 07f73fd..c38a689 100644
 --- a/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
 +++ b/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
 @@ -3,6 +3,7 @@ package com.reactnativecommunity.webview;
@@ -39,7 +39,7 @@ index 07f73fd..f870f7b 100644
          final WebView newWebView = new WebView(view.getContext());
  
          if(mHasOnOpenWindowEvent) {
-@@ -114,6 +125,69 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
+@@ -114,6 +125,81 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
          return true;
      }
  
@@ -81,9 +81,21 @@ index 07f73fd..f870f7b 100644
 +        popup.setWebViewClient(new WebViewClient() {
 +            @Override
 +            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-+                // Web pages stay in the window. Deep links (instagram://, intent://) never open other apps.
++                // Web pages and in-page pseudo-addresses stay in the window (the same schemes as
++                // core/navigationPolicy.ts). Deep links (instagram://, intent://) never open other apps.
 +                String scheme = request.getUrl().getScheme();
-+                return !"http".equals(scheme) && !"https".equals(scheme);
++                if (scheme == null) return false;
++                switch (scheme.toLowerCase(java.util.Locale.ROOT)) {
++                    case "http":
++                    case "https":
++                    case "about":
++                    case "data":
++                    case "blob":
++                    case "javascript":
++                        return false;
++                    default:
++                        return true;
++                }
 +            }
 +        });
 +        popup.setWebChromeClient(new WebChromeClient() {

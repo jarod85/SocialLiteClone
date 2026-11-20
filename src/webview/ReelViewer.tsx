@@ -21,6 +21,7 @@ import type { ReelDetails } from '@/core/types';
 import { pause as pauseYouTube } from '@/features/youtube/player';
 
 import { MAX_SPEED, MIN_SPEED, speedForSlide } from './reelSpeed';
+import { type Fingers, fingersOf, NO_ZOOM, type Zoom, zoomStep } from './reelZoom';
 
 export type ReelState = { requestId: string; state: 'loading' } | { requestId: string; state: 'ready'; reel: ReelDetails };
 
@@ -34,7 +35,8 @@ const DISMISS_DISTANCE = 140;
  * A reel full screen, the way the Instagram app shows it: edge to edge, on a
  * loop, with the account and caption at the bottom. Tap to pause, hold to
  * pause while you look, slide up or down along the left side for 0.5× to 2×,
- * swipe down or press Back to close.
+ * pinch with two fingers to zoom in while it plays (it springs back when you
+ * let go), swipe down or press Back to close.
  */
 export function ReelViewer({ reel, onClose }: { reel: ReelState; onClose: () => void }) {
   useEffect(() => {
@@ -55,7 +57,7 @@ export function ReelViewer({ reel, onClose }: { reel: ReelState; onClose: () => 
   );
 }
 
-type Mode = 'undecided' | 'speed' | 'dismiss' | 'none';
+type Mode = 'undecided' | 'speed' | 'dismiss' | 'zoom' | 'none';
 
 /** One touch on the reel, from finger down to finger up. */
 interface Gesture {
@@ -105,6 +107,10 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
   const [userPaused, setUserPaused] = useState(false);
   const [drag] = useState(() => new Animated.Value(0));
   const gesture = useRef<Gesture | null>(null);
+  const [zoomValues] = useState(() => ({ scale: new Animated.Value(1), x: new Animated.Value(0), y: new Animated.Value(0) }));
+  const zoom = useRef<Zoom>(NO_ZOOM);
+  const fingers = useRef<Fingers | null>(null);
+  const [pinching, setPinching] = useState(false);
 
   useEffect(
     () => () => {
@@ -125,6 +131,41 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
     g.held = false;
     setHolding(false);
     if (!userPaused) player.play();
+  };
+
+  /** A second finger makes the touch a pinch, whatever it was doing: the reel plays on. */
+  const startZoom = (g: Gesture, e: GestureResponderEvent) => {
+    endHold(g);
+    if (g.mode === 'speed') setSliding(false);
+    if (g.mode === 'dismiss') Animated.spring(drag, { toValue: 0, useNativeDriver: true }).start();
+    g.mode = 'zoom';
+    fingers.current = fingersOf(e.nativeEvent.touches);
+    setPinching(true);
+  };
+
+  const moveZoom = (e: GestureResponderEvent) => {
+    const next = fingersOf(e.nativeEvent.touches);
+    if (fingers.current) {
+      const z = zoomStep(zoom.current, fingers.current, next, width, height);
+      zoom.current = z;
+      zoomValues.scale.setValue(z.scale);
+      zoomValues.x.setValue(z.x);
+      zoomValues.y.setValue(z.y);
+    }
+    fingers.current = next;
+  };
+
+  const endZoom = () => {
+    zoom.current = NO_ZOOM;
+    fingers.current = null;
+    setPinching(false);
+    const spring = (value: Animated.Value, toValue: number) => Animated.spring(value, { toValue, useNativeDriver: true, bounciness: 0 });
+    Animated.parallel([spring(zoomValues.scale, 1), spring(zoomValues.x, 0), spring(zoomValues.y, 0)]).start();
+  };
+
+  const onStart = (e: GestureResponderEvent) => {
+    const g = gesture.current;
+    if (g && g.mode !== 'zoom' && e.nativeEvent.touches.length >= 2) startZoom(g, e);
   };
 
   const onGrant = (e: GestureResponderEvent) => {
@@ -155,6 +196,11 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
   const onMove = (e: GestureResponderEvent) => {
     const g = gesture.current;
     if (!g) return;
+    if (g.mode !== 'zoom' && e.nativeEvent.touches.length >= 2) startZoom(g, e);
+    if (g.mode === 'zoom') {
+      moveZoom(e);
+      return;
+    }
     const { pageX, pageY, timestamp } = e.nativeEvent;
     const dx = pageX - g.startX;
     const dy = pageY - g.startY;
@@ -190,6 +236,8 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
     const dy = e.nativeEvent.pageY - g.startY;
     if (g.held) {
       endHold(g);
+    } else if (g.mode === 'zoom') {
+      endZoom();
     } else if (g.mode === 'dismiss') {
       if (dy > DISMISS_DISTANCE || g.velocityY > 1.2) {
         Animated.timing(drag, { toValue: height, duration: 160, useNativeDriver: true }).start(onClose);
@@ -213,6 +261,7 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
     const g = gesture.current;
     gesture.current = null;
     if (g) endHold(g);
+    if (g?.mode === 'zoom') endZoom();
     setSliding(false);
     Animated.spring(drag, { toValue: 0, useNativeDriver: true }).start();
   };
@@ -222,29 +271,34 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
   const fill = Math.abs(videoRatio - width / height) / (width / height) < 0.25;
   const backdrop = drag.interpolate({ inputRange: [0, height], outputRange: [1, 0.2], extrapolate: 'clamp' });
   const scale = drag.interpolate({ inputRange: [0, height], outputRange: [1, 0.85], extrapolate: 'clamp' });
-  const chrome = !holding; // Holding hides everything but the video, like Instagram.
+  const chrome = !holding && !pinching; // Holding or pinching hides everything but the video, like Instagram.
 
   return (
     <Animated.View style={[styles.screen, { opacity: backdrop }]}>
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: drag }, { scale }] }]}>
-        {!firstFrame && reel.poster ? (
-          <Image source={{ uri: reel.poster }} style={StyleSheet.absoluteFill} contentFit={fill ? 'cover' : 'contain'} />
-        ) : null}
-        <VideoView
-          player={player}
-          style={StyleSheet.absoluteFill}
-          nativeControls={false}
-          contentFit={fill ? 'cover' : 'contain'}
-          surfaceType="textureView"
-          fullscreenOptions={{ enable: false }}
-          onFirstFrameRender={() => setFirstFrame(true)}
-        />
+        <Animated.View
+          style={[StyleSheet.absoluteFill, { transform: [{ translateX: zoomValues.x }, { translateY: zoomValues.y }, { scale: zoomValues.scale }] }]}
+        >
+          {!firstFrame && reel.poster ? (
+            <Image source={{ uri: reel.poster }} style={StyleSheet.absoluteFill} contentFit={fill ? 'cover' : 'contain'} />
+          ) : null}
+          <VideoView
+            player={player}
+            style={StyleSheet.absoluteFill}
+            nativeControls={false}
+            contentFit={fill ? 'cover' : 'contain'}
+            surfaceType="textureView"
+            fullscreenOptions={{ enable: false }}
+            onFirstFrameRender={() => setFirstFrame(true)}
+          />
+        </Animated.View>
         <View
           style={StyleSheet.absoluteFill}
           onStartShouldSetResponder={() => true}
           onMoveShouldSetResponder={() => true}
           onResponderTerminationRequest={() => false}
           onResponderGrant={onGrant}
+          onResponderStart={onStart}
           onResponderMove={onMove}
           onResponderRelease={onRelease}
           onResponderTerminate={onTerminate}

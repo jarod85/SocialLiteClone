@@ -10,6 +10,7 @@ import type { EnginePayload, PageMessage } from '@/core/types';
 import '@/injected/engine';
 import { mediaIdFromShortcode, reelDetails } from '@/injected/reelViewer';
 import { MAX_SPEED, MIN_SPEED, speedForSlide } from '@/webview/reelSpeed';
+import { fingersOf, MAX_ZOOM, NO_ZOOM, zoomStep } from '@/webview/reelZoom';
 
 const posted: PageMessage[] = [];
 window.ReactNativeWebView = { postMessage: (m: string) => posted.push(JSON.parse(m)) };
@@ -154,5 +155,34 @@ describe('speed slide', () => {
     expect(speedForSlide(1.5, 147, 800)).toBe(1);
     expect(speedForSlide(1, 2000, 800)).toBe(MIN_SPEED);
     expect(speedForSlide(1, -2000, 800)).toBe(MAX_SPEED);
+  });
+});
+
+describe('pinch zoom', () => {
+  const two = (ax: number, ay: number, bx: number, by: number) =>
+    fingersOf([
+      { pageX: ax, pageY: ay },
+      { pageX: bx, pageY: by },
+    ]);
+
+  it('zooms in about the spot between the fingers', () => {
+    // Spread from 100 to 200 apart around (100, 200) on a 400x800 screen.
+    const z = zoomStep(NO_ZOOM, two(50, 200, 150, 200), two(0, 200, 200, 200), 400, 800);
+    expect(z.scale).toBe(2);
+    // That spot (100 left of center, 200 above it) stays under the fingers.
+    expect(z.x).toBe(100);
+    expect(z.y).toBe(200);
+  });
+
+  it('stays between 1x and the most, and keeps the video covering the screen', () => {
+    expect(zoomStep(NO_ZOOM, two(0, 0, 200, 0), two(50, 0, 150, 0), 400, 800)).toEqual(NO_ZOOM);
+    expect(zoomStep(NO_ZOOM, two(199, 0, 201, 0), two(0, 0, 400, 0), 400, 800).scale).toBe(MAX_ZOOM);
+    const panned = zoomStep({ scale: 2, x: 0, y: 0 }, fingersOf([{ pageX: 0, pageY: 0 }]), fingersOf([{ pageX: 1000, pageY: -1000 }]), 400, 800);
+    expect(panned).toEqual({ scale: 2, x: 200, y: -400 });
+  });
+
+  it('carries on without a jump when a finger comes or goes', () => {
+    const z = { scale: 2, x: 10, y: 10 };
+    expect(zoomStep(z, two(0, 0, 100, 0), fingersOf([{ pageX: 300, pageY: 300 }]), 400, 800)).toBe(z);
   });
 });

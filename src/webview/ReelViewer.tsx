@@ -90,6 +90,8 @@ function ReelPlayer({ reel, onClose }: { reel: ReelDetails; onClose: () => void 
   const player = useVideoPlayer({ uri: reel.video, contentType: 'progressive' }, (p) => {
     p.loop = true;
     p.timeUpdateEventInterval = 0.25;
+    // The speed slide keeps voices at their pitch. expo-video's Android player starts at false despite its docs.
+    p.preservesPitch = true;
     p.play();
   });
   const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });

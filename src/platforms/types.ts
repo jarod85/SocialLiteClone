@@ -50,6 +50,13 @@ export interface PlatformConfig {
    * agent at page load whether to offer calls. See webview/userAgent.ts.
    */
   tabletUserAgentPaths?: string[];
+  /**
+   * Android only, within tabletUserAgentPaths: pages that load as a tablet but are laid out
+   * for a phone. Once one has loaded, the WebView goes back to the phone user agent and the
+   * page asks the site for its view again. Instagram picks each view's layout from the user
+   * agent of the request that fetches it, but decides calls only at page load.
+   */
+  phoneLayoutPaths?: string[];
   /** Accent color for the platform's card on the picker. */
   accentColor: string;
 }

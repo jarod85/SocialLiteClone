@@ -49,6 +49,21 @@ export function statsScript(requestId: string): string {
 export const PAUSE_MEDIA_SCRIPT = `${callEngine('pauseMedia')}true;`;
 
 /**
+ * Re-lays out a page that loaded as a tablet for a phone (PlatformConfig.phoneLayoutPaths),
+ * once the WebView is back on the phone user agent. Instagram's router fetches each view's
+ * layout from the server, so the page asks it for the current address again: replaceState
+ * drops the router's key for this history entry and popstate makes it look the address up
+ * afresh. No history entry is added. Waits (up to 5 s) for the phone agent to reach the page.
+ */
+export const PHONE_LAYOUT_SCRIPT = `(function(){
+if(window.__liteSocialPhoneLayout)return;window.__liteSocialPhoneLayout=true;var tries=0;
+(function relayout(){
+if(!/\\bMobile\\b/.test(navigator.userAgent)){if(++tries<50)setTimeout(relayout,100);return;}
+history.replaceState(null,'',location.href);
+window.dispatchEvent(new PopStateEvent('popstate',{state:null}));
+})();})();true;`;
+
+/**
  * Parse a message from the page. The site's own scripts can call
  * ReactNativeWebView.postMessage too, so anything that isn't exactly one of our
  * message shapes, naming one of our rules, is ignored. A valid message can only

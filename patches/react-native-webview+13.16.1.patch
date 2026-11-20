@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java b/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
-index 07f73fd..c38a689 100644
+index 07f73fd..077db0a 100644
 --- a/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
 +++ b/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
 @@ -3,6 +3,7 @@ package com.reactnativecommunity.webview;
@@ -39,7 +39,7 @@ index 07f73fd..c38a689 100644
          final WebView newWebView = new WebView(view.getContext());
  
          if(mHasOnOpenWindowEvent) {
-@@ -114,6 +125,81 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
+@@ -114,6 +125,83 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
          return true;
      }
  
@@ -57,7 +57,9 @@ index 07f73fd..c38a689 100644
 +        final WebSettings settings = popup.getSettings();
 +        settings.setJavaScriptEnabled(true);
 +        settings.setDomStorageEnabled(true);
-+        settings.setUserAgentString(opener.getSettings().getUserAgentString());
++        // As a tablet, like the page that opens it (the app may have put the opener back on the
++        // phone user agent for its layout): Instagram only runs calls for a tablet or desktop.
++        settings.setUserAgentString(opener.getSettings().getUserAgentString().replace(" Mobile Safari/", " Safari/"));
 +        settings.setMediaPlaybackRequiresUserGesture(false); // A call's sound starts without a tap.
 +        settings.setAllowFileAccess(false);
 +        settings.setAllowContentAccess(false);

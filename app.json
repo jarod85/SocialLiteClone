@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lite Social",
     "slug": "lite-social",
-    "version": "1.11.2",
+    "version": "1.11.3",
     "scheme": "litesocial",
     "platforms": ["ios", "android"],
     "orientation": "portrait",
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.jarod85.litesocial",
-      "versionCode": 19,
+      "versionCode": 20,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",

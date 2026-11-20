@@ -90,6 +90,9 @@ export function getPlayer(): VideoPlayer {
   p.showNowPlayingNotification = true;
   p.timeUpdateEventInterval = 1;
   p.audioMixingMode = 'doNotMix';
+  // Speed changes keep the voice's pitch (ExoPlayer's Sonic time-stretch, AVPlayer's spectral). Set explicitly:
+  // expo-video documents true but its Android player starts at false, which made 1.5x/2x sound chipmunked.
+  p.preservesPitch = true;
   p.addListener('statusChange', ({ status, error }) => {
     if (status === 'error') void recover(error?.message);
   });

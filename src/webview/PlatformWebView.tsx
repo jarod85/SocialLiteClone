@@ -35,6 +35,7 @@ import {
   parsePageMessage,
   ruleIds,
   statsScript,
+  TABLET_RELOAD_SCRIPT,
 } from './engineBridge';
 import { LoadErrorView } from './LoadErrorView';
 import { ReelViewer, type ReelState } from './ReelViewer';
@@ -160,6 +161,21 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     },
     [updatePhoneLayout],
   );
+  // Android reloads a page whose user agent changes while it is still loading (Instagram adds a
+  // login-sync frame seconds after load), and the reload would load as a phone. So the phone agent
+  // goes on once loading has stopped, or after a few seconds if it never does.
+  const progressRef = useRef(0);
+  const phoneLayoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelPhoneLayout = useCallback(() => {
+    if (phoneLayoutTimerRef.current) clearTimeout(phoneLayoutTimerRef.current);
+    phoneLayoutTimerRef.current = null;
+  }, []);
+  const startPhoneLayout = useCallback(() => {
+    cancelPhoneLayout();
+    updatePhoneLayout(true);
+    webViewRef.current?.injectJavaScript(PHONE_LAYOUT_SCRIPT);
+  }, [cancelPhoneLayout, updatePhoneLayout]);
+  useEffect(() => cancelPhoneLayout, [cancelPhoneLayout]);
   useEffect(() => {
     // Runs once the tablet agent is back in the WebView's props.
     const held = heldLoadRef.current;
@@ -193,12 +209,27 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
       setLoadError(null);
       const tabletPage = tabletPageLoadingRef.current;
       tabletPageLoadingRef.current = false;
-      if (!tabletPage || !phoneLayoutPaths) return;
+      if (!phoneLayoutPaths) return;
       if (wantsTabletUserAgent(event.nativeEvent.url, platform.siteHosts, phoneLayoutPaths) !== true) return;
-      updatePhoneLayout(true);
-      webViewRef.current?.injectJavaScript(PHONE_LAYOUT_SCRIPT);
+      if (phoneLayoutRef.current) {
+        // Also fires for in-page navigation. A page that reloaded as a phone loads again, as a tablet.
+        webViewRef.current?.injectJavaScript(TABLET_RELOAD_SCRIPT);
+      } else if (tabletPage) {
+        // Android also reports some in-page navigation while the page is loading as loaded.
+        if (progressRef.current >= 1) startPhoneLayout();
+        else phoneLayoutTimerRef.current ??= setTimeout(startPhoneLayout, 4000);
+      }
     },
-    [phoneLayoutPaths, platform.siteHosts, updatePhoneLayout],
+    [phoneLayoutPaths, platform.siteHosts, startPhoneLayout],
+  );
+
+  const onLoadProgress = useCallback(
+    (e: WebViewProgressEvent) => {
+      progressRef.current = e.nativeEvent.progress;
+      setProgress(e.nativeEvent.progress);
+      if (e.nativeEvent.progress >= 1 && phoneLayoutTimerRef.current) startPhoneLayout();
+    },
+    [startPhoneLayout],
   );
 
   const onNavigationStateChange = useCallback((nav: WebViewNavigation) => {
@@ -210,9 +241,12 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     if (tabletPaths) {
       const wanted = wantsTabletUserAgent(nav.url, platform.siteHosts, tabletPaths);
       if (wanted !== null) setTabletMode(wanted);
-      if (wanted === false) updatePhoneLayout(false); // The next tablet page starts as a tablet again.
+      if (wanted === false) {
+        cancelPhoneLayout();
+        updatePhoneLayout(false); // The next tablet page starts as a tablet again.
+      }
     }
-  }, [platform.siteHosts, tabletPaths, updatePhoneLayout]);
+  }, [cancelPhoneLayout, platform.siteHosts, tabletPaths, updatePhoneLayout]);
 
   // ---- Layer 1: navigation interception -----------------------------------
   const onShouldStartLoadWithRequest = useCallback((request: ShouldStartLoadRequest) => {
@@ -226,7 +260,8 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
           tabletPaths &&
           wantsTabletUserAgent(request.url, platform.siteHosts, tabletPaths) !== false
         ) {
-          loadAsTablet(request.url, false);
+          // Like a browser, loading the address already shown replaces it in history.
+          loadAsTablet(request.url, request.url === currentUrlRef.current);
           return false;
         }
         return true;
@@ -310,9 +345,10 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
 
   const reload = useCallback(() => {
     setLoadError(null);
+    cancelPhoneLayout();
     if (phoneLayoutRef.current) loadAsTablet(currentUrlRef.current, true);
     else webViewRef.current?.reload();
-  }, [loadAsTablet]);
+  }, [cancelPhoneLayout, loadAsTablet]);
 
   const goHome = useCallback(() => {
     setLoadError(null);
@@ -426,7 +462,7 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
             webviewDebuggingEnabled={__DEV__ || webInspection} // chrome://inspect / Safari Web Inspector.
             // --- Lifecycle ---
             onNavigationStateChange={onNavigationStateChange}
-            onLoadProgress={(e: WebViewProgressEvent) => setProgress(e.nativeEvent.progress)}
+            onLoadProgress={onLoadProgress}
             onLoadStart={onLoadStart}
             onLoad={onLoad}
             onError={(e: WebViewErrorEvent) =>

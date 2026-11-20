@@ -64,6 +64,19 @@ window.dispatchEvent(new PopStateEvent('popstate',{state:null}));
 })();})();true;`;
 
 /**
+ * Run after a page on the phone agent for its layout loads. Android reloads a page whose user agent
+ * changes while it is still loading, and such a reload loads as a phone: Instagram then has calls
+ * off (its InstagramUserAgent.is_mobile, set at load). Loading the page again goes through the
+ * app, which loads it as a tablet. At most once every 30 s, so a page that keeps doing it stays.
+ */
+export const TABLET_RELOAD_SCRIPT = `(function(){try{
+if(typeof window.require!=='function'||window.require('InstagramUserAgent').is_mobile!==true)return;
+var k='liteSocialTabletReload',last=Number(sessionStorage.getItem(k))||0;
+if(Date.now()-last<30000)return;
+sessionStorage.setItem(k,String(Date.now()));location.replace(location.href);
+}catch(e){}})();true;`;
+
+/**
  * Parse a message from the page. The site's own scripts can call
  * ReactNativeWebView.postMessage too, so anything that isn't exactly one of our
  * message shapes, naming one of our rules, is ignored. A valid message can only

@@ -1,4 +1,4 @@
-import { buildPayload, PHONE_LAYOUT_SCRIPT, parsePageMessage, ruleIds } from '@/webview/engineBridge';
+import { buildPayload, PHONE_LAYOUT_SCRIPT, parsePageMessage, ruleIds, TABLET_RELOAD_SCRIPT } from '@/webview/engineBridge';
 import { instagram } from '@/platforms/instagram';
 import { platformRules, validateRules } from '@/rules/schema';
 
@@ -116,5 +116,31 @@ describe('PHONE_LAYOUT_SCRIPT', () => {
   it('gives up if the phone agent never arrives, and runs once per page', () => {
     expect(run([tablet])).toEqual([]);
     expect(run([phone], { __liteSocialPhoneLayout: true })).toEqual([]);
+  });
+});
+
+describe('TABLET_RELOAD_SCRIPT', () => {
+  /** Runs the script in a fake Instagram page; returns the addresses it loaded. */
+  function run(isMobile: boolean | undefined, stored: Record<string, string>, now: number) {
+    const loads: string[] = [];
+    const require = isMobile === undefined ? undefined : () => ({ is_mobile: isMobile });
+    const sessionStorage = { getItem: (k: string) => stored[k] ?? null, setItem: (k: string, v: string) => (stored[k] = v) };
+    const location = { href: 'https://www.instagram.com/direct/t/1/', replace: (url: string) => loads.push(url) };
+    new Function('window', 'sessionStorage', 'location', 'Date', TABLET_RELOAD_SCRIPT)(
+      { require }, sessionStorage, location, { now: () => now },
+    );
+    return loads;
+  }
+
+  it('loads a page that came back as a phone again, at most once every 30 s', () => {
+    const stored: Record<string, string> = {};
+    expect(run(true, stored, 100_000)).toEqual(['https://www.instagram.com/direct/t/1/']);
+    expect(run(true, stored, 120_000)).toEqual([]);
+    expect(run(true, stored, 131_000)).toEqual(['https://www.instagram.com/direct/t/1/']);
+  });
+
+  it('leaves a tablet page, or a page without Instagram\'s modules, alone', () => {
+    expect(run(false, {}, 100_000)).toEqual([]);
+    expect(run(undefined, {}, 100_000)).toEqual([]);
   });
 });

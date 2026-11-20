@@ -7,6 +7,7 @@ import type {
   ShouldStartLoadRequest,
   WebViewErrorEvent,
   WebViewNavigation,
+  WebViewNavigationEvent,
   WebViewOpenWindowEvent,
   WebViewProgressEvent,
 } from 'react-native-webview/lib/WebViewTypes';
@@ -30,6 +31,7 @@ import {
   bootScript,
   buildPayload,
   PAUSE_MEDIA_SCRIPT,
+  PHONE_LAYOUT_SCRIPT,
   parsePageMessage,
   ruleIds,
   statsScript,
@@ -137,6 +139,36 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     webViewRef.current?.injectJavaScript(`window.location.replace(${JSON.stringify(currentUrlRef.current)});true;`);
   }, [tabletMode]);
 
+  // Phone layout for tablet pages (platform.phoneLayoutPaths). Once such a page has loaded as a
+  // tablet, the WebView goes back to the phone user agent and the page fetches its view again,
+  // now laid out for a phone; it keeps what the site decided at load (Instagram: calls). Pages
+  // loaded after that are held until the tablet agent is back on, so they load as a tablet too.
+  const phoneLayoutPaths = tabletPaths ? platform.phoneLayoutPaths : undefined;
+  const [phoneLayout, setPhoneLayout] = useState(false);
+  const phoneLayoutRef = useRef(false);
+  const updatePhoneLayout = useCallback((on: boolean) => {
+    phoneLayoutRef.current = on;
+    setPhoneLayout(on);
+  }, []);
+  /** Whether the page loading now started while the tablet agent was on. */
+  const tabletPageLoadingRef = useRef(tabletMode);
+  const heldLoadRef = useRef<{ url: string; replace: boolean } | null>(null);
+  const loadAsTablet = useCallback(
+    (url: string, replace: boolean) => {
+      heldLoadRef.current = { url, replace };
+      updatePhoneLayout(false);
+    },
+    [updatePhoneLayout],
+  );
+  useEffect(() => {
+    // Runs once the tablet agent is back in the WebView's props.
+    const held = heldLoadRef.current;
+    if (phoneLayout || !held) return;
+    heldLoadRef.current = null;
+    const method = held.replace ? 'replace' : 'assign';
+    webViewRef.current?.injectJavaScript(`window.location.${method}(${JSON.stringify(held.url)});true;`);
+  }, [phoneLayout]);
+
   // In tablet mode the WebView opens new windows. Sized popups (the call window) are shown by
   // the patched library; plain new tabs (target="_blank" links) load here, through the policy.
   const onOpenWindow = useCallback((event: WebViewOpenWindowEvent) => {
@@ -151,6 +183,24 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
   // Changing the key remounts the WebView. Used when the OS kills its web content process.
   const [instanceKey, setInstanceKey] = useState(0);
 
+  // Also fires for in-page navigation, which takes the user agent of the page it's in.
+  const onLoadStart = useCallback(() => {
+    tabletPageLoadingRef.current = appliedTabletModeRef.current && !phoneLayoutRef.current;
+  }, []);
+
+  const onLoad = useCallback(
+    (event: WebViewNavigationEvent) => {
+      setLoadError(null);
+      const tabletPage = tabletPageLoadingRef.current;
+      tabletPageLoadingRef.current = false;
+      if (!tabletPage || !phoneLayoutPaths) return;
+      if (wantsTabletUserAgent(event.nativeEvent.url, platform.siteHosts, phoneLayoutPaths) !== true) return;
+      updatePhoneLayout(true);
+      webViewRef.current?.injectJavaScript(PHONE_LAYOUT_SCRIPT);
+    },
+    [phoneLayoutPaths, platform.siteHosts, updatePhoneLayout],
+  );
+
   const onNavigationStateChange = useCallback((nav: WebViewNavigation) => {
     // Fires for full page loads and, on both platforms, for in-page history.pushState
     // navigation, so this stays accurate inside single-page apps like Instagram.
@@ -160,8 +210,9 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     if (tabletPaths) {
       const wanted = wantsTabletUserAgent(nav.url, platform.siteHosts, tabletPaths);
       if (wanted !== null) setTabletMode(wanted);
+      if (wanted === false) updatePhoneLayout(false); // The next tablet page starts as a tablet again.
     }
-  }, [platform.siteHosts, tabletPaths]);
+  }, [platform.siteHosts, tabletPaths, updatePhoneLayout]);
 
   // ---- Layer 1: navigation interception -----------------------------------
   const onShouldStartLoadWithRequest = useCallback((request: ShouldStartLoadRequest) => {
@@ -169,6 +220,15 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
     const decision = decideNavigation(request.url, request.isTopFrame ?? true, navContextRef.current);
     switch (decision.type) {
       case 'allow':
+        // On the phone agent for a page's layout: a new page that would load as a tablet waits for it.
+        if (
+          phoneLayoutRef.current &&
+          tabletPaths &&
+          wantsTabletUserAgent(request.url, platform.siteHosts, tabletPaths) !== false
+        ) {
+          loadAsTablet(request.url, false);
+          return false;
+        }
         return true;
       case 'deny':
         return false;
@@ -182,7 +242,7 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
         webViewRef.current?.injectJavaScript(`window.location.replace(${JSON.stringify(decision.url)});true;`);
         return false;
     }
-  }, []);
+  }, [loadAsTablet, platform.siteHosts, tabletPaths]);
 
   // ---- Full-screen reels (injected/reelViewer.ts) ---------------------------
   const [reel, setReel] = useState<ReelState | null>(null);
@@ -250,8 +310,9 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
 
   const reload = useCallback(() => {
     setLoadError(null);
-    webViewRef.current?.reload();
-  }, []);
+    if (phoneLayoutRef.current) loadAsTablet(currentUrlRef.current, true);
+    else webViewRef.current?.reload();
+  }, [loadAsTablet]);
 
   const goHome = useCallback(() => {
     setLoadError(null);
@@ -332,7 +393,7 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
             key={instanceKey}
             ref={webViewRef}
             source={{ uri: startUrl }}
-            userAgent={tabletMode && tabletUserAgent ? tabletUserAgent : userAgent}
+            userAgent={tabletMode && tabletUserAgent && !phoneLayout ? tabletUserAgent : userAgent}
             style={{ backgroundColor: theme.background }}
             // --- Blocking ---
             // Send every URL through our policy. The default whitelist hands non-http
@@ -366,7 +427,8 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
             // --- Lifecycle ---
             onNavigationStateChange={onNavigationStateChange}
             onLoadProgress={(e: WebViewProgressEvent) => setProgress(e.nativeEvent.progress)}
-            onLoad={() => setLoadError(null)}
+            onLoadStart={onLoadStart}
+            onLoad={onLoad}
             onError={(e: WebViewErrorEvent) =>
               setLoadError(e.nativeEvent.description || 'Check your connection and try again.')
             }

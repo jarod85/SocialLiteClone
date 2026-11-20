@@ -1,4 +1,4 @@
-import { buildPayload, parsePageMessage, ruleIds } from '@/webview/engineBridge';
+import { buildPayload, PHONE_LAYOUT_SCRIPT, parsePageMessage, ruleIds } from '@/webview/engineBridge';
 import { instagram } from '@/platforms/instagram';
 import { platformRules, validateRules } from '@/rules/schema';
 
@@ -87,5 +87,34 @@ describe('reel messages', () => {
     }
     expect(parsePageMessage(JSON.stringify({ type: 'reel', requestId: 'x', state: 'loading' }), known)).toBeNull();
     expect(parsePageMessage(message(reel, 'playing'), known)).toBeNull();
+  });
+});
+
+describe('PHONE_LAYOUT_SCRIPT', () => {
+  /** Runs the script in a fake page whose user agent reads `agents` in turn; returns what it did. */
+  function run(agents: string[], page: Record<string, unknown> = {}) {
+    const calls: string[] = [];
+    const timers: (() => void)[] = [];
+    let read = 0;
+    const navigator = { get userAgent() { return agents[Math.min(read++, agents.length - 1)]; } };
+    const history = { replaceState: (state: unknown, _title: string, url: string) => calls.push(`replaceState ${state} ${url}`) };
+    const window = Object.assign(page, { dispatchEvent: (e: { type: string; state: unknown }) => calls.push(`${e.type} ${e.state}`) });
+    class PopStateEvent { state: unknown; constructor(public type: string, init: { state: unknown }) { this.state = init.state; } }
+    new Function('window', 'navigator', 'history', 'location', 'PopStateEvent', 'setTimeout', PHONE_LAYOUT_SCRIPT)(
+      window, navigator, history, { href: 'https://www.instagram.com/direct/inbox/' }, PopStateEvent, (f: () => void) => timers.push(f),
+    );
+    while (timers.length) timers.shift()!();
+    return calls;
+  }
+  const tablet = 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
+  const phone = 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36';
+
+  it('waits for the phone user agent, then has the router look the page up again', () => {
+    expect(run([tablet, tablet, phone])).toEqual(['replaceState null https://www.instagram.com/direct/inbox/', 'popstate null']);
+  });
+
+  it('gives up if the phone agent never arrives, and runs once per page', () => {
+    expect(run([tablet])).toEqual([]);
+    expect(run([phone], { __liteSocialPhoneLayout: true })).toEqual([]);
   });
 });

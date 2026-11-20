@@ -29,6 +29,8 @@ export const instagram: PlatformConfig = {
   ],
   // Audio and video calls: offered on DM pages, run on /call/ or in a popup window.
   tabletUserAgentPaths: ['/direct', '/call'],
+  // DMs as on a phone (the inbox list, then one conversation full screen), calls still on.
+  phoneLayoutPaths: ['/direct'],
   toggles: [
     {
       id: 'blockReels',

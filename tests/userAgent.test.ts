@@ -106,3 +106,19 @@ describe('wantsTabletUserAgent (Instagram calls)', () => {
     expect(wants('about:blank')).toBeNull();
   });
 });
+
+describe('phoneLayoutPaths (Instagram DMs laid out for a phone)', () => {
+  const phoneLayout = (url: string) => wantsTabletUserAgent(url, instagram.siteHosts, instagram.phoneLayoutPaths ?? []);
+
+  it('covers DM pages but not the call page', () => {
+    expect(phoneLayout('https://www.instagram.com/direct/inbox/')).toBe(true);
+    expect(phoneLayout('https://www.instagram.com/direct/t/111859033546039/')).toBe(true);
+    expect(phoneLayout('https://www.instagram.com/call/?has_video=true&ig_thread_id=1')).toBe(false);
+  });
+
+  it('only lists pages that load as a tablet', () => {
+    for (const path of instagram.phoneLayoutPaths ?? []) {
+      expect(wantsTabletUserAgent(`https://www.instagram.com${path}/`, instagram.siteHosts, instagram.tabletUserAgentPaths ?? [])).toBe(true);
+    }
+  });
+});

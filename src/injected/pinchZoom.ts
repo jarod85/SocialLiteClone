@@ -100,6 +100,13 @@ export function installPinchZoom(enabled: () => boolean, options: PinchZoomOptio
   listen('touchend', lift);
   listen('touchcancel', lift);
 
+  // iOS: WebKit zooms the whole page on its own gesture events, which touch events don't cancel.
+  const noPageZoom = (event: Event) => {
+    if (pinch && !pinch.ending) take(event);
+  };
+  listen('gesturestart', noPageZoom);
+  listen('gesturechange', noPageZoom);
+
   // The page may follow fingers with pointer events (a carousel swipe): not while zooming.
   listen('pointermove', (event) => {
     if (pinch && !pinch.ending && (event as PointerEvent).pointerType === 'touch') event.stopImmediatePropagation();

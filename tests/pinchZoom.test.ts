@@ -74,6 +74,25 @@ describe('pinch gesture math', () => {
 });
 
 describe('pinching a post', () => {
+  it("stops WebKit's own page zoom while a photo is pinched (iOS gesture events)", () => {
+    engine.apply(payload(true));
+    const { layer } = post();
+    const gesture = (type: string) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      layer.dispatchEvent(event);
+      return event;
+    };
+    expect(gesture('gesturestart').defaultPrevented).toBe(false);
+    touch('touchstart', layer, [
+      { identifier: 1, clientX: 150, clientY: 300 },
+      { identifier: 2, clientX: 250, clientY: 300 },
+    ]);
+    expect(gesture('gesturestart').defaultPrevented).toBe(true);
+    expect(gesture('gesturechange').defaultPrevented).toBe(true);
+    touch('touchend', layer, []);
+    jest.advanceTimersByTime(300);
+  });
+
   it('lifts a copy of the photo, follows the fingers and springs back', () => {
     engine.apply(payload(true));
     const { photo, layer } = post();

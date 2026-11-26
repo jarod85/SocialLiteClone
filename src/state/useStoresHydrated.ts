@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useAlertsState } from '@/features/instagramAlerts/checker/state';
 import { useUpdates } from '@/features/updates/updates';
 import { useFeed, useSubscriptions, useYouTubeSettings } from '@/features/youtube/stores';
 
@@ -7,7 +8,7 @@ import { useLeaks } from './leakStore';
 import { useSettings } from './settingsStore';
 import { useUsage } from './usageStore';
 
-const stores = [useSettings, useUsage, useLeaks, useSubscriptions, useFeed, useYouTubeSettings, useUpdates];
+const stores = [useSettings, useUsage, useLeaks, useSubscriptions, useFeed, useYouTubeSettings, useUpdates, useAlertsState];
 const allHydrated = () => stores.every((s) => s.persist.hasHydrated());
 
 /**

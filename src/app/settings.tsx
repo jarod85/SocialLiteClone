@@ -5,6 +5,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
+  alertsPlatformNote,
   CHECK_INTERVAL_OPTIONS,
   checkNow as checkInstagramNow,
   hasSession as hasInstagramSession,
@@ -178,7 +179,7 @@ function InstagramAlertsSection() {
       title="Instagram notifications"
       footer={
         "Lite Social can't receive Instagram's push notifications, so it checks Instagram itself in the background, using your " +
-        'Instagram login in this app. Alerts can arrive up to the interval late (Android decides the exact time). ' +
+        `Instagram login in this app. ${alertsPlatformNote ?? 'Alerts can arrive up to the interval late (Android decides the exact time).'} ` +
         'Nothing is stored or sent anywhere except to instagram.com.'
       }
     >

@@ -1,0 +1,117 @@
+{
+ "data": {
+  "get_slide_mailbox_for_iris_subscription": {
+   "threads_by_folder": {
+    "edges": [
+     {
+      "node": {
+       "as_ig_direct_thread": {
+        "thread_id": "340282366841710300949128100000000001",
+        "thread_key": "17840000000000001",
+        "is_group": false,
+        "is_muted": false,
+        "marked_as_unread": false,
+        "viewer": {
+         "interop_messaging_user_fbid": "900",
+         "id": "17841400000000000"
+        },
+        "users": [
+         {
+          "interop_messaging_user_fbid": "901",
+          "id": "555",
+          "username": "jane.doe",
+          "full_name": "Jane Doe",
+          "profile_pic_url": "https://cdn/x.jpg"
+         }
+        ],
+        "slide_messages": {
+         "edges": [
+          {
+           "node": {
+            "content_type": "TEXT",
+            "content": {
+             "text_body": "see you at 7?"
+            },
+            "sender_fbid": "901",
+            "timestamp_ms": "1791000002000"
+           }
+          },
+          {
+           "node": {
+            "content_type": "REACTION_LOG_XMAT",
+            "sender_fbid": "900",
+            "timestamp_ms": "1791000001500"
+           }
+          },
+          {
+           "node": {
+            "content_type": "TEXT",
+            "content": {
+             "text_body": "hey"
+            },
+            "sender": {
+             "id": "901"
+            },
+            "timestamp_ms": 1791000001000
+           }
+          },
+          {
+           "node": {
+            "content_type": "TEXT",
+            "content": {
+             "text_body": "hi!"
+            },
+            "sender_fbid": "900",
+            "timestamp_ms": 1791000000000
+           }
+          }
+         ]
+        }
+       }
+      }
+     },
+     {
+      "node": {
+       "as_ig_direct_thread": {
+        "thread_id": "340282366841710300949128100000000002",
+        "is_group": true,
+        "thread_title": "Climbing",
+        "is_muted": true,
+        "viewer": {
+         "interop_messaging_user_fbid": "900"
+        },
+        "users": [
+         {
+          "interop_messaging_user_fbid": "902",
+          "username": "sam"
+         }
+        ],
+        "slide_messages": {
+         "edges": [
+          {
+           "node": {
+            "content_type": "XMA",
+            "content": {
+             "xma": {
+              "target_url": "https://www.instagram.com/reel/abc/"
+             }
+            },
+            "sender": {
+             "user_dict": {
+              "interop_messaging_user_fbid": "902",
+              "username": "sam"
+             }
+            },
+            "timestamp_ms": "1791000003000"
+           }
+          }
+         ]
+        }
+       }
+      }
+     }
+    ]
+   }
+  }
+ }
+}

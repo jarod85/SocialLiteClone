@@ -1,6 +1,9 @@
 {
-  "platforms": ["android"],
+  "platforms": ["android", "apple"],
   "android": {
     "modules": ["com.jarod85.litesocial.alerts.InstagramAlertsModule"]
+  },
+  "apple": {
+    "modules": ["InstagramAlertsModule"]
   }
 }

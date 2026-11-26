@@ -1,5 +1,6 @@
 /**
- * Instagram alerts (Android only).
+ * Instagram alerts. Android: the native module below. iOS: the same calls in
+ * TypeScript (iosAlerts.ios.ts, checker/), with a background task iOS schedules.
  *
  * Lite Social can't receive Instagram's push notifications: the site runs in a
  * WebView, and Android's WebView has no web push. Instead, modules/instagram-alerts
@@ -14,7 +15,11 @@
 import { requireOptionalNativeModule } from 'expo';
 import { PermissionsAndroid, Platform } from 'react-native';
 
-interface InstagramAlertsModule {
+import { iosAlertsModule, requestIosNotificationPermission } from './iosAlerts';
+
+export { alertsPlatformNote, startIosAlerts } from './iosAlerts';
+
+export interface InstagramAlertsModule {
   isEnabled(): boolean;
   setEnabled(enabled: boolean): void;
   getIntervalMinutes(): number;
@@ -30,7 +35,7 @@ interface InstagramAlertsModule {
   openAppSettings(): void;
 }
 
-const native = Platform.OS === 'android' ? requireOptionalNativeModule<InstagramAlertsModule>('InstagramAlerts') : null;
+const native = Platform.OS === 'android' ? requireOptionalNativeModule<InstagramAlertsModule>('InstagramAlerts') : iosAlertsModule;
 
 /** Android runs periodic background work at most every 15 minutes. */
 export const CHECK_INTERVAL_OPTIONS = [15, 30, 60] as const;
@@ -118,8 +123,9 @@ export async function hasSession(): Promise<boolean> {
   return native ? native.hasSession() : false;
 }
 
-/** Android 13+ asks before an app may post notifications; older versions allow it by default. */
+/** iOS and Android 13+ ask before an app may post notifications; older Android versions allow it by default. */
 export async function requestNotificationPermission(): Promise<boolean> {
+  if (Platform.OS === 'ios') return iosAlertsModule ? requestIosNotificationPermission() : true;
   if (Platform.OS !== 'android' || (Platform.Version as number) < 33) return true;
   const result = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
   return result === PermissionsAndroid.RESULTS.GRANTED;

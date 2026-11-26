@@ -1,0 +1,42 @@
+{
+ "viewer": {
+  "pk": "100"
+ },
+ "inbox": {
+  "threads": [
+   {
+    "thread_id": "340282366841710300949128100000000003",
+    "thread_title": "kim",
+    "is_group": false,
+    "users": [
+     {
+      "pk": "200",
+      "username": "kim",
+      "full_name": ""
+     }
+    ],
+    "last_seen_at": {
+     "100": {
+      "timestamp": "1791000000000000"
+     }
+    },
+    "items": [
+     {
+      "user_id": "200",
+      "item_type": "text",
+      "text": "lunch?",
+      "timestamp": "1791000005000000"
+     },
+     {
+      "user_id": "200",
+      "item_type": "media",
+      "media": {
+       "media_type": 2
+      },
+      "timestamp": 1791000004000000
+     }
+    ]
+   }
+  ]
+ }
+}

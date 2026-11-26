@@ -23,12 +23,12 @@ const POINTS: [string, string][] = [
     'Your settings, today’s total time, any leak reports you create (a page address without its query, plus how many items each rule caught), your YouTube channel list and its cached feed. All of it stays on this phone.',
   ],
   [
-    'Instagram notifications (optional, Android)',
+    'Instagram notifications (optional)',
     'If you turn them on, a background check uses your Instagram login from the in-app browser to ask instagram.com, the same way the site itself does, for new messages and activity. The login cookies are only ever sent to instagram.com. Sender names, message previews and activity texts go straight into a notification on this phone; nothing is saved or sent anywhere else.',
   ],
   [
     'YouTube',
-    'YouTube runs without a Google account. Searches, channel pages, your feed and videos are loaded directly from YouTube by the app (with the open-source NewPipe Extractor). YouTube sees requests from your phone, but they aren’t linked to any account. Downloads are saved on this phone only.',
+    'YouTube runs without a Google account. Searches, channel pages, your feed and videos are loaded directly from YouTube by the app (on Android with the open-source NewPipe Extractor, on iPhone with the app’s own code). YouTube sees requests from your phone, but they aren’t linked to any account. Downloads are saved on this phone only.',
   ],
   [
     'What goes over the network',

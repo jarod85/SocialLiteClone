@@ -28,6 +28,41 @@ public class YouTubeModule: Module {
     AsyncFunction("resetZoom") {
       self.zoom.reset()
     }.runOnQueue(.main)
+
+    // Downloads (Downloads.swift): the app passes the streams it found; progress comes as onDownloadUpdate.
+    Function("startDownload") { (options: [String: Any]) in
+      guard let id = options["id"] as? String, let audio = (options["audioUrl"] as? String).flatMap(URL.init(string:)) else {
+        throw DownloadOptionsException()
+      }
+      let url = { (key: String) in (options[key] as? String).flatMap(URL.init(string:)) }
+      let request = Downloads.Request(
+        id: id,
+        title: options["title"] as? String ?? "Video",
+        format: options["format"] as? String ?? "mp4",
+        videoUrl: url("videoUrl"),
+        audioUrl: audio,
+        captionsUrl: url("captionsUrl"),
+        durationMs: (options["durationMs"] as? NSNumber)?.intValue,
+        artist: options["artist"] as? String,
+        artworkUrl: url("artworkUrl"))
+      DispatchQueue.main.async { self.downloads.start(request) }
+    }
+
+    Function("cancelDownload") { (id: String) in
+      DispatchQueue.main.async { self.downloads.cancel(id) }
+    }
+
+    Function("getDownloads") {
+      DispatchQueue.main.sync { self.downloads.snapshot() }
+    }
+
+    Function("clearFinishedDownloads") {
+      DispatchQueue.main.async { self.downloads.clearFinished() }
+    }
+  }
+
+  private lazy var downloads = Downloads { [weak self] update in
+    self?.sendEvent("onDownloadUpdate", update.compactMapValues { $0 })
   }
 
   private lazy var zoom = VideoZoom { [weak self] scale in
@@ -42,4 +77,8 @@ public class YouTubeModule: Module {
     guard tries > 0 else { return promise.resolve(false) }
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.attachZoom(viewTag, tries: tries - 1, promise: promise) }
   }
+}
+
+final class DownloadOptionsException: Exception, @unchecked Sendable {
+  override var reason: String { "A download needs an id and an audio address." }
 }

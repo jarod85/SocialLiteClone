@@ -84,7 +84,7 @@ function DownloadRow({ download }: { download: DownloadUpdate }) {
           {download.title}
         </Text>
         <Text style={[styles.detail, { color }]} numberOfLines={3}>
-          {download.format.toUpperCase()} · {detail}
+          {(download.format === 'mp3' ? youtubeFeatures.audioFormat : download.format).toUpperCase()} · {detail}
         </Text>
         {active ? (
           <View style={[styles.track, { backgroundColor: theme.border }]}>

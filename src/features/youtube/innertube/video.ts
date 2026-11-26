@@ -121,9 +121,20 @@ export async function video(url: string): Promise<VideoDetails> {
   return Number.isFinite(published) ? { ...details, uploadedAt: published } : details;
 }
 
+export interface DownloadStreams {
+  video: { url: string; height: number };
+  audio: { url: string };
+  /** YouTube's length of the streams. Apple's media framework misreads YouTube's stream files (twice as long), so the Swift side trims to this. */
+  durationMs: number | null;
+  /** For the file's tags. */
+  author: string | null;
+  thumbnail: string | null;
+}
+
 /** The streams a download joins: H.264 video up to `maxHeight` (else the lowest there is) and AAC audio. */
-export async function downloadStreams(id: string, maxHeight: number): Promise<{ video: { url: string; height: number }; audio: { url: string } }> {
-  const formats: any[] = (await playerResponse(id))?.streamingData?.adaptiveFormats ?? [];
+export async function downloadStreams(id: string, maxHeight: number): Promise<DownloadStreams> {
+  const json = await playerResponse(id);
+  const formats: any[] = json?.streamingData?.adaptiveFormats ?? [];
   const h264 = formats
     .filter((f) => typeof f.url === 'string' && /^video\/mp4; codecs="avc1/.test(f.mimeType ?? '') && f.height > 0)
     .sort((a, b) => b.height - a.height || (b.bitrate ?? 0) - (a.bitrate ?? 0));
@@ -131,5 +142,11 @@ export async function downloadStreams(id: string, maxHeight: number): Promise<{ 
   const aac = formats.filter((f) => typeof f.url === 'string' && /^audio\/mp4/.test(f.mimeType ?? ''));
   const audio = aac.find((f) => f.itag === 140) ?? aac.sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0))[0];
   if (!video || !audio) throw new YouTubeError('ERR_YOUTUBE', 'No downloadable version of this video was found.');
-  return { video: { url: video.url, height: video.height }, audio: { url: audio.url } };
+  return {
+    video: { url: video.url, height: video.height },
+    audio: { url: audio.url },
+    durationMs: Number(video.approxDurationMs ?? audio.approxDurationMs) || null,
+    author: json?.videoDetails?.author ?? null,
+    thumbnail: bestImage(json?.videoDetails?.thumbnail),
+  };
 }

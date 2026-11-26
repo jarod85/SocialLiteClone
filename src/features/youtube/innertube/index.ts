@@ -17,4 +17,4 @@ export const engine = {
   },
 };
 
-export { downloadStreams } from './video';
+export { downloadStreams, type DownloadStreams } from './video';

@@ -151,8 +151,11 @@ function CaptionChoice({ target, onClose, onPick }: { target: Target; onClose: (
     <SheetModal
       title="Captions in the video"
       note={
-        "Pick a language to add its captions to the MP4. They're saved in the video and as an .srt file next to it in " +
-        "Movies/Lite Social, which Samsung's video player and most others show (turn on subtitles in the player if they don't)."
+        youtubeFeatures.musicFolder
+          ? "Pick a language to add its captions to the MP4. They're saved in the video and as an .srt file next to it in " +
+            "Movies/Lite Social, which Samsung's video player and most others show (turn on subtitles in the player if they don't)."
+          : "Pick a language to save its captions as an .srt file next to the MP4 (Files: On My iPhone → Lite Social → Downloads). " +
+            'Players such as VLC show them.'
       }
       onClose={onClose}
     >

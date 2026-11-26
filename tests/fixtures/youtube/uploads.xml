@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?playlist_id=UULFHnyfMqiRRG1u-2MsSQLbXA"/>
+ <id>yt:playlist:UULFHnyfMqiRRG1u-2MsSQLbXA</id>
+ <yt:playlistId>UULFHnyfMqiRRG1u-2MsSQLbXA</yt:playlistId>
+ <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+ <title>Videos</title>
+ <author>
+  <name>Veritasium</name>
+  <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+ </author>
+ <published>2021-10-13T07:10:08+00:00</published>
+ <entry>
+  <id>yt:video:WbM7GP7QoEM</id>
+  <yt:videoId>WbM7GP7QoEM</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Scientists Said This Wave Was Impossible</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=WbM7GP7QoEM"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-11-25T14:00:52+00:00</published>
+  <updated>2026-11-26T00:22:38+00:00</updated>
+  <media:group>
+   <media:title>Scientists Said This Wave Was Impossible</media:title>
+   <media:content url="https://www.youtube.com/v/WbM7GP7QoEM?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/WbM7GP7QoEM/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="33235" average="5.00" min="1" max="5"/>
+    <media:statistics views="2981319"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:uXuQF_PPg5U</id>
+  <yt:videoId>uXuQF_PPg5U</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Randomness is a lie. Let me explain</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=uXuQF_PPg5U"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-11-18T20:29:44+00:00</published>
+  <updated>2026-11-24T10:37:12+00:00</updated>
+  <media:group>
+   <media:title>Randomness is a lie. Let me explain</media:title>
+   <media:content url="https://www.youtube.com/v/uXuQF_PPg5U?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/uXuQF_PPg5U/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="49460" average="5.00" min="1" max="5"/>
+    <media:statistics views="4465559"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:KfODG5REyss</id>
+  <yt:videoId>KfODG5REyss</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>I finally saw quantum physics with my own eyes... (It's spookier than I expected)</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=KfODG5REyss"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-11-04T15:52:59+00:00</published>
+  <updated>2026-11-20T19:51:12+00:00</updated>
+  <media:group>
+   <media:title>I finally saw quantum physics with my own eyes... (It's spookier than I expected)</media:title>
+   <media:content url="https://www.youtube.com/v/KfODG5REyss?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/KfODG5REyss/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="218954" average="5.00" min="1" max="5"/>
+    <media:statistics views="22043599"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:eyZEqSPeMwg</id>
+  <yt:videoId>eyZEqSPeMwg</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Relativity is so much weirder than we thought...</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=eyZEqSPeMwg"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-10-23T18:46:44+00:00</published>
+  <updated>2026-11-19T22:48:36+00:00</updated>
+  <media:group>
+   <media:title>Relativity is so much weirder than we thought...</media:title>
+   <media:content url="https://www.youtube.com/v/eyZEqSPeMwg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/eyZEqSPeMwg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="87574" average="5.00" min="1" max="5"/>
+    <media:statistics views="8662635"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:NiCgcUTL9_Q</id>
+  <yt:videoId>NiCgcUTL9_Q</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Fiber Optics are so much cooler than I thought</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=NiCgcUTL9_Q"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-10-12T17:11:45+00:00</published>
+  <updated>2026-11-03T11:33:19+00:00</updated>
+  <media:group>
+   <media:title>Fiber Optics are so much cooler than I thought</media:title>
+   <media:content url="https://www.youtube.com/v/NiCgcUTL9_Q?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/NiCgcUTL9_Q/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="169321" average="5.00" min="1" max="5"/>
+    <media:statistics views="16876808"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:ONAuUyml0yI</id>
+  <yt:videoId>ONAuUyml0yI</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>We're trying something new...</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=ONAuUyml0yI"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-09-30T19:19:10+00:00</published>
+  <updated>2026-10-04T23:43:47+00:00</updated>
+  <media:group>
+   <media:title>We're trying something new...</media:title>
+   <media:content url="https://www.youtube.com/v/ONAuUyml0yI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/ONAuUyml0yI/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="22209" average="5.00" min="1" max="5"/>
+    <media:statistics views="1477327"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:JsBZOcqZerk</id>
+  <yt:videoId>JsBZOcqZerk</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>The Insane Real Engineering of the Nazi Enigma Machine</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=JsBZOcqZerk"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-09-21T17:49:57+00:00</published>
+  <updated>2026-10-13T14:49:04+00:00</updated>
+  <media:group>
+   <media:title>The Insane Real Engineering of the Nazi Enigma Machine</media:title>
+   <media:content url="https://www.youtube.com/v/JsBZOcqZerk?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/JsBZOcqZerk/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="154928" average="5.00" min="1" max="5"/>
+    <media:statistics views="22411151"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:J1WoNuemKOg</id>
+  <yt:videoId>J1WoNuemKOg</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>We sent a camera to space to film the solar eclipse</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=J1WoNuemKOg"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-08-17T14:30:16+00:00</published>
+  <updated>2026-11-19T13:57:36+00:00</updated>
+  <media:group>
+   <media:title>We sent a camera to space to film the solar eclipse</media:title>
+   <media:content url="https://www.youtube.com/v/J1WoNuemKOg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/J1WoNuemKOg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="68645" average="5.00" min="1" max="5"/>
+    <media:statistics views="2821364"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:wt4p2oalmRY</id>
+  <yt:videoId>wt4p2oalmRY</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Is spider web really stronger than steel?</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=wt4p2oalmRY"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-08-02T13:21:11+00:00</published>
+  <updated>2026-10-01T04:02:05+00:00</updated>
+  <media:group>
+   <media:title>Is spider web really stronger than steel?</media:title>
+   <media:content url="https://www.youtube.com/v/wt4p2oalmRY?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/wt4p2oalmRY/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="144745" average="5.00" min="1" max="5"/>
+    <media:statistics views="10017553"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:tL9Lw250spc</id>
+  <yt:videoId>tL9Lw250spc</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Why does every mammal get 1 billion heartbeats in their life?</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=tL9Lw250spc"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-07-25T17:29:09+00:00</published>
+  <updated>2026-09-30T03:07:18+00:00</updated>
+  <media:group>
+   <media:title>Why does every mammal get 1 billion heartbeats in their life?</media:title>
+   <media:content url="https://www.youtube.com/v/tL9Lw250spc?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/tL9Lw250spc/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="155479" average="5.00" min="1" max="5"/>
+    <media:statistics views="6972693"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:GK2pZ_oVU1o</id>
+  <yt:videoId>GK2pZ_oVU1o</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>The Scariest Chart in Electrical Engineering</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=GK2pZ_oVU1o"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-07-14T18:03:28+00:00</published>
+  <updated>2026-09-30T23:01:04+00:00</updated>
+  <media:group>
+   <media:title>The Scariest Chart in Electrical Engineering</media:title>
+   <media:content url="https://www.youtube.com/v/GK2pZ_oVU1o?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/GK2pZ_oVU1o/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="156225" average="5.00" min="1" max="5"/>
+    <media:statistics views="6991922"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:mvcesPWvUIc</id>
+  <yt:videoId>mvcesPWvUIc</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>We've Been Using The Wrong Science In Court For 50 years</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=mvcesPWvUIc"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-06-22T14:40:50+00:00</published>
+  <updated>2026-10-04T14:12:11+00:00</updated>
+  <media:group>
+   <media:title>We've Been Using The Wrong Science In Court For 50 years</media:title>
+   <media:content url="https://www.youtube.com/v/mvcesPWvUIc?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/mvcesPWvUIc/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="78979" average="5.00" min="1" max="5"/>
+    <media:statistics views="2760377"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:8HBDE-msUjw</id>
+  <yt:videoId>8HBDE-msUjw</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>We're 99.9% sure this pattern is true, but no one can prove it</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=8HBDE-msUjw"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-06-14T15:18:45+00:00</published>
+  <updated>2026-09-30T06:12:08+00:00</updated>
+  <media:group>
+   <media:title>We're 99.9% sure this pattern is true, but no one can prove it</media:title>
+   <media:content url="https://www.youtube.com/v/8HBDE-msUjw?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/8HBDE-msUjw/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="111968" average="5.00" min="1" max="5"/>
+    <media:statistics views="6856042"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:tz23G_UXCGA</id>
+  <yt:videoId>tz23G_UXCGA</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Something is jamming GPS over Europe. Here's what we found</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=tz23G_UXCGA"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-06-05T07:09:17+00:00</published>
+  <updated>2026-10-01T10:56:15+00:00</updated>
+  <media:group>
+   <media:title>Something is jamming GPS over Europe. Here's what we found</media:title>
+   <media:content url="https://www.youtube.com/v/tz23G_UXCGA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/tz23G_UXCGA/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="296096" average="5.00" min="1" max="5"/>
+    <media:statistics views="12578692"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:kS-CGkiPetQ</id>
+  <yt:videoId>kS-CGkiPetQ</yt:videoId>
+  <yt:channelId>UCHnyfMqiRRG1u-2MsSQLbXA</yt:channelId>
+  <title>Google Maps is unreasonably fast. Let me explain</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=kS-CGkiPetQ"/>
+  <author>
+   <name>Veritasium</name>
+   <uri>https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA</uri>
+  </author>
+  <published>2026-05-30T14:46:43+00:00</published>
+  <updated>2026-10-04T10:21:47+00:00</updated>
+  <media:group>
+   <media:title>Google Maps is unreasonably fast. Let me explain</media:title>
+   <media:content url="https://www.youtube.com/v/kS-CGkiPetQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/kS-CGkiPetQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Description &amp; more</media:description>
+   <media:community>
+    <media:starRating count="169013" average="5.00" min="1" max="5"/>
+    <media:statistics views="9005821"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

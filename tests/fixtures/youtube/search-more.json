@@ -1,0 +1,378 @@
+{
+ "onResponseReceivedCommands": [
+  {
+   "appendContinuationItemsAction": {
+    "continuationItems": [
+     {
+      "itemSectionRenderer": {
+       "contents": [
+        {
+         "videoRenderer": {
+          "videoId": "uXuQF_PPg5U",
+          "thumbnail": {
+           "thumbnails": [
+            {
+             "url": "https://i.ytimg.com/vi/uXuQF_PPg5U/hq720_custom_2.jpg?sqp=COSGntgG-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLD5X2XoehtRZ9-YJ93N8LdqQnJixw",
+             "width": 360,
+             "height": 202
+            },
+            {
+             "url": "https://i.ytimg.com/vi/uXuQF_PPg5U/hq720_custom_2.jpg?sqp=COSGntgG-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLBIkCLE2WdLHfmvdwCA6Ay_i4cBcw",
+             "width": 720,
+             "height": 404
+            }
+           ]
+          },
+          "title": {
+           "runs": [
+            {
+             "text": "The Nerds Who Beat Slot Machines With Math"
+            }
+           ]
+          },
+          "longBylineText": {
+           "runs": [
+            {
+             "text": "Veritasium",
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/@veritasium",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+               "canonicalBaseUrl": "/@veritasium"
+              }
+             }
+            }
+           ]
+          },
+          "publishedTimeText": {
+           "simpleText": "7 days ago"
+          },
+          "lengthText": {
+           "simpleText": "38:48"
+          },
+          "viewCountText": {
+           "simpleText": "4,468,104 views"
+          },
+          "navigationEndpoint": {
+           "commandMetadata": {
+            "webCommandMetadata": {
+             "url": "/watch?v=uXuQF_PPg5U&pp=ygUKdmVyaXRhc2l1bQ%3D%3D",
+             "webPageType": "WEB_PAGE_TYPE_WATCH",
+             "rootVe": 3832
+            }
+           },
+           "watchEndpoint": {
+            "videoId": "uXuQF_PPg5U",
+            "params": "qgMKdmVyaXRhc2l1bboDCgjLlZOiuePg-Sm6AwoIoN6t1OjDvYkPugMKCOK-nbekgpiYZroDCgjQ1fifidn1g0O6AwsI2_CMps2D1rroAboDJBIiUExrYWhaalY1d0tlOXEzSy1uazgya1ZEX3BOZlBaMTQwaboDCgiZ7Y6UjuGo0ly6AwsIl9TB797n9JqRAboDCwiHob2tj9bH-5oBugMKCPO8_qfs1-HdE7oDCgj4lOWPz-yRtku6AyQSIlBMa2FoWmpWNXdLZV9ZaC03VkZyUDFieEpPdGtWemRxZUK6AwoItum_tbGwiLlsugMLCPDqr8Gawu7y5QG6AwoIsLm9qbigsuBgugMLCJLv5rjIzqmjgwG6AwsIvKSxzb7ikLjwAfIDBQ2MGzE-ggQCGAE%3D",
+            "playerParams": "ygUKdmVyaXRhc2l1bQ%3D%3D",
+            "watchEndpointSupportedOnesieConfig": {
+             "html5PlaybackOnesieConfig": {
+              "commonConfig": {
+               "url": "https://rr2---sn-u5oxu-un5z.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&epbp=1&msp=1&odepv=1&id=b97b9017f3cf8395&ip=2001%3A288%3A22f2%3A32%3A2dfe%3A7f05%3Ae896%3A30e4&initcwndbps=3538625&mt=1795654413&oweuc="
+              }
+             }
+            }
+           }
+          },
+          "badges": [
+           {
+            "metadataBadgeRenderer": {
+             "style": "BADGE_STYLE_TYPE_SIMPLE",
+             "label": "4K"
+            }
+           },
+           {
+            "metadataBadgeRenderer": {
+             "style": "BADGE_STYLE_TYPE_SIMPLE",
+             "label": "CC",
+             "accessibilityData": {
+              "label": "Closed captions"
+             }
+            }
+           }
+          ],
+          "ownerBadges": [
+           {
+            "metadataBadgeRenderer": {
+             "icon": {
+              "iconType": "CHECK_CIRCLE_THICK"
+             },
+             "style": "BADGE_STYLE_TYPE_VERIFIED",
+             "tooltip": "Verified",
+             "accessibilityData": {
+              "label": "Verified"
+             }
+            }
+           }
+          ],
+          "ownerText": {
+           "runs": [
+            {
+             "text": "Veritasium",
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/@veritasium",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+               "canonicalBaseUrl": "/@veritasium"
+              }
+             }
+            }
+           ]
+          },
+          "shortBylineText": {
+           "runs": [
+            {
+             "text": "Veritasium",
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/@veritasium",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+               "canonicalBaseUrl": "/@veritasium"
+              }
+             }
+            }
+           ]
+          },
+          "shortViewCountText": {
+           "simpleText": "4.4M views"
+          },
+          "avatar": {
+           "decoratedAvatarViewModel": {
+            "avatar": {
+             "avatarViewModel": {
+              "image": {
+               "sources": [
+                {
+                 "url": "https://yt3.ggpht.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA=s68-c-k-c0x00ffffff-no-rj",
+                 "width": 68,
+                 "height": 68
+                }
+               ]
+              },
+              "avatarImageSize": "AVATAR_SIZE_M"
+             }
+            },
+            "a11yLabel": "Go to channel Veritasium"
+           }
+          }
+         }
+        },
+        {
+         "videoRenderer": {
+          "videoId": "KfODG5REyss",
+          "thumbnail": {
+           "thumbnails": [
+            {
+             "url": "https://i.ytimg.com/vi/KfODG5REyss/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLBYroMP0nnenAUs9adGt37dFCuNKA",
+             "width": 360,
+             "height": 202
+            },
+            {
+             "url": "https://i.ytimg.com/vi/KfODG5REyss/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCrm0vfOBEzUezcnzeIWzxDf-NocA",
+             "width": 720,
+             "height": 404
+            }
+           ]
+          },
+          "title": {
+           "runs": [
+            {
+             "text": "I finally saw quantum physics with my own eyes... (It's spookier than I expected)"
+            }
+           ]
+          },
+          "longBylineText": {
+           "runs": [
+            {
+             "text": "Veritasium",
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/@veritasium",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+               "canonicalBaseUrl": "/@veritasium"
+              }
+             }
+            }
+           ]
+          },
+          "publishedTimeText": {
+           "simpleText": "3 weeks ago"
+          },
+          "lengthText": {
+           "simpleText": "1:05:56"
+          },
+          "viewCountText": {
+           "simpleText": "22,046,141 views"
+          },
+          "navigationEndpoint": {
+           "commandMetadata": {
+            "webCommandMetadata": {
+             "url": "/watch?v=KfODG5REyss&pp=ygUKdmVyaXRhc2l1bQ%3D%3D",
+             "webPageType": "WEB_PAGE_TYPE_WATCH",
+             "rootVe": 3832
+            }
+           },
+           "watchEndpoint": {
+            "videoId": "KfODG5REyss",
+            "params": "qgMKdmVyaXRhc2l1bboDCwiVh76e_4LkvbkBugMKCKDerdTow72JD7oDCgjivp23pIKYmGa6AwoI0NX4n4nZ9YNDugMLCNvwjKbNg9a66AG6AyQSIlBMa2FoWmpWNXdLZTlxM0stbms4MmtWRF9wTmZQWjE0MGm6AwoIme2OlI7hqNJcugMLCJfUwe_e5_SakQG6AwsIh6G9rY_Wx_uaAboDCgjzvP6n7Nfh3RO6AwoI-JTlj8_skbZLugMkEiJQTGthaFpqVjV3S2VfWWgtN1ZGclAxYnhKT3RrVnpkcWVCugMKCLbpv7WxsIi5bLoDCwjw6q_BmsLu8uUBugMKCLC5vam4oLLgYLoDCwiS7-a4yM6po4MBugMLCLyksc2-4pC48AHyAwUNjBsxPoIEAhgB",
+            "playerParams": "ygUKdmVyaXRhc2l1bQ%3D%3D",
+            "watchEndpointSupportedOnesieConfig": {
+             "html5PlaybackOnesieConfig": {
+              "commonConfig": {
+               "url": "https://rr2---sn-u5oxu-un5z.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&epbp=1&msp=1&odepv=1&id=29f3831b9444cacb&ip=2001%3A288%3A22f2%3A32%3A2dfe%3A7f05%3Ae896%3A30e4&initcwndbps=3538625&mt=1795654413&oweuc="
+              }
+             }
+            }
+           }
+          },
+          "badges": [
+           {
+            "metadataBadgeRenderer": {
+             "style": "BADGE_STYLE_TYPE_SIMPLE",
+             "label": "4K"
+            }
+           },
+           {
+            "metadataBadgeRenderer": {
+             "style": "BADGE_STYLE_TYPE_SIMPLE",
+             "label": "CC",
+             "accessibilityData": {
+              "label": "Closed captions"
+             }
+            }
+           }
+          ],
+          "ownerBadges": [
+           {
+            "metadataBadgeRenderer": {
+             "icon": {
+              "iconType": "CHECK_CIRCLE_THICK"
+             },
+             "style": "BADGE_STYLE_TYPE_VERIFIED",
+             "tooltip": "Verified",
+             "accessibilityData": {
+              "label": "Verified"
+             }
+            }
+           }
+          ],
+          "ownerText": {
+           "runs": [
+            {
+             "text": "Veritasium",
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/@veritasium",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+               "canonicalBaseUrl": "/@veritasium"
+              }
+             }
+            }
+           ]
+          },
+          "shortBylineText": {
+           "runs": [
+            {
+             "text": "Veritasium",
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/@veritasium",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+               "canonicalBaseUrl": "/@veritasium"
+              }
+             }
+            }
+           ]
+          },
+          "shortViewCountText": {
+           "simpleText": "22M views"
+          },
+          "avatar": {
+           "decoratedAvatarViewModel": {
+            "avatar": {
+             "avatarViewModel": {
+              "image": {
+               "sources": [
+                {
+                 "url": "https://yt3.ggpht.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA=s68-c-k-c0x00ffffff-no-rj",
+                 "width": 68,
+                 "height": 68
+                }
+               ]
+              },
+              "avatarImageSize": "AVATAR_SIZE_M"
+             }
+            },
+            "a11yLabel": "Go to channel Veritasium"
+           }
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "continuationItemRenderer": {
+       "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+       "continuationEndpoint": {
+        "commandMetadata": {
+         "webCommandMetadata": {
+          "sendPost": true,
+          "apiUrl": "/youtubei/v1/search"
+         }
+        },
+        "continuationCommand": {
+         "token": "Et8DEgp2ZXJpdGFzaXVtGtADU0NpQ0FRdDFXSFZSUmw5UVVHYzFWWUlCQzB0bVQwUkhOVkpGZVhOemdnRUxSSGhNTWtodmNVeGllVUdDQVF0YWFrSm5SV3RpYmxneVNZSUJDMUYzWmxkNVNsQXRTM1JCZ2dFTE5raFdXVWhPVkVSUFJuT0NBU0pRVEd0aGFGcHFWalYzUzJVNWNUTkxMVzVyT0RKclZrUmZjRTVtVUZveE5EQnBnZ0VMV0V0VGFrTlBTMFIwY0d1Q0FRdHJWRmhVVUdVemQyRm9ZNElCQzIxMlkyVnpVRmQyVlVsamdnRUxSVGQxUjNaelZGOXViazJDQVF0VE1uaElXbEJJTlZOdVo0SUJJbEJNYTJGb1dtcFdOWGRMWlY5WmFDMDNWa1p5VURGaWVFcFBkR3RXZW1SeFpVS0NBUXRpU0Vsb1ozaGhkamxNV1lJQkdGVkRibTl3U21sc1dXdEliWFZMTFhOa2JEQTNkbXRXWjRJQkN6VmxWelpGWVdkeU9WaEJnZ0VMV1UxRVNrRTBWWFpZVEVHQ0FRdG5NR0Z0WkVsalduUTFTWUlCQ3poSVFrUkZMVzF6VldwM3NnRUdDZ1FJTGhBRDZnRUVDQVFRTWclM0QlM0QYgeDoGCILc2VhcmNoLWZlZWQ%3D",
+         "request": "CONTINUATION_REQUEST_TYPE_SEARCH"
+        }
+       }
+      }
+     }
+    ],
+    "targetId": "search-feed"
+   }
+  }
+ ]
+}

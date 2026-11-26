@@ -12,11 +12,13 @@ const API = 'https://www.youtube.com/youtubei/v1/';
 const PLAYER_API = 'https://youtubei.googleapis.com/youtubei/v1/player';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
-/** The device's language and country, as YouTube's hl and gl. */
+/**
+ * YouTube's hl (language) and gl (country). The language stays English: the parsers read
+ * English counts and dates ("2.9M views", "3 days ago"), like the rest of the app's text.
+ */
 export function locale(): { hl: string; gl: string } {
-  const tag = Intl.DateTimeFormat().resolvedOptions().locale ?? '';
-  const [language, region] = tag.split('-');
-  return { hl: language || 'en', gl: region && /^[A-Z]{2}$/.test(region) ? region : 'US' };
+  const region = (Intl.DateTimeFormat().resolvedOptions().locale ?? '').split('-')[1];
+  return { hl: 'en', gl: region && /^[A-Z]{2}$/.test(region) ? region : 'US' };
 }
 
 const random = (length: number) => Array.from({ length }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');

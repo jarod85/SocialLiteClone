@@ -1,0 +1,1007 @@
+{
+ "contents": {
+  "twoColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@veritasium/videos",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+        "params": "EgZ2aWRlb3PyBgQKAjoA",
+        "canonicalBaseUrl": "/@veritasium"
+       }
+      },
+      "title": "Videos",
+      "selected": true,
+      "content": {
+       "richGridRenderer": {
+        "contents": [
+         {
+          "richItemRenderer": {
+           "content": {
+            "lockupViewModel": {
+             "contentImage": {
+              "thumbnailViewModel": {
+               "image": {
+                "sources": [
+                 {
+                  "url": "https://i.ytimg.com/vi/WbM7GP7QoEM/hq720_custom_3.jpg?sqp=COD_ndgG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBVMBPK1uRNNYEKjSuQ7umCRSB0OQ",
+                  "width": 360,
+                  "height": 202
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/WbM7GP7QoEM/hq720_custom_3.jpg?sqp=COD_ndgG-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLA7bleAF-IKluiBGRQaaZBColCwYw",
+                  "width": 720,
+                  "height": 404
+                 }
+                ]
+               },
+               "overlays": [
+                {
+                 "thumbnailBottomOverlayViewModel": {
+                  "badges": [
+                   {
+                    "thumbnailBadgeViewModel": {
+                     "text": "28:04",
+                     "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT",
+                     "animationActivationTargetId": "WbM7GP7QoEM",
+                     "animationActivationEntityKey": "Eh8veW91dHViZS9hcHAvd2F0Y2gvcGxheWVyX3N0YXRlIMMCKAE%3D",
+                     "lottieData": {
+                      "url": "https://www.gstatic.com/youtube/img/lottie/audio_indicator/audio_indicator_v2.json",
+                      "settings": {
+                       "loop": true,
+                       "autoplay": true
+                      }
+                     },
+                     "animatedText": "Now playing",
+                     "animationActivationEntitySelectorType": "THUMBNAIL_BADGE_ANIMATION_ENTITY_SELECTOR_TYPE_PLAYER_STATE"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "animatedThumbnailOverlayViewModel": {
+                  "thumbnail": {
+                   "sources": [
+                    {
+                     "url": "https://i.ytimg.com/an_webp/WbM7GP7QoEM/mqdefault_6s.webp?du=3000&sqp=COn0ndgG&rs=AOn4CLBSEXYCfXtXuH8q9GIEPX9a7TY_sA",
+                     "width": 320,
+                     "height": 180
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "thumbnailHoverOverlayToggleActionsViewModel": {
+                  "buttons": [
+                   {
+                    "toggleButtonViewModel": {
+                     "defaultButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "WATCH_LATER",
+                       "accessibilityText": "Watch later",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "toggledButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "CHECK",
+                       "accessibilityText": "Added",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "isToggled": false
+                    }
+                   },
+                   {
+                    "toggleButtonViewModel": {
+                     "defaultButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "ADD_TO_QUEUE_TAIL",
+                       "accessibilityText": "Add to queue",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "toggledButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "CHECK",
+                       "accessibilityText": "Added",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "isToggled": false
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             "metadata": {
+              "lockupMetadataViewModel": {
+               "title": {
+                "content": "Scientists Said This Wave Was Impossible"
+               },
+               "metadata": {
+                "contentMetadataViewModel": {
+                 "metadataRows": [
+                  {
+                   "metadataParts": [
+                    {
+                     "text": {
+                      "content": "2.9M views"
+                     }
+                    },
+                    {
+                     "text": {
+                      "content": "10 hours ago"
+                     },
+                     "accessibilityLabel": "10 hours ago"
+                    }
+                   ]
+                  }
+                 ],
+                 "delimiter": " • "
+                }
+               }
+              }
+             },
+             "contentId": "WbM7GP7QoEM",
+             "contentType": "LOCKUP_CONTENT_TYPE_VIDEO"
+            }
+           }
+          }
+         },
+         {
+          "richItemRenderer": {
+           "content": {
+            "lockupViewModel": {
+             "contentImage": {
+              "thumbnailViewModel": {
+               "image": {
+                "sources": [
+                 {
+                  "url": "https://i.ytimg.com/vi/uXuQF_PPg5U/hq720_custom_3.jpg?sqp=COD_ndgG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLCuRJzZj0OSLJ2BeFsRB-8HMF_WXw",
+                  "width": 360,
+                  "height": 202
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/uXuQF_PPg5U/hq720_custom_3.jpg?sqp=COD_ndgG-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBIhqVL91aNZQ18grUj5BYBmOo_8g",
+                  "width": 720,
+                  "height": 404
+                 }
+                ]
+               },
+               "overlays": [
+                {
+                 "thumbnailBottomOverlayViewModel": {
+                  "badges": [
+                   {
+                    "thumbnailBadgeViewModel": {
+                     "text": "38:48",
+                     "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT",
+                     "animationActivationTargetId": "uXuQF_PPg5U",
+                     "animationActivationEntityKey": "Eh8veW91dHViZS9hcHAvd2F0Y2gvcGxheWVyX3N0YXRlIMMCKAE%3D",
+                     "lottieData": {
+                      "url": "https://www.gstatic.com/youtube/img/lottie/audio_indicator/audio_indicator_v2.json",
+                      "settings": {
+                       "loop": true,
+                       "autoplay": true
+                      }
+                     },
+                     "animatedText": "Now playing",
+                     "animationActivationEntitySelectorType": "THUMBNAIL_BADGE_ANIMATION_ENTITY_SELECTOR_TYPE_PLAYER_STATE"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "animatedThumbnailOverlayViewModel": {
+                  "thumbnail": {
+                   "sources": [
+                    {
+                     "url": "https://i.ytimg.com/an_webp/uXuQF_PPg5U/mqdefault_6s.webp?du=3000&sqp=CP3dndgG&rs=AOn4CLCdTacJIOWj9fh7AL65fkc8MG_y0A",
+                     "width": 320,
+                     "height": 180
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "thumbnailHoverOverlayToggleActionsViewModel": {
+                  "buttons": [
+                   {
+                    "toggleButtonViewModel": {
+                     "defaultButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "WATCH_LATER",
+                       "accessibilityText": "Watch later",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "toggledButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "CHECK",
+                       "accessibilityText": "Added",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "isToggled": false
+                    }
+                   },
+                   {
+                    "toggleButtonViewModel": {
+                     "defaultButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "ADD_TO_QUEUE_TAIL",
+                       "accessibilityText": "Add to queue",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "toggledButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "CHECK",
+                       "accessibilityText": "Added",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "isToggled": false
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             "metadata": {
+              "lockupMetadataViewModel": {
+               "title": {
+                "content": "The Math Geniuses Who Hacked a Casino and Made Millions"
+               },
+               "metadata": {
+                "contentMetadataViewModel": {
+                 "metadataRows": [
+                  {
+                   "metadataParts": [
+                    {
+                     "text": {
+                      "content": "4.4M views"
+                     }
+                    },
+                    {
+                     "text": {
+                      "content": "7 days ago"
+                     },
+                     "accessibilityLabel": "7 days ago"
+                    }
+                   ]
+                  }
+                 ],
+                 "delimiter": " • "
+                }
+               }
+              }
+             },
+             "contentId": "uXuQF_PPg5U",
+             "contentType": "LOCKUP_CONTENT_TYPE_VIDEO"
+            }
+           }
+          }
+         },
+         {
+          "richItemRenderer": {
+           "content": {
+            "lockupViewModel": {
+             "contentImage": {
+              "thumbnailViewModel": {
+               "image": {
+                "sources": [
+                 {
+                  "url": "https://i.ytimg.com/vi/KfODG5REyss/hq720.jpg?sqp=-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLA9s734DzDgJsSWgYdbR0f8KXLKDA",
+                  "width": 360,
+                  "height": 202
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/KfODG5REyss/hq720.jpg?sqp=-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLAsJV8tEg6rzod2HHXu_Ho0Y9BTAQ",
+                  "width": 720,
+                  "height": 404
+                 }
+                ]
+               },
+               "overlays": [
+                {
+                 "thumbnailBottomOverlayViewModel": {
+                  "badges": [
+                   {
+                    "thumbnailBadgeViewModel": {
+                     "text": "1:05:56",
+                     "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT",
+                     "animationActivationTargetId": "KfODG5REyss",
+                     "animationActivationEntityKey": "Eh8veW91dHViZS9hcHAvd2F0Y2gvcGxheWVyX3N0YXRlIMMCKAE%3D",
+                     "lottieData": {
+                      "url": "https://www.gstatic.com/youtube/img/lottie/audio_indicator/audio_indicator_v2.json",
+                      "settings": {
+                       "loop": true,
+                       "autoplay": true
+                      }
+                     },
+                     "animatedText": "Now playing",
+                     "animationActivationEntitySelectorType": "THUMBNAIL_BADGE_ANIMATION_ENTITY_SELECTOR_TYPE_PLAYER_STATE"
+                    }
+                   }
+                  ]
+                 }
+                },
+                {
+                 "animatedThumbnailOverlayViewModel": {
+                  "thumbnail": {
+                   "sources": [
+                    {
+                     "url": "https://i.ytimg.com/an_webp/KfODG5REyss/mqdefault_6s.webp?du=3000&sqp=CKPjndgG&rs=AOn4CLCFIXqL8IzAuqz63F9oq7dHzig1Lw",
+                     "width": 320,
+                     "height": 180
+                    }
+                   ]
+                  }
+                 }
+                },
+                {
+                 "thumbnailHoverOverlayToggleActionsViewModel": {
+                  "buttons": [
+                   {
+                    "toggleButtonViewModel": {
+                     "defaultButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "WATCH_LATER",
+                       "accessibilityText": "Watch later",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "toggledButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "CHECK",
+                       "accessibilityText": "Added",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "isToggled": false
+                    }
+                   },
+                   {
+                    "toggleButtonViewModel": {
+                     "defaultButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "ADD_TO_QUEUE_TAIL",
+                       "accessibilityText": "Add to queue",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "toggledButtonViewModel": {
+                      "buttonViewModel": {
+                       "iconName": "CHECK",
+                       "accessibilityText": "Added",
+                       "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                       "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                       "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                       "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                      }
+                     },
+                     "isToggled": false
+                    }
+                   }
+                  ]
+                 }
+                }
+               ]
+              }
+             },
+             "metadata": {
+              "lockupMetadataViewModel": {
+               "title": {
+                "content": "I finally saw quantum physics with my own eyes... (It's spookier than I expected)"
+               },
+               "metadata": {
+                "contentMetadataViewModel": {
+                 "metadataRows": [
+                  {
+                   "metadataParts": [
+                    {
+                     "text": {
+                      "content": "22M views"
+                     }
+                    },
+                    {
+                     "text": {
+                      "content": "3 weeks ago"
+                     },
+                     "accessibilityLabel": "3 weeks ago"
+                    }
+                   ]
+                  }
+                 ],
+                 "delimiter": " • "
+                }
+               }
+              }
+             },
+             "contentId": "KfODG5REyss",
+             "contentType": "LOCKUP_CONTENT_TYPE_VIDEO"
+            }
+           }
+          }
+         },
+         {
+          "continuationItemRenderer": {
+           "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+           "continuationEndpoint": {
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "sendPost": true,
+              "apiUrl": "/youtubei/v1/browse"
+             }
+            },
+            "continuationCommand": {
+             "token": "4qmFsgK5CxIYVUNIbnlmTXFpUlJHMXUtMk1zU1FMYlhBGpwLOGdhc0NCcXBDSHFtQ0RxakNBb2tObUl5TW1JM05qY3RNREF3TUMweU4yTTRMVGxqTmpVdE5UZ3lOREk1WXpGaVpqQTBFdmdIUVdOV09GWmtWbEpQTTA1dlEzWTVhV0V3WlRkSWNYaHpkbVE1YlZGeWVISklVMW8xWVRNeGRqWk5UbTl5YkZaR2VsZHlRbm80ZDJZemNsQjVSV1YyVmt0UlUyTTFUekZaUlZOc2NHRkVWV0pZWDJWbldHeDJNalpxWDE5MGMwVkNaSFpoVkV4S1pHUTBObUpDVUhaSVFXcGxTRXhpT1VwbVYwNW5iemhaTlhvd00wVlVlalJxVlhWMVduQXRhMWRDY2xGcU9GUjJNblZXWTNGSGJVUTBVa3cyVGtVelVWVjZTV0pzUmtORE1WUTNiWE5ZTkZKaFNsQTROR2xMYkVSZmJWRkpaV2h2Y0ZGa2NuZHBWVWRVZUhKU1JsUkNVVE5LVlc5a1JWOTZTbUZTY3poRWJXSjRNbUV0VFZweVdqSTRUbmcyWTBoRE5UaHRhbVZQVmtaRGREVnhlVEZDWWtkdlVHMHdlRWxTU2tzeFNVaEVSbmhITkZwemJsOXliVzlsVFVOT1RrdDRlalZVWVhObVMycG5UMlZ2YjNKb2MwaHdaRUpPVHpoRWQzVlVjR0pNU21kUE5IZFhRMnhCY2sxNVNVWlJibGhNZGpoUVlpMUVhbmRmWDB0VWRuWTRkbUpqZG10bVgwaDNXRnBITTFkQlZXTlVWWFE1T1hWWWVsaHljbDlpVjNwQmVYUm9VMlpOUWpobFVFaDRVbnBYZUMxRVNXMXRUVEp6VVVaWU1VVTBTRWN4TjFWWGNraHdkMVpqYWsxeldsbHhTMlZKYTNGNmJqUmplR04wYlROYVZuVnROalZPUVcxYVZUUnVPSEExTjFoV1FuZG9VREpoTFZsVWQzTTVNbWRWZFVzeFNWOUVSR2QxZGpCNVQycGtNRmROVWxoeFdIcFVjRjlFU0hwbGFVTjRRbEZUT0MxTVlqWnRSblY1U0U5alZEaHBZbE5RUldSM1ZWQXRTVXBuYVdGd1lXSjBaM1pYVWxOdGN6TnNTR3hKVFZGb1dHeHZUbEJsYTBock1scDFkbVpZVlVrNWFuRnhhWGN4WnpnNVJteFRhVEowU1VVeFpIaDVWbTFrYjA5eWEwVnZNWGxZWkZwWlIyWk1OMU54YzJKeFZYQktPSEo2YW1oNVV6bFFSbTFXYUdSR2NuWTRaRkUxTjA5TmFFUTFZbGRQZW1GeU1UTnRkRWxuYlhsQk9YWjRUVXBDVW5Zd01VRlhRME5NVkVrdFUybzFSRVUxVjJ4dmFreG5WSE15VVdSbmJtWktObVJYUjFseGJYVldVa3RyY0hCSFRFc3dWblJCYURCVlpVZzJTM2RrY0ZGaVp6a3RRMmc1WVRCNWN6WlJPRkI2TVMxdE5sVkpNVGhRT1RGa01VZFJNVGhZT0c5MWFVUkVjRTR3VDFKUmFVTjRVV0ZvU200eVJIUnpXaTFvUkdNeVJWQnZjbWRNTURkMk9VWldia2d3U0ZKRk5rRk9ZMlpUY3kxc1RFa3dORTVZVFhocWNsUldhelJ3UnpKUlZHdzJRMGg1T0dOS1YxWkJMVkE1UkUxa1luWjJZVTlaU1hsUlQwNVNZMWN6Uldad05VeHFkV2hwYTNKelYwWjNWbWhpUTFGVFltNHhUazl3VVRaRmVGaFdOM2xxYUdWS1pIZENkSEpuYm5WRlEwNDNURXB1VTIwMFYwWkZYMmRJVlhCTGJUbDVaVXR2UldaNFJFUnhXbkJ1WkZkU1pIQlBjMnh3ZEdoUlZFbFlUakEyZVZCSlUxSm1hR1pRVkdJeFJEWXRTRlJhZURkS1NFNHdiRkFZQkElM0QlM0Q%3D",
+             "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+            }
+           }
+          }
+         }
+        ],
+        "header": {
+         "chipBarViewModel": {
+          "chips": [
+           {
+            "chipViewModel": {
+             "text": "Latest",
+             "selected": true,
+             "displayType": "CHIP_VIEW_MODEL_DISPLAY_TYPE_UNSPECIFIED",
+             "tapCommand": {
+              "innertubeCommand": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "sendPost": true,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "continuationCommand": {
+                "token": "4qmFsgJkEhhVQ0hueWZNcWlSUkcxdS0yTXNTUUxiWEEaSDhnWXVHaXg2S2tJb0NpUTJZakl5WWpjMk55MHdNREF3TFRJM1l6Z3RPV00yTlMwMU9ESTBNamxqTVdKbU1EUVlCQSUzRCUzRA%3D%3D",
+                "request": "CONTINUATION_REQUEST_TYPE_BROWSE",
+                "command": {
+                 "showReloadUiCommand": {
+                  "targetId": "6b22b767-0000-27c8-9c65-582429c1bf04"
+                 }
+                }
+               }
+              }
+             },
+             "accessibilityLabel": "Latest"
+            }
+           },
+           {
+            "chipViewModel": {
+             "text": "Popular",
+             "selected": false,
+             "displayType": "CHIP_VIEW_MODEL_DISPLAY_TYPE_UNSPECIFIED",
+             "tapCommand": {
+              "innertubeCommand": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "sendPost": true,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "continuationCommand": {
+                "token": "4qmFsgJkEhhVQ0hueWZNcWlSUkcxdS0yTXNTUUxiWEEaSDhnWXVHaXg2S2tJb0NpUTJZakl5WWpjMk55MHdNREF3TFRJM1l6Z3RPV00yTlMwMU9ESTBNamxqTVdKbU1EUVlBZyUzRCUzRA%3D%3D",
+                "request": "CONTINUATION_REQUEST_TYPE_BROWSE",
+                "command": {
+                 "showReloadUiCommand": {
+                  "targetId": "6b22b767-0000-27c8-9c65-582429c1bf04"
+                 }
+                }
+               }
+              }
+             },
+             "accessibilityLabel": "Popular"
+            }
+           },
+           {
+            "chipViewModel": {
+             "text": "Oldest",
+             "selected": false,
+             "displayType": "CHIP_VIEW_MODEL_DISPLAY_TYPE_UNSPECIFIED",
+             "tapCommand": {
+              "innertubeCommand": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "sendPost": true,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "continuationCommand": {
+                "token": "4qmFsgJkEhhVQ0hueWZNcWlSUkcxdS0yTXNTUUxiWEEaSDhnWXVHaXg2S2tJb0NpUTJZakl5WWpjMk55MHdNREF3TFRJM1l6Z3RPV00yTlMwMU9ESTBNamxqTVdKbU1EUVlCUSUzRCUzRA%3D%3D",
+                "request": "CONTINUATION_REQUEST_TYPE_BROWSE",
+                "command": {
+                 "showReloadUiCommand": {
+                  "targetId": "6b22b767-0000-27c8-9c65-582429c1bf04"
+                 }
+                }
+               }
+              }
+             },
+             "accessibilityLabel": "Oldest"
+            }
+           }
+          ]
+         }
+        },
+        "targetId": "6b22b767-0000-27c8-9c65-582429c1bf04",
+        "style": "RICH_GRID_STYLE_SLIM"
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ "header": {
+  "pageHeaderRenderer": {
+   "pageTitle": "Veritasium",
+   "content": {
+    "pageHeaderViewModel": {
+     "title": {
+      "dynamicTextViewModel": {
+       "text": {
+        "content": "Veritasium"
+       },
+       "maxLines": 2
+      }
+     },
+     "image": {
+      "decoratedAvatarViewModel": {
+       "avatar": {
+        "avatarViewModel": {
+         "image": {
+          "sources": [
+           {
+            "url": "https://yt3.googleusercontent.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA=s72-c-k-c0x00ffffff-no-rj",
+            "width": 72,
+            "height": 72
+           },
+           {
+            "url": "https://yt3.googleusercontent.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA=s120-c-k-c0x00ffffff-no-rj",
+            "width": 120,
+            "height": 120
+           },
+           {
+            "url": "https://yt3.googleusercontent.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA=s160-c-k-c0x00ffffff-no-rj",
+            "width": 160,
+            "height": 160
+           }
+          ],
+          "processor": {
+           "borderImageProcessor": {
+            "circular": true
+           }
+          }
+         },
+         "avatarImageSize": "AVATAR_SIZE_XL"
+        }
+       }
+      }
+     },
+     "metadata": {
+      "contentMetadataViewModel": {
+       "metadataRows": [
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "@veritasium"
+           },
+           "enableTruncation": true
+          }
+         ]
+        },
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "21.5M subscribers"
+           },
+           "accessibilityLabel": "21.5 million subscribers"
+          },
+          {
+           "text": {
+            "content": "554 videos"
+           }
+          }
+         ]
+        }
+       ],
+       "delimiter": "•"
+      }
+     },
+     "description": {
+      "descriptionPreviewViewModel": {
+       "description": {
+        "content": "An element of truth - videos about science, education, and anything else we find interesting. "
+       },
+       "maxLines": 2,
+       "truncationText": {
+        "content": "...more"
+       },
+       "alwaysShowTruncationText": true
+      }
+     },
+     "banner": {
+      "imageBannerViewModel": {
+       "image": {
+        "sources": [
+         {
+          "url": "https://yt3.googleusercontent.com/sDCGwJYqtOxT-odxPiErdlwfq3jlzXh0TsYFXtSSD6rld0Be51ZUNcoE17di2u1OiCjQunbcqA=w1060-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 1060,
+          "height": 175
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/sDCGwJYqtOxT-odxPiErdlwfq3jlzXh0TsYFXtSSD6rld0Be51ZUNcoE17di2u1OiCjQunbcqA=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 1138,
+          "height": 188
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/sDCGwJYqtOxT-odxPiErdlwfq3jlzXh0TsYFXtSSD6rld0Be51ZUNcoE17di2u1OiCjQunbcqA=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 1707,
+          "height": 283
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/sDCGwJYqtOxT-odxPiErdlwfq3jlzXh0TsYFXtSSD6rld0Be51ZUNcoE17di2u1OiCjQunbcqA=w2120-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 2120,
+          "height": 351
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/sDCGwJYqtOxT-odxPiErdlwfq3jlzXh0TsYFXtSSD6rld0Be51ZUNcoE17di2u1OiCjQunbcqA=w2276-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 2276,
+          "height": 377
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/sDCGwJYqtOxT-odxPiErdlwfq3jlzXh0TsYFXtSSD6rld0Be51ZUNcoE17di2u1OiCjQunbcqA=w2560-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 2560,
+          "height": 424
+         }
+        ]
+       },
+       "style": "IMAGE_BANNER_STYLE_INSET"
+      }
+     }
+    }
+   }
+  }
+ },
+ "metadata": {
+  "channelMetadataRenderer": {
+   "title": "Veritasium",
+   "description": "An element of truth - videos about science, education, and anything else we find interesting.\n\nFor all enquiries email us at contact@veritasium.com\n",
+   "rssUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA",
+   "channelConversionUrl": "https://www.youtube.com/measurement/follow_on/962985656/?backend=innertube&cname=1&cver=2_20260805_01_00&data=backend%3Dinnertube%3Bcname%3D1%3Bcver%3D2_20260805_01_00%3Bptype%3Dcview%3Btype%3Dcview%3Butuid%3DHnyfMqiRRG1u-2MsSQLbXA&foc_id=HnyfMqiRRG1u-2MsSQLbXA&label=followon_cvisit&ptype=cview&utuid=HnyfMqiRRG1u-2MsSQLbXA",
+   "externalId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+   "keywords": "\"science videos\" science \"science education\" \"science literacy\" veritasium misconceptions physics education astronomy chemistry biology teaching learning math \"united states\" finance",
+   "ownerUrls": [
+    "http://www.youtube.com/@veritasium"
+   ],
+   "avatar": {
+    "thumbnails": [
+     {
+      "url": "https://yt3.googleusercontent.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA=s900-c-k-c0x00ffffff-no-rj",
+      "width": 900,
+      "height": 900
+     }
+    ]
+   },
+   "channelUrl": "https://www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA",
+   "isFamilySafe": true,
+   "facebookProfileId": "veritasium",
+   "availableCountryCodes": [
+    "JM",
+    "GA",
+    "KG",
+    "YE",
+    "YT",
+    "PE",
+    "UY",
+    "KH",
+    "HM",
+    "IE",
+    "QA",
+    "BA",
+    "SC",
+    "HR",
+    "NE",
+    "TO",
+    "ID",
+    "BI",
+    "IM",
+    "AF",
+    "BW",
+    "BD",
+    "CO",
+    "NO",
+    "CF",
+    "GP",
+    "ML",
+    "HU",
+    "RW",
+    "UZ",
+    "VN",
+    "CK",
+    "CX",
+    "LT",
+    "WF",
+    "DE",
+    "TG",
+    "NU",
+    "TM",
+    "TT",
+    "VU",
+    "DZ",
+    "CZ",
+    "RU",
+    "TJ",
+    "SA",
+    "KN",
+    "AQ",
+    "AR",
+    "PG",
+    "SN",
+    "LV",
+    "GB",
+    "CI",
+    "NF",
+    "TK",
+    "AI",
+    "GU",
+    "VI",
+    "KY",
+    "SD",
+    "BT",
+    "SZ",
+    "ZM",
+    "DM",
+    "SO",
+    "DO",
+    "FM",
+    "GF",
+    "MS",
+    "CM",
+    "FK",
+    "AW",
+    "CY",
+    "VG",
+    "LI",
+    "TF",
+    "SK",
+    "SI",
+    "TV",
+    "LY",
+    "AM",
+    "TL",
+    "ST",
+    "CU",
+    "MR",
+    "BF",
+    "CR",
+    "AT",
+    "OM",
+    "UA",
+    "JE",
+    "SB",
+    "SJ",
+    "MY",
+    "TN",
+    "CD",
+    "PW",
+    "TD",
+    "MA",
+    "BE",
+    "IQ",
+    "PR",
+    "ZW",
+    "BO",
+    "NG",
+    "GT",
+    "JP",
+    "SY",
+    "MG",
+    "KI",
+    "WS",
+    "AX",
+    "GH",
+    "CL",
+    "MN",
+    "BR",
+    "GN",
+    "KZ",
+    "AL",
+    "IR",
+    "SX",
+    "JO",
+    "NC",
+    "AD",
+    "LC",
+    "PS",
+    "VE",
+    "AG",
+    "ME",
+    "US",
+    "NI",
+    "PY",
+    "CH",
+    "TR",
+    "SL",
+    "FI",
+    "SM",
+    "CW",
+    "AO",
+    "CG",
+    "AE",
+    "GY",
+    "BY",
+    "MU",
+    "MK",
+    "TW",
+    "BV",
+    "GE",
+    "PF",
+    "BB",
+    "GW",
+    "RO",
+    "SH",
+    "BZ",
+    "FO",
+    "NA",
+    "TZ",
+    "IL",
+    "VA",
+    "IT",
+    "MP",
+    "VC",
+    "RS",
+    "KE",
+    "ET",
+    "MH",
+    "ZA",
+    "GM",
+    "MQ",
+    "DK",
+    "EH",
+    "AS",
+    "LU",
+    "GL",
+    "NP",
+    "EE",
+    "LB",
+    "BM",
+    "DJ",
+    "PK",
+    "BS",
+    "AU",
+    "EC",
+    "IS",
+    "KM",
+    "SG",
+    "KW",
+    "GQ",
+    "MT",
+    "GD",
+    "UM",
+    "HN",
+    "BL",
+    "SV",
+    "KR",
+    "GG",
+    "CN",
+    "MO",
+    "MZ",
+    "MW",
+    "IN",
+    "AZ",
+    "TC",
+    "NZ",
+    "GR",
+    "PN",
+    "SE",
+    "LK",
+    "UG",
+    "HK",
+    "HT",
+    "PH",
+    "LS",
+    "RE",
+    "BN",
+    "GI",
+    "BQ",
+    "BG",
+    "MF",
+    "PL",
+    "TH",
+    "BJ",
+    "PT",
+    "MV",
+    "CV",
+    "FJ",
+    "IO",
+    "CA",
+    "CC",
+    "KP",
+    "ER",
+    "FR",
+    "LR",
+    "MC",
+    "EG",
+    "NR",
+    "SS",
+    "MD",
+    "BH",
+    "PM",
+    "NL",
+    "GS",
+    "LA",
+    "MX",
+    "PA",
+    "MM",
+    "SR",
+    "ES"
+   ],
+   "androidDeepLink": "android-app://com.google.android.youtube/http/www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA",
+   "androidAppindexingLink": "android-app://com.google.android.youtube/http/www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA",
+   "iosAppindexingLink": "ios-app://544007664/vnd.youtube/www.youtube.com/channel/UCHnyfMqiRRG1u-2MsSQLbXA",
+   "vanityChannelUrl": "http://www.youtube.com/@veritasium"
+  }
+ }
+}

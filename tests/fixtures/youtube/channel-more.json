@@ -1,0 +1,304 @@
+{
+ "onResponseReceivedActions": [
+  {
+   "appendContinuationItemsAction": {
+    "continuationItems": [
+     {
+      "richItemRenderer": {
+       "content": {
+        "lockupViewModel": {
+         "contentImage": {
+          "thumbnailViewModel": {
+           "image": {
+            "sources": [
+             {
+              "url": "https://i.ytimg.com/vi/Y-W-w8yNiKU/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLCC-EfXhhZJ1A4FKv3BR5AfE6t6JA",
+              "width": 360,
+              "height": 202
+             },
+             {
+              "url": "https://i.ytimg.com/vi/Y-W-w8yNiKU/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAAPTM3ChitVsmXjOjrE94asfhjsg",
+              "width": 720,
+              "height": 404
+             }
+            ]
+           },
+           "overlays": [
+            {
+             "thumbnailBottomOverlayViewModel": {
+              "badges": [
+               {
+                "thumbnailBadgeViewModel": {
+                 "text": "35:23",
+                 "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT",
+                 "animationActivationTargetId": "Y-W-w8yNiKU",
+                 "animationActivationEntityKey": "Eh8veW91dHViZS9hcHAvd2F0Y2gvcGxheWVyX3N0YXRlIMMCKAE%3D",
+                 "lottieData": {
+                  "url": "https://www.gstatic.com/youtube/img/lottie/audio_indicator/audio_indicator_v2.json",
+                  "settings": {
+                   "loop": true,
+                   "autoplay": true
+                  }
+                 },
+                 "animatedText": "Now playing",
+                 "animationActivationEntitySelectorType": "THUMBNAIL_BADGE_ANIMATION_ENTITY_SELECTOR_TYPE_PLAYER_STATE"
+                }
+               }
+              ]
+             }
+            },
+            {
+             "thumbnailHoverOverlayToggleActionsViewModel": {
+              "buttons": [
+               {
+                "toggleButtonViewModel": {
+                 "defaultButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "WATCH_LATER",
+                   "accessibilityText": "Watch later",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "toggledButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "CHECK",
+                   "accessibilityText": "Added",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "isToggled": false
+                }
+               },
+               {
+                "toggleButtonViewModel": {
+                 "defaultButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "ADD_TO_QUEUE_TAIL",
+                   "accessibilityText": "Add to queue",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "toggledButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "CHECK",
+                   "accessibilityText": "Added",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "isToggled": false
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         "metadata": {
+          "lockupMetadataViewModel": {
+           "title": {
+            "content": "Why does antimatter exist?"
+           },
+           "metadata": {
+            "contentMetadataViewModel": {
+             "metadataRows": [
+              {
+               "metadataParts": [
+                {
+                 "text": {
+                  "content": "10M views"
+                 }
+                },
+                {
+                 "text": {
+                  "content": "11 months ago"
+                 },
+                 "accessibilityLabel": "11 months ago"
+                }
+               ]
+              }
+             ],
+             "delimiter": " • "
+            }
+           }
+          }
+         },
+         "contentId": "Y-W-w8yNiKU",
+         "contentType": "LOCKUP_CONTENT_TYPE_VIDEO"
+        }
+       }
+      }
+     },
+     {
+      "richItemRenderer": {
+       "content": {
+        "lockupViewModel": {
+         "contentImage": {
+          "thumbnailViewModel": {
+           "image": {
+            "sources": [
+             {
+              "url": "https://i.ytimg.com/vi/HBluLfX2F_k/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLBbZiR-l9ER-MGyer4Q1R50Er8Cuw",
+              "width": 360,
+              "height": 202
+             },
+             {
+              "url": "https://i.ytimg.com/vi/HBluLfX2F_k/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLDOQedmC0Sgx3JbHXttAgQ9qSfdWA",
+              "width": 720,
+              "height": 404
+             }
+            ]
+           },
+           "overlays": [
+            {
+             "thumbnailBottomOverlayViewModel": {
+              "badges": [
+               {
+                "thumbnailBadgeViewModel": {
+                 "text": "45:13",
+                 "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT",
+                 "animationActivationTargetId": "HBluLfX2F_k",
+                 "animationActivationEntityKey": "Eh8veW91dHViZS9hcHAvd2F0Y2gvcGxheWVyX3N0YXRlIMMCKAE%3D",
+                 "lottieData": {
+                  "url": "https://www.gstatic.com/youtube/img/lottie/audio_indicator/audio_indicator_v2.json",
+                  "settings": {
+                   "loop": true,
+                   "autoplay": true
+                  }
+                 },
+                 "animatedText": "Now playing",
+                 "animationActivationEntitySelectorType": "THUMBNAIL_BADGE_ANIMATION_ENTITY_SELECTOR_TYPE_PLAYER_STATE"
+                }
+               }
+              ]
+             }
+            },
+            {
+             "thumbnailHoverOverlayToggleActionsViewModel": {
+              "buttons": [
+               {
+                "toggleButtonViewModel": {
+                 "defaultButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "WATCH_LATER",
+                   "accessibilityText": "Watch later",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "toggledButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "CHECK",
+                   "accessibilityText": "Added",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "isToggled": false
+                }
+               },
+               {
+                "toggleButtonViewModel": {
+                 "defaultButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "ADD_TO_QUEUE_TAIL",
+                   "accessibilityText": "Add to queue",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "toggledButtonViewModel": {
+                  "buttonViewModel": {
+                   "iconName": "CHECK",
+                   "accessibilityText": "Added",
+                   "style": "BUTTON_VIEW_MODEL_STYLE_OVERLAY_DARK",
+                   "type": "BUTTON_VIEW_MODEL_TYPE_TONAL",
+                   "buttonSize": "BUTTON_VIEW_MODEL_SIZE_COMPACT",
+                   "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+                  }
+                 },
+                 "isToggled": false
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         "metadata": {
+          "lockupMetadataViewModel": {
+           "title": {
+            "content": "You've (Likely) Been Playing The Game Of Life Wrong"
+           },
+           "metadata": {
+            "contentMetadataViewModel": {
+             "metadataRows": [
+              {
+               "metadataParts": [
+                {
+                 "text": {
+                  "content": "11M views"
+                 }
+                },
+                {
+                 "text": {
+                  "content": "11 months ago"
+                 },
+                 "accessibilityLabel": "11 months ago"
+                }
+               ]
+              }
+             ],
+             "delimiter": " • "
+            }
+           }
+          }
+         },
+         "contentId": "HBluLfX2F_k",
+         "contentType": "LOCKUP_CONTENT_TYPE_VIDEO"
+        }
+       }
+      }
+     },
+     {
+      "continuationItemRenderer": {
+       "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+       "continuationEndpoint": {
+        "commandMetadata": {
+         "webCommandMetadata": {
+          "sendPost": true,
+          "apiUrl": "/youtubei/v1/browse"
+         }
+        },
+        "continuationCommand": {
+         "token": "4qmFsgLzHBIYVUNIbnlmTXFpUlJHMXUtMk1zU1FMYlhBGtYcOGdhNkZScTNGWHEwRlRxeEZRb2tObUl5TW1JM05qY3RNREF3TUMweU4yTTRMVGxqTmpVdE5UZ3lOREk1WXpGaVpqQTBFb1lWUVdOV09GWmtXSFpaWW5VemFGZElVMDV3VVZKWlIxUmhNbVYyZWxwTGJXWjZRbTUyVFdKa1dESjVOSEpYWWxOUllUUlJMVlpGTm1VdE5tSkVOV0ZFZVZoS2FGRm1WVk5mZGtoMFVtWkxUMHhCY1hWalpURTBVRVp2U2xWRk9HTnViWEZ5TFZSQ2RYTnFielI0Vld4MGVUSldiRnBRVVY5WFgxVlBTQzB6VldoVmJrZDZWRVpWTm10WmVYZHNWMlJGV21ST2NGTlpjV2wxYWtod01XOXpNMk4xT0dWamFHNTJVVXRYTjNoR1FrWkVRelF6WlhCUmFqVk5NMmszTFcwd1dqZDRhMDR6Vld0d2JtWmpha3h6WTJKSmFtWmZVRmh5YjJvMGJUazFhMnBtTTBsU1MydGxiMFJLZWtsc2JucGZNV1JWT1d0QlozcHdOa1J0UVhNMFNqWTFSM1Z1WkRNdFIycFJlR0ZDTURGa1VVczBMVlpxV2pSSE9GOUVOM05zV0RGRFIyNU1UbUpRTUZjNVUyTTFXWEJETTBwSVVGcEVPRUZLZWpnM1VuQnpkRFo2UTB0SFJteFNMVkY1WWxseFN6aGxRM2c0VHpkbmVraGxVMkphTVVkQ1pIUmxNblpNVGpaaU1tbDNOR0ZqU1V0T1dYQldRWGRYTUhGT1FYQldMV1pUT1hseloySjFSWEZqZDFwUGEwbzNkblJCV1RkRE5rcGpUVkpSTlV4V04xVkdRMWxpYlUwNVRIZ3dNazlFU1dOWGVYVm9VbXhzVUY5ZlJuTktXRGxVWDNveWQyTlBNa3A2TW1WTFVIb3pjbTU1V1V0RFZGWmpVV1Z1UlZwc2NuQjBaRWMxZVdWM1dIRm1VV1puY25sNFJYZFdjRUprTWpsS1NteEZSMVJ0VUhKT1ZGUmZWVGN3V2pWWlh6Vk1TSGMyWlVoVWVpMTJRVkJZWDNsV2FVNUhkVlpaWVRKMFNqSkViSFJvYTFKdVRrRXROa1ptZEcxS2VqUk5SbFIxWmt4RlkyWnFiV1pGT0d0UmRreHNRbWt4VDJwaVdFY3RMV0V5ZUhJMU9GQnJjVEl6TUU1cE9VbHFjR3hqY1UxS2F6SktURkJpUVZaYWVtWklhMHhTVW5KMFQwTkRhVkpOV21GemFISXlkbE52VkZCcVNFeHdXbGh5WW1ScGFIVTNTbUpSYVMxelpYaEJiVmRMZW1ReFJUYzBUSGMxTXpWRVkxRlhTeTAyWVhSNVIyaGhiR1pYZUc1bVZIUlpkWFJWWWw4M1FXSjVVM2cwWDFoa1oybFBNRUZ4VTB0aE1sUmpVbXd5VTFkRFZuWjNUMDAzVFZsVFEwSllPVU5NVUdWcWFtSm1NbWszUkhKMFNWbEJWakpPWWtnMVkwRm1jRWxZZHpaTldtcFdRV2wyWDA5WExXZGZYMGRsYmxZMk5uYzJiVnBIVEVFM1VtZ3plSGt6WTIwM2FVMWZRVEJJVVc0d05IaE9NMjlPYlRZMlFuaGxUbHBLUzFwWmJXdExRMEl4YkhjdFJqUnlZMnRpYXpkMWJHOVpOMk50UldkNE56TkZRVXREVjBWaFdXZE1Namx4V0dsMU9XYzVja3BsVDNKTFRIWnlYMUZXVDBRNWFuRlROamh3UTFZMGFTMHRRMVZvUmxSSWIyTktXVnBXZEc1a1ozWnJObGxEUW5aS1RGZ3RUamQ1VG5Cak9FZDNlVkp3VW5wdFRYbHlkVWxxTm1GTmJrWmZkVGQyYWtOMkxWSXRYemh0VEZkVlNraGtOWHA0VjNOSk1raHdRMlkwVm5vdFYxcHlOR2RDY1RoUldUSlZjazg0ZVRob1JrRndjR04wTFRCdlpVWmtTVFJXYTA1TFRqZG1SVVJIT1VNMGNHVlFMV2h5YzA1TlltWTJWSGd6WW1KclNrbHJOVlpRT0hCSVpHbHdOVlZxVm1GMGRVZFRlRXRwYlhsME1IRXhkSGRtYXpCVVdVNXVOVk5XZWtSM1UySlpTbkZZTUVwQmNXVmpjbVJHTFRSR1FWZ3dSaTFIWDFoSFh6Um5VR0oyU1RjeWRVcExlaTFVUzJKNFdqVkZjalV5VDFkVlpXUlNRMVJzUXpCR05rVXdUa00yWTNkdFIzTm5UVGhNV2poNVdsOTJiRGx0Vm1nNFNrMTBUV3N5ZGpRMmFtRXdUMGw1V0RaVGJqUnBaaTExUmpKd1dqZGhjRXhuVUV3NWRIcFhabWxDTkZsSFlteG9WME13WlhWM01UWmtWSE41ZW1OemVHdFNSSFoyYVZaMlZqRlJWVGg0T1RoWlIxcFhRM0l6Y0RnMU1EWnNXVzVxTTBkcVNERnFiMmhJUWpJemNUZzFWR1o1Ylcxa09UTmlaRFkzUTBsVmVHYzJlRU5tV0daVmNGaG5PRVpqTlU0d1NUZDBUVVIxVW1wMFpGZGZka1I1VmkwMFlURkZWbXd6Y2tOYVJucENSRUZzVVZCUE5ITlFYM0JCVkhsU05GUllja2RFVmpSSmVrVXdWMUozUTI1aWMwVnNjREEzYkRVdFZXeDNUR2hPYTB4WmNuVktURUYzVFRScFoyVXRSbFJWT0VaSlRHOXpVRk5WT1doYVpqQnVjME5YWld4R1NFdzJRbnB1VjIxV1FuQnVWalE1TkZOZloxWkJYMGwwY2sxNVUwOVFNazg1YTAxMFJrTktNVVJxVG1Oa1h6SjFhekpxZGpGSmVVdGpkSGxmYzJOQmFtb3ljWGRPYVVOYWVsOHhhbUZLVURReU0xZElVMEZzVjBkMlJ6a3RNMjVpVW5KM2QwSXdNSGRoTjFKdGNYaEdPVGxtYlRrNU4ydHphMmszUlVGTGRHUnlZMmd6V0RKWmVYWlhhRFp5WjJ4eVIxWTFTMHh3YUU1dWJXUkZNVlJLTFhKaFdVZFRhMUp5VW1SV1RFZzVUREIwYW1FNGFTMVBRak41WjJ0WVJrNVNSSFY0Tm01dFFqbEtPVFpqWW5sSVJYZHpZMVZwUzBod05XUkxiVWxuTTNSa1pWVTROR1ZsTkUxcldXMVZja1ZTY1MxclNGaEtZMncxYUUxVFpFRnZjbk4zWW0xbE1VTlJSbEoyWTI5aFdUQnBUMUpEUm5WaGRGaHVYMVl6UmpWbWVqazNiMEYzUW1zMmVHaFRkMFJtV2pNM1pIa3hPSEUwVlZBMFR6bEhlVmQzWm5KaFNHWjVhVmc1UVZaYU9WcDRkMFZFTUU5S09HSnJkMkZuZUd4NWJVTlVTSHBZUkdjelgyODFkMmxCVWpCRFZtZzFSVzlqU1RGMGFqRklXRlpvVVdrM09EQXRjRTFSZVZwMFpqVkdWSFYwUlhkME1YTjRkMk5PT0ZCQlJVRm9ObGhTVG5KQ2EyWnNVemRuZWs5WGJFdzJPVGs1WmpKaUxUWkJWSEF0ZG10S2VIYzBlRFpYTUU5MlJFMVVYMFJ6VG01SFUzcE9XbFJSZWpORmFGazBaREZwYVRkM2RFSkNiMEl0ZFZZMlpGVktkbTh6VVhsU1NtaHZOR2d4TW1GbFRubGtOVE5sZEhsdFNVRnRUak55Wm14VGRWRTVVRmh2Umpsc1QyUkNNa1ZoUVZGc2FsVnlRbUpxWWxORlpsTTVWa1p5YmtGUGRtazJaMVF5UkRkdk5taGhVMmxrVTNCSlpta3RSR3hMVHpadFdIVTRjR3R5WVhacWVVSmhZWGxQVkVsd2RHRmthbEV0VXkxZlVpMXhhRlJEU2tSb2VIQkJibVYzTld4V1QyNW5aRXRMV1VJelJ6QkxiMUptVFZkb056TXpUamgxTjI5d2QxUjNZa2xuVUdnNVJWWmFlQzF0U0Y5dFZWOXZVWEZvZGpWcVlUZFRkMUZrTjJWSVExRldja1psT0RoWmJqSXhSbFF6UXpOT1FUQXRiWG8wYURVdFFqbFNjWGhtUzBkMFYyTk1SSGt3Y2tONU5VSXhiVTF3WkRCTGJrdHRVVEJFYVZWdVRuZFFUMU5UWVdkNVZuWnZiakZFYTBORlJrVmZVVXd6WWs4dGJuaExhSGhGZUVobFVXVkpVRlEyTW5sTWFtcFBRbkV3ZDJsS1dHYzBNMGxGT0VaemMwazBiRlpZVUVkb1ZuQkhjMFpmTkdGaGNIZHBhRmhHVkdkYVVtOVVaelU0V0RSVlprdHVRVk54VUdGUGNuaGxabGsxWDI1S2JWVm9Obk5DZVdnNGJrTnVWMVk0U0hwQlZYQnJUMnc0WDNWRFEycHVielZyY1ZFeGNtaHBVRkpzYVRaWlZVeHBYMFpqY2tzelZYZExaa0ozZW05MmNYTlVhVGhUVms1a1MyNHpkakp1Y2w5bVJWOUlNRWsxVlcxb2JtNTFRemxuZUc1VVNVNUJNa2xhWVVoQkxXSXdTRGhaWkU1aVN6RklZbnBXUW5oVE5YRkdPVVZ4U21ObFpIUnROa3huZURjNWNIWllVbVZGY2xKbE1tNUdaREk1TVRsTVQwYzBObFJmZEZabmRrZFRiSEk0YWpkWFdrNVRNVlJ2ZDFOVVdVRTRUR3M1UkRkb09GUjZZVWxYY0hwTlVFOHpNMWx6UzJOR09UaGpWVXhNUmxCdWEzcHNVVzFsZGpGSGJ6SnViRk40TTBZME5XcHlTakJaV210MlVGRlFOa1pPYlhSMk1rMDRVRWREYTBKdVFYTk5UVkp0T1cxWlJWaFhWMlZRVURscFlqWTRSVlZsYjI1b05qZEVPRzl2VTBSVk16aHlOalYyWHpCUFRWZHdTVEpOV1c1TlZubzVXVlpOY21WQkdBUSUzRA%3D%3D",
+         "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+        }
+       }
+      }
+     }
+    ],
+    "targetId": "6b22b767-0000-27c8-9c65-582429c1bf04"
+   }
+  }
+ ]
+}

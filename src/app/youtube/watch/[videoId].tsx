@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, BackHandler, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EmbeddedPlayer, isEmbeddableId } from '@/features/youtube/components/EmbeddedPlayer';
+import { CaptionOverlay } from '@/features/youtube/components/CaptionOverlay';
 import { PlayerControls, PlayerSheet, VideoOverlay } from '@/features/youtube/components/PlayerControls';
 import { PlaylistPanel } from '@/features/youtube/components/PlaylistPanel';
 import { Avatar, SubscribeButton } from '@/features/youtube/components/rows';
@@ -199,6 +200,7 @@ export default function WatchScreen() {
               fullscreenOptions={NATIVE_FULLSCREEN}
               buttonOptions={BUTTONS}
             />
+            <CaptionOverlay details={details} fullscreen={fullscreen} />
           </VideoOverlay>
         ) : showEmbed ? (
           <EmbeddedPlayer videoId={videoId} />

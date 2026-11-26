@@ -12,6 +12,9 @@ import type { DownloadUpdate } from './types';
 export interface IosYouTubeModule {
   /** Caps the height AVPlayer picks from the HLS manifest; null lets it pick freely. */
   capVideoHeight(player: VideoPlayer, height: number | null): Promise<void>;
+  /** Pinch to zoom on a VideoView (its view tag), as on Android; the level comes as onZoomChange. */
+  attachZoom(viewTag: number): Promise<boolean>;
+  resetZoom(): Promise<void>;
   addListener(event: string, listener: (event: any) => void): { remove(): void };
   emit(event: string, payload: unknown): void;
 }
@@ -35,10 +38,10 @@ export function createIosBackend(native: IosYouTubeModule) {
     createFolder: unsupported('Choosing a music folder') as () => Promise<string>,
     describeFolder: (_tree: string, _path: string[]) => '',
     isMusicoletInstalled: () => false,
-    // Full screen and zoom run in JavaScript on iOS (fullscreen.ts, ZoomableVideo).
+    // Full screen turns the app with expo-screen-orientation on iOS (fullscreen.ts).
     setFullscreen: async (_enabled: boolean) => undefined,
-    attachZoom: async (_viewTag: number) => false,
-    resetZoom: async () => undefined,
+    attachZoom: (viewTag: number) => native.attachZoom(viewTag),
+    resetZoom: () => native.resetZoom(),
     addListener: (event: string, listener: (event: any) => void) => native.addListener(event, listener),
   };
 }

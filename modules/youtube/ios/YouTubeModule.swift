@@ -18,5 +18,28 @@ public class YouTubeModule: Module {
       let side = height.map { Double($0) * 16 / 9 } ?? 0
       player.ref.currentItem?.preferredMaximumResolution = CGSize(width: side, height: side)
     }.runOnQueue(.main)
+
+    // Pinch to zoom on a VideoView (its view tag), as on Android. The view may not be
+    // registered yet when React hands over its ref: try again for a moment.
+    AsyncFunction("attachZoom") { (viewTag: Int, promise: Promise) in
+      self.attachZoom(viewTag, tries: 10, promise: promise)
+    }.runOnQueue(.main)
+
+    AsyncFunction("resetZoom") {
+      self.zoom.reset()
+    }.runOnQueue(.main)
+  }
+
+  private lazy var zoom = VideoZoom { [weak self] scale in
+    self?.sendEvent("onZoomChange", ["scale": scale])
+  }
+
+  private func attachZoom(_ viewTag: Int, tries: Int, promise: Promise) {
+    if let view = appContext?.findView(withTag: viewTag, ofType: UIView.self) {
+      zoom.attach(to: view)
+      return promise.resolve(true)
+    }
+    guard tries > 0 else { return promise.resolve(false) }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.attachZoom(viewTag, tries: tries - 1, promise: promise) }
   }
 }

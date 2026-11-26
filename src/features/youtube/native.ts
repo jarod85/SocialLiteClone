@@ -78,9 +78,11 @@ export interface YouTubeFeatures {
   musicFolder: boolean;
   /** Downloads finish with the app closed (Android's foreground service); iOS needs the app open. */
   backgroundDownloads: boolean;
+  /** Full screen turns the app sideways natively, with the phone's rotation handled there (Android); else via expo-screen-orientation (iOS). */
+  nativeFullscreen: boolean;
   /** Full-screen swipes set brightness and volume (Android). */
   swipeAdjust: boolean;
-  /** Pinch to zoom runs natively on the player (Android); else in JavaScript (ZoomableVideo). */
+  /** Pinch to zoom on the player (Android VideoZoom.kt, iOS VideoZoom.swift); the app shows the level and a reset. */
   nativeZoom: boolean;
   /** Captions shown by the player from its DASH manifest (Android), or drawn by the app over the video (iOS, HLS). */
   captions: 'player' | 'overlay';
@@ -94,12 +96,21 @@ export const youtubeFeatures: YouTubeFeatures =
         audioFormat: 'm4a',
         musicFolder: false,
         backgroundDownloads: false,
+        nativeFullscreen: false,
         swipeAdjust: false,
-        nativeZoom: false,
+        nativeZoom: true,
         captions: 'overlay',
         capVideoHeight: iosNative ? (player, height) => void iosNative.capVideoHeight(player, height).catch(() => undefined) : undefined,
       }
-    : { audioFormat: 'mp3', musicFolder: true, backgroundDownloads: true, swipeAdjust: true, nativeZoom: true, captions: 'player' };
+    : {
+        audioFormat: 'mp3',
+        musicFolder: true,
+        backgroundDownloads: true,
+        nativeFullscreen: true,
+        swipeAdjust: true,
+        nativeZoom: true,
+        captions: 'player',
+      };
 
 /**
  * The readable part of an error from the native module. Expo puts "Call to function

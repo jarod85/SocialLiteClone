@@ -5,10 +5,12 @@
  * built-in full screen has neither.) Swipes on the video set the brightness
  * (left half) and volume (right half) there (modules/youtube SwipeAdjust.kt).
  */
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { setStatusBarHidden } from 'expo-status-bar';
 import { AppState } from 'react-native';
 import { create } from 'zustand';
 
-import { youtube, youtubeAvailable } from './native';
+import { youtube, youtubeAvailable, youtubeFeatures } from './native';
 import type { SwipeLevel } from './types';
 
 export const useFullscreen = create<{ on: boolean }>()(() => ({ on: false }));
@@ -36,15 +38,24 @@ function listen(): void {
   });
 }
 
+/** iOS: sideways without the status bar, or back upright (the app is otherwise portrait only). */
+function setIosFullscreen(enabled: boolean): void {
+  setStatusBarHidden(enabled, 'fade');
+  const lock = enabled ? ScreenOrientation.OrientationLock.LANDSCAPE : ScreenOrientation.OrientationLock.PORTRAIT_UP;
+  void ScreenOrientation.lockAsync(lock).catch(() => undefined);
+}
+
 export function enterFullscreen(): void {
   if (!youtubeAvailable) return;
-  listen();
   useFullscreen.setState({ on: true });
+  if (!youtubeFeatures.nativeFullscreen) return setIosFullscreen(true);
+  listen();
   void youtube().setFullscreen(true);
 }
 
 export function exitFullscreen(): void {
   if (!useFullscreen.getState().on) return;
   useFullscreen.setState({ on: false });
+  if (!youtubeFeatures.nativeFullscreen) return setIosFullscreen(false);
   if (youtubeAvailable) void youtube().setFullscreen(false);
 }

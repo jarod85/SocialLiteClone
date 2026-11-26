@@ -237,6 +237,12 @@ export async function setQuality(height: number | null): Promise<void> {
   await load(current, source, position, wasPlaying);
 }
 
+/** Captions drawn by the app (iOS) couldn't be loaded: off for this video, the language stays picked for the next. */
+export function captionFailed(message: string): void {
+  wantedCaption = null;
+  usePlayer.setState({ caption: null, captionError: message });
+}
+
 /** Shows captions (an id from current.captions) or hides them (null); the language is kept for the next videos. */
 export function setCaption(id: string | null): void {
   rememberCaption(id);

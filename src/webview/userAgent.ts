@@ -69,12 +69,17 @@ function toMobileChrome(ua: string): string {
 }
 
 /**
- * Android Chrome without its "Mobile" token is what Chrome sends on a tablet.
- * Instagram then treats the browser as a big screen and offers calls; the page
- * still lays itself out for the screen's width.
+ * The browser a site takes for a big screen. Android: Chrome without its "Mobile"
+ * token, as Chrome sends on a tablet. iOS: Safari on a Mac, as Safari on an iPad
+ * sends it. Instagram then offers calls; the page still lays itself out for the
+ * screen's width.
  */
-export function toTabletUserAgent(mobileUserAgent: string): string {
-  return mobileUserAgent.replace(' Mobile Safari/', ' Safari/');
+export function toTabletUserAgent(mobileUserAgent: string, os: MobileOS): string {
+  if (os === 'android') return mobileUserAgent.replace(' Mobile Safari/', ' Safari/');
+  const osVersion = mobileUserAgent.match(/iPhone OS (\d+)_(\d+)/);
+  if (!osVersion) return mobileUserAgent;
+  // Safari froze the Mac part of its user agent at 10_15_7; only Version/ moves.
+  return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${osVersion[1]}.${osVersion[2]} Safari/605.1.15`;
 }
 
 /**

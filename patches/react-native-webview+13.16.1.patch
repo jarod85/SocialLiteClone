@@ -123,3 +123,177 @@ index 07f73fd..077db0a 100644
      @Override
      public boolean onConsoleMessage(ConsoleMessage message) {
          if (ReactBuildConfig.DEBUG) {
+diff --git a/node_modules/react-native-webview/apple/RNCWebViewImpl.m b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+index 7f5c24d..db4cefb 100644
+--- a/node_modules/react-native-webview/apple/RNCWebViewImpl.m
++++ b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+@@ -114,6 +114,104 @@ - (void)scrollWheel:(NSEvent *)theEvent {
+ #endif // TARGET_OS_OSX
+ @end
+ 
++#if !TARGET_OS_OSX
++/**
++ * Lite Social: a sized popup (window.open with width/height) is a real window its opener
++ * keeps driving, like Instagram's call window. Shown full screen over the app with a close
++ * button; window.close() closes it too.
++ */
++@interface RNCPopupWindowController : UIViewController <WKNavigationDelegate, WKUIDelegate>
++@property (nonatomic, strong, readonly) WKWebView *webView;
++@end
++
++@implementation RNCPopupWindowController {
++  BOOL _idleTimerWasDisabled;
++}
++
++- (instancetype)initWithConfiguration:(WKWebViewConfiguration *)configuration userAgent:(NSString *)userAgent inspectable:(BOOL)inspectable
++{
++  if ((self = [super initWithNibName:nil bundle:nil])) {
++    // A call's sound starts without a tap.
++    configuration.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeNone;
++    // Not the opener's scripts and message handlers: they would report to the app as the main page.
++    configuration.userContentController = [WKUserContentController new];
++    // WebKit's configuration keeps the popup in the opener's process, so window.opener works.
++    _webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
++    _webView.customUserAgent = userAgent;
++    _webView.navigationDelegate = self;
++    _webView.UIDelegate = self;
++    if (@available(iOS 16.4, *)) {
++      _webView.inspectable = inspectable;
++    }
++    self.modalPresentationStyle = UIModalPresentationFullScreen;
++  }
++  return self;
++}
++
++- (void)viewDidLoad
++{
++  [super viewDidLoad];
++  self.view.backgroundColor = UIColor.systemBackgroundColor;
++
++  UIButton *close = [UIButton buttonWithType:UIButtonTypeSystem];
++  [close setImage:[UIImage systemImageNamed:@"xmark"] forState:UIControlStateNormal];
++  close.accessibilityLabel = @"Close";
++  [close addTarget:self action:@selector(close) forControlEvents:UIControlEventTouchUpInside];
++
++  close.translatesAutoresizingMaskIntoConstraints = NO;
++  _webView.translatesAutoresizingMaskIntoConstraints = NO;
++  [self.view addSubview:close];
++  [self.view addSubview:_webView];
++  UILayoutGuide *safe = self.view.safeAreaLayoutGuide;
++  [NSLayoutConstraint activateConstraints:@[
++    [close.topAnchor constraintEqualToAnchor:safe.topAnchor],
++    [close.trailingAnchor constraintEqualToAnchor:safe.trailingAnchor constant:-8],
++    [close.widthAnchor constraintEqualToConstant:44],
++    [close.heightAnchor constraintEqualToConstant:44],
++    [_webView.topAnchor constraintEqualToAnchor:close.bottomAnchor],
++    [_webView.leadingAnchor constraintEqualToAnchor:safe.leadingAnchor],
++    [_webView.trailingAnchor constraintEqualToAnchor:safe.trailingAnchor],
++    [_webView.bottomAnchor constraintEqualToAnchor:safe.bottomAnchor],
++  ]];
++}
++
++// The screen stays on during a call, as it would for a video.
++- (void)viewWillAppear:(BOOL)animated
++{
++  [super viewWillAppear:animated];
++  _idleTimerWasDisabled = UIApplication.sharedApplication.idleTimerDisabled;
++  UIApplication.sharedApplication.idleTimerDisabled = YES;
++}
++
++- (void)viewDidDisappear:(BOOL)animated
++{
++  [super viewDidDisappear:animated];
++  UIApplication.sharedApplication.idleTimerDisabled = _idleTimerWasDisabled;
++}
++
++- (void)close
++{
++  // Releasing the web view closes the window, so the opener sees it closed.
++  [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
++}
++
++- (void)webViewDidClose:(WKWebView *)webView
++{
++  [self close];
++}
++
++- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler
++{
++  // Web pages and in-page pseudo-addresses stay in the window (the same schemes as
++  // core/navigationPolicy.ts). Deep links (instagram://) never open other apps.
++  NSString *scheme = navigationAction.request.URL.scheme.lowercaseString;
++  BOOL web = scheme == nil || [@[@"http", @"https", @"about", @"data", @"blob", @"javascript"] containsObject:scheme];
++  decisionHandler(web ? WKNavigationActionPolicyAllow : WKNavigationActionPolicyCancel);
++}
++
++@end
++#endif // !TARGET_OS_OSX
++
+ @interface RNCWebViewImpl () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKHTTPCookieStoreObserver,
+ #if !TARGET_OS_OSX
+ UIScrollViewDelegate,
+@@ -389,6 +487,17 @@ - (BOOL)canPerformAction:(SEL)action withSender:(id)sender
+  */
+ - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures
+ {
++#if !TARGET_OS_OSX
++  // Lite Social: like Android's onCreateWindow, only while the app takes new windows itself
++  // (onOpenWindow set), and only for sized popups: the call window.
++  if (_onOpenWindow && windowFeatures.width != nil) {
++    WKWebView *popup = [self openPopupWindowWithConfiguration:configuration];
++    if (popup != nil) {
++      return popup;
++    }
++  }
++#endif // !TARGET_OS_OSX
++
+   if (!navigationAction.targetFrame.isMainFrame) {
+     NSURL *url = navigationAction.request.URL;
+ 
+@@ -403,6 +512,46 @@ - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWe
+   return nil;
+ }
+ 
++#if !TARGET_OS_OSX
++/**
++ * Lite Social: shows a popup window full screen. Returning its web view links it to the
++ * opener (window.opener and the handle window.open returned both work).
++ */
++- (WKWebView *)openPopupWindowWithConfiguration:(WKWebViewConfiguration *)configuration
++{
++  UIViewController *presenter = RCTPresentedViewController();
++  if (presenter == nil) {
++    return nil;
++  }
++  BOOL inspectable = NO;
++  if (@available(iOS 16.4, *)) {
++    inspectable = _webView.inspectable;
++  }
++  RNCPopupWindowController *popup = [[RNCPopupWindowController alloc] initWithConfiguration:configuration
++                                                                                  userAgent:[self popupUserAgent]
++                                                                                inspectable:inspectable];
++  [presenter presentViewController:popup animated:YES completion:nil];
++  return popup.webView;
++}
++
++/**
++ * Lite Social: as Safari on a Mac, like the page that opens it (the app may have put the opener
++ * back on the phone user agent for its layout): Instagram only runs calls for a big screen.
++ * Same result as toTabletUserAgent in src/webview/userAgent.ts.
++ */
++- (NSString *)popupUserAgent
++{
++  NSString *ua = _userAgent ?: @"";
++  NSRegularExpression *iPhoneOS = [NSRegularExpression regularExpressionWithPattern:@"iPhone OS (\\d+)_(\\d+)" options:0 error:nil];
++  NSTextCheckingResult *match = [iPhoneOS firstMatchInString:ua options:0 range:NSMakeRange(0, ua.length)];
++  if (match == nil) {
++    return _userAgent;
++  }
++  return [NSString stringWithFormat:@"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%@.%@ Safari/605.1.15",
++          [ua substringWithRange:[match rangeAtIndex:1]], [ua substringWithRange:[match rangeAtIndex:2]]];
++}
++#endif // !TARGET_OS_OSX
++
+ /**
+  * Enables file input on macos, see https://developer.apple.com/documentation/webkit/wkuidelegate/1641952-webview
+  */

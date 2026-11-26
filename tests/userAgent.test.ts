@@ -77,9 +77,26 @@ describe('toTabletUserAgent', () => {
     expect(
       toTabletUserAgent(
         'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+        'android',
       ),
     ).toBe('Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36');
-    expect(toTabletUserAgent(FALLBACK_USER_AGENTS.android)).not.toContain('Mobile');
+    expect(toTabletUserAgent(FALLBACK_USER_AGENTS.android, 'android')).not.toContain('Mobile');
+  });
+
+  it('is Safari on a Mac on iOS, as Safari on an iPad sends it, with the same Safari version', () => {
+    expect(toTabletUserAgent(FALLBACK_USER_AGENTS.ios, 'ios')).toBe(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15',
+    );
+    expect(
+      toTabletUserAgent(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+        'ios',
+      ),
+    ).toContain(' Version/17.5 Safari/605.1.15');
+  });
+
+  it('keeps an iOS agent it cannot read', () => {
+    expect(toTabletUserAgent('SomethingElse/1.0', 'ios')).toBe('SomethingElse/1.0');
   });
 });
 

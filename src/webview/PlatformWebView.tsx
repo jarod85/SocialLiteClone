@@ -119,13 +119,13 @@ export function PlatformWebView({ platform, openPath, openKey, onClose, onOpenSe
   const canGoBackRef = useRef(false);
   const currentUrlRef = useRef(startUrl);
 
-  // ---- Tablet user agent (Android) -------------------------------------------
+  // ---- Tablet user agent -----------------------------------------------------
   // Instagram only offers calls to browsers it doesn't take for a phone, judged from the
-  // user agent when a page loads, so DM pages load as Chrome on a tablet. The call window
-  // they open is shown by the patched react-native-webview (patches/).
-  const tabletPaths = Platform.OS === 'android' ? platform.tabletUserAgentPaths : undefined;
+  // user agent when a page loads, so DM pages load as Chrome on a tablet (Android) or Safari
+  // on a Mac (iOS). The call window they open is shown by the patched react-native-webview (patches/).
+  const tabletPaths = platform.tabletUserAgentPaths;
   const tabletUserAgent = useMemo(
-    () => (userAgent && tabletPaths ? toTabletUserAgent(userAgent) : null),
+    () => (userAgent && tabletPaths ? toTabletUserAgent(userAgent, Platform.OS === 'ios' ? 'ios' : 'android') : null),
     [userAgent, tabletPaths],
   );
   const [tabletMode, setTabletMode] = useState(

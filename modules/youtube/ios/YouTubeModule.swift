@@ -13,10 +13,11 @@ public class YouTubeModule: Module {
     Events("onDownloadUpdate", "onFullscreenExitRequest", "onZoomChange", "onSwipeAdjust")
 
     // A picked quality: AVPlayer chooses from YouTube's HLS manifest by itself, at most this
-    // height (the shorter side, so portrait videos are capped alike); nil lets it choose freely.
+    // height (the manifest's RESOLUTION height, which the app's qualities list); nil lets it choose
+    // freely. The width is left loose, so a film wider than 16:9 keeps its full width.
     AsyncFunction("capVideoHeight") { (player: SharedRef<AVPlayer>, height: Int?) in
-      let side = height.map { Double($0) * 16 / 9 } ?? 0
-      player.ref.currentItem?.preferredMaximumResolution = CGSize(width: side, height: side)
+      let cap = height.map { CGSize(width: Double($0) * 4, height: Double($0)) } ?? .zero
+      player.ref.currentItem?.preferredMaximumResolution = cap
     }.runOnQueue(.main)
 
     // Pinch to zoom on a VideoView (its view tag), as on Android. The view may not be

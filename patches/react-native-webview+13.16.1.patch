@@ -124,7 +124,7 @@ index 07f73fd..077db0a 100644
      public boolean onConsoleMessage(ConsoleMessage message) {
          if (ReactBuildConfig.DEBUG) {
 diff --git a/node_modules/react-native-webview/apple/RNCWebViewImpl.m b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
-index 7f5c24d..db4cefb 100644
+index 7f5c24d..444fe62 100644
 --- a/node_modules/react-native-webview/apple/RNCWebViewImpl.m
 +++ b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
 @@ -114,6 +114,104 @@ - (void)scrollWheel:(NSEvent *)theEvent {
@@ -250,7 +250,7 @@ index 7f5c24d..db4cefb 100644
    if (!navigationAction.targetFrame.isMainFrame) {
      NSURL *url = navigationAction.request.URL;
  
-@@ -403,6 +512,46 @@ - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWe
+@@ -403,6 +512,47 @@ - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWe
    return nil;
  }
  
@@ -262,7 +262,8 @@ index 7f5c24d..db4cefb 100644
 +- (WKWebView *)openPopupWindowWithConfiguration:(WKWebViewConfiguration *)configuration
 +{
 +  UIViewController *presenter = RCTPresentedViewController();
-+  if (presenter == nil) {
++  // Mid-transition UIKit refuses to show it, which would leave a call running with no window.
++  if (presenter == nil || presenter.isBeingPresented || presenter.isBeingDismissed) {
 +    return nil;
 +  }
 +  BOOL inspectable = NO;
@@ -273,7 +274,7 @@ index 7f5c24d..db4cefb 100644
 +                                                                                  userAgent:[self popupUserAgent]
 +                                                                                inspectable:inspectable];
 +  [presenter presentViewController:popup animated:YES completion:nil];
-+  return popup.webView;
++  return popup.presentingViewController != nil ? popup.webView : nil;
 +}
 +
 +/**

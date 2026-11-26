@@ -16,7 +16,7 @@ final class VideoZoom: NSObject, UIGestureRecognizerDelegate {
   private weak var view: UIView?
   private var scale: CGFloat = 1
   private var offset = CGPoint.zero
-  private var start = (scale: CGFloat(1), offset: CGPoint.zero, mid: CGPoint.zero)
+  private var pinchStart = (scale: CGFloat(1), offset: CGPoint.zero, mid: CGPoint.zero)
   private let onChange: (Double) -> Void
   private lazy var pinch = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
   private lazy var pan = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
@@ -54,13 +54,13 @@ final class VideoZoom: NSObject, UIGestureRecognizerDelegate {
     let mid = CGPoint(x: g.location(in: view).x - view.bounds.midX, y: g.location(in: view).y - view.bounds.midY)
     switch g.state {
     case .began:
-      start = (scale, offset, mid)
+      pinchStart = (scale, offset, mid)
     case .changed:
-      let s = min(Self.maxScale, max(1, start.scale * g.scale))
+      let s = min(Self.maxScale, max(1, pinchStart.scale * g.scale))
       // The spot that was under the fingers stays under them.
       offset = CGPoint(
-        x: mid.x - s * (start.mid.x - start.offset.x) / start.scale,
-        y: mid.y - s * (start.mid.y - start.offset.y) / start.scale)
+        x: mid.x - s * (pinchStart.mid.x - pinchStart.offset.x) / pinchStart.scale,
+        y: mid.y - s * (pinchStart.mid.y - pinchStart.offset.y) / pinchStart.scale)
       scale = s
       apply(animated: false)
       onChange(Double(s))
@@ -72,17 +72,14 @@ final class VideoZoom: NSObject, UIGestureRecognizerDelegate {
   }
 
   @objc private func onPan(_ g: UIPanGestureRecognizer) {
-    guard let view else { return }
-    switch g.state {
-    case .began:
-      start = (scale, offset, .zero)
-    case .changed:
-      let t = g.translation(in: view)
-      offset = CGPoint(x: start.offset.x + t.x, y: start.offset.y + t.y)
-      apply(animated: false)
-    default:
-      break
-    }
+    guard let view, g.state == .changed else { return }
+    // Step by step, so a drag that outlasts a pinch carries on from where the pinch left the video.
+    let t = g.translation(in: view)
+    g.setTranslation(.zero, in: view)
+    // While two fingers pinch, their midpoint already moves the video.
+    if pinch.state == .began || pinch.state == .changed { return }
+    offset = CGPoint(x: offset.x + t.x, y: offset.y + t.y)
+    apply(animated: false)
   }
 
   func gestureRecognizerShouldBegin(_ g: UIGestureRecognizer) -> Bool {

@@ -97,6 +97,7 @@
       "./plugins/withCMakeObjectPathMax",
       "./plugins/withReleaseSigning",
       "./plugins/withSceneLifecycle",
+      "./plugins/withoutPushEntitlement",
       "expo-router",
       "expo-status-bar",
       "expo-font",

@@ -105,6 +105,15 @@ describe('check', () => {
     expect(mockRequest).not.toHaveBeenCalled();
   });
 
+  it('says so and posts nothing when the Instagram login has expired', async () => {
+    mockRequest.mockResolvedValue({ status: 302, body: '', headers: { location: 'https://www.instagram.com/accounts/login/' } });
+    const result = await check();
+    expect(result).toMatchObject({ loggedIn: false, messages: 'Not logged in. Open Instagram in Lite Social and log in.' });
+    expect(mockNotify.postConversation).not.toHaveBeenCalled();
+    expect(mockNotify.postUnreadCount).not.toHaveBeenCalled();
+    expect(mockNotify.postActivity).not.toHaveBeenCalled();
+  });
+
   it('posts one alert per conversation with new messages, and none again for the same messages', async () => {
     const result = await check();
     expect(result).toMatchObject({ loggedIn: true, messages: 'OK', newMessages: 1, unreadConversations: 1, activity: 'OK' });

@@ -56,6 +56,9 @@ final class Downloads {
   private var entries: [String: Entry] = [:]
   private var order: [String] = []
   private var tasks: [String: Task<Void, Never>] = [:]
+  private var backgroundTasks: [String: UIBackgroundTaskIdentifier] = [:]
+  /** Downloads stopped because iOS's time after leaving the app ran out. */
+  private var outOfTime: Set<String> = []
   private var lastSent: [String: (state: String, at: Date)] = [:]
   private let onUpdate: ([String: Any?]) -> Void
 
@@ -95,14 +98,26 @@ final class Downloads {
 
   func start(_ request: Request) {
     publish(Entry(id: request.id, title: request.title, format: request.format, state: "downloading", progress: 0))
-    let background = UIApplication.shared.beginBackgroundTask(withName: "Lite Social download")
+    // Out of time after leaving the app: stop the download (shown as interrupted) rather than
+    // have iOS end the whole app.
+    backgroundTasks[request.id] = UIApplication.shared.beginBackgroundTask(withName: "Lite Social download") { [weak self] in
+      self?.outOfTime.insert(request.id)
+      self?.tasks[request.id]?.cancel()
+      self?.endBackgroundTask(request.id)
+    }
     tasks[request.id] = Task { [weak self] in
       await self?.run(request)
       await MainActor.run {
         self?.tasks[request.id] = nil
-        UIApplication.shared.endBackgroundTask(background)
+        self?.outOfTime.remove(request.id)
+        self?.endBackgroundTask(request.id)
       }
     }
+  }
+
+  private func endBackgroundTask(_ id: String) {
+    guard let task = backgroundTasks.removeValue(forKey: id) else { return }
+    UIApplication.shared.endBackgroundTask(task)
   }
 
   // MARK: Work
@@ -143,8 +158,13 @@ final class Downloads {
         $0.savedTo = Self.savedTo
         $0.fileUri = saved.absoluteString
       }
-    } catch is CancellationError {
-      await update(r) { $0.state = "cancelled" }
+    } catch where Task.isCancelled {
+      // Cancelled requests and exports end with their own errors, not CancellationError.
+      let interrupted = await MainActor.run { self.outOfTime.contains(r.id) }
+      await update(r) {
+        $0.state = interrupted ? "failed" : "cancelled"
+        $0.error = interrupted ? "Interrupted. Start it again." : nil
+      }
     } catch {
       await update(r) {
         $0.state = "failed"
@@ -210,10 +230,17 @@ final class Downloads {
     session.outputURL = output
     session.outputFileType = type
     session.metadata = metadata
-    await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
-      session.exportAsynchronously { done.resume() }
+    await withTaskCancellationHandler {
+      await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+        session.exportAsynchronously { done.resume() }
+      }
+    } onCancel: {
+      session.cancelExport()
     }
-    if session.status != .completed { throw session.error ?? DownloadError.unreadable }
+    if session.status != .completed {
+      try? FileManager.default.removeItem(at: output)  // Not a cut-off file in the Files app.
+      throw session.error ?? DownloadError.unreadable
+    }
   }
 
   private static func tags(title: String, artist: String?, artwork: Data?) -> [AVMetadataItem] {

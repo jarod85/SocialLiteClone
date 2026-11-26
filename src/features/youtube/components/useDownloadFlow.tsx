@@ -42,7 +42,8 @@ export function useDownloadFlow() {
 
   const started = useCallback(
     (format: string) => {
-      void requestNotificationPermission(); // Progress and "saved" notifications.
+      // Progress and "saved" notifications; iOS downloads post none, so it doesn't ask there.
+      if (youtubeFeatures.backgroundDownloads) void requestNotificationPermission();
       const where = youtubeFeatures.backgroundDownloads
         ? `The ${format} downloads in the background. You'll get a notification when it's saved.`
         : `The ${format} downloads while Lite Social is open. Keep it open until it's saved.`;

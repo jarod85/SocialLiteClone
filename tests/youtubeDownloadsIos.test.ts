@@ -7,12 +7,14 @@ import type { DownloadUpdate } from '@/features/youtube/types';
 import { fixture } from './fixtures';
 
 const mockStart = jest.fn();
+const mockCancel = jest.fn();
 const mockListeners: ((u: DownloadUpdate) => void)[] = [];
 jest.mock('expo', () => ({
   requireOptionalNativeModule: (name: string) =>
     name === 'LiteSocialYouTube'
       ? {
           startDownload: (...args: unknown[]) => mockStart(...args),
+          cancelDownload: (...args: unknown[]) => mockCancel(...args),
           addListener: (_event: string, l: (u: DownloadUpdate) => void) => {
             mockListeners.push(l);
             return { remove() {} };
@@ -85,4 +87,16 @@ it('reports a failure to find the streams as a failed download', async () => {
   for (let i = 0; i < 5 && seen.length < 2; i++) await settle();
   expect(seen[1]).toMatchObject({ id, state: 'failed', error: 'No connection.' });
   expect(mockStart).not.toHaveBeenCalled();
+});
+
+it('cancels a download whose streams are still being found, before the Swift side has it', async () => {
+  fetchMock.mockImplementation(async (url: string) =>
+    url.includes('/visitor_id') ? answer(JSON.stringify({ responseContext: { visitorData: 'V' } })) : answer(fixture('youtube/player-visionos.json')),
+  );
+  const id = youtube().startDownload(options('mp4'));
+  youtube().cancelDownload(id);
+  for (let i = 0; i < 5; i++) await settle();
+  expect(seen.map((u) => u.state)).toEqual(['queued', 'cancelled']);
+  expect(mockStart).not.toHaveBeenCalled();
+  expect(mockCancel).not.toHaveBeenCalled();
 });

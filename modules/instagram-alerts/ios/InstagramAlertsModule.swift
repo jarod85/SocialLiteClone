@@ -51,7 +51,8 @@ public class InstagramAlertsModule: Module {
       guard let http = response as? HTTPURLResponse else { throw InstagramPathException() }
       var fields: [String: String] = [:]
       for (key, value) in http.allHeaderFields {
-        if let key = key as? String, let value = value as? String { fields[key.lowercased()] = value }
+        // Refreshed cookies go to the browser's store below, never to JavaScript.
+        if let key = (key as? String)?.lowercased(), key != "set-cookie", let value = value as? String { fields[key] = value }
       }
       let refreshed = HTTPCookie.cookies(withResponseHeaderFields: http.allHeaderFields as? [String: String] ?? [:], for: url)
       if !refreshed.isEmpty { await Self.store(refreshed) }

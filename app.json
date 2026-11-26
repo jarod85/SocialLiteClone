@@ -13,7 +13,14 @@
       "supportsTablet": false,
       "infoPlist": {
         "NSCameraUsageDescription": "Lite Social uses the camera only for Instagram video calls you start or answer.",
-        "NSMicrophoneUsageDescription": "Lite Social uses the microphone only for Instagram calls you start or answer."
+        "NSMicrophoneUsageDescription": "Lite Social uses the microphone only for Instagram calls you start or answer.",
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true,
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
       }
     },
     "android": {
@@ -89,6 +96,7 @@
     "plugins": [
       "./plugins/withCMakeObjectPathMax",
       "./plugins/withReleaseSigning",
+      "./plugins/withSceneLifecycle",
       "expo-router",
       "expo-status-bar",
       "expo-font",
@@ -120,7 +128,13 @@
           }
         }
       ],
-      "expo-image"
+      "expo-image",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "PORTRAIT_UP"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

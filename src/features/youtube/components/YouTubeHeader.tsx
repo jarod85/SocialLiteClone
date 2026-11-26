@@ -29,7 +29,8 @@ export function YouTubeHeader({
   return (
     <View style={[styles.bar, { borderBottomColor: theme.border, backgroundColor: theme.background }]}>
       <IconButton icon={backIcon} label="Back" onPress={onBack} />
-      <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+      {/* Small phones (iPhone SE, 360 dp Android) leave the title ~110 pt beside five actions: shrink, don't cut. */}
+      <Text style={[styles.title, { color: theme.text }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
         {title}
       </Text>
       {actions.map((a) => (

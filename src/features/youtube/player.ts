@@ -15,11 +15,11 @@ import { create } from 'zustand';
 
 import { pickCaption } from './captions';
 import { resumePosition, useHistory } from './history';
-import { errorText, watchUrl, youtube } from './native';
+import { errorText, watchUrl, youtube, youtubeFeatures } from './native';
 import { findPlaylist, stepInPlaylist, type Playlist } from './playlists';
 import { pickQuality } from './quality';
 import { useYouTubeSettings } from './stores';
-import type { PlaybackSource, VideoDetails } from './types';
+import type { PlaybackSource, VideoDetails, VideoQuality } from './types';
 
 /** The playlist a video was started from. */
 export interface Queue {
@@ -40,7 +40,7 @@ interface PlayerState {
   quality: number | null;
   /** Id of the captions showing (one of current.captions), or null when off. */
   caption: string | null;
-  /** The playing source carries the video's captions (only Lite Social's own DASH manifests do). */
+  /** The video's captions can be shown: from Lite Social's own DASH manifests (Android) or drawn over the video (iOS). */
   captionsAvailable: boolean;
   /** Set when captions were turned off because the video stopped with them. */
   captionError: string | null;
@@ -145,18 +145,26 @@ async function load(details: VideoDetails, source: PlaybackSource, position = 0,
   switching = true;
   try {
     await p.replaceAsync(sourceFor(details, source));
+    // iOS: each source is a new player item, so the picked quality's height cap is set again.
+    youtubeFeatures.capVideoHeight?.(p, usePlayer.getState().quality);
     if (position > 0) p.currentTime = position;
   } finally {
     switching = false;
   }
   if (playAfter) p.play();
-  usePlayer.setState({ captionsAvailable: source.contentType === 'dash' && details.captions.length > 0 && !details.isLive });
+  const captionsShown = youtubeFeatures.captions === 'overlay' || source.contentType === 'dash';
+  usePlayer.setState({ captionsAvailable: captionsShown && details.captions.length > 0 && !details.isLive });
   applyCaption(p.availableSubtitleTracks);
 }
 
 /** Shows the wanted captions once the player lists them; hides captions when none are wanted. */
 function applyCaption(tracks: SubtitleTrack[]): void {
   if (!player) return;
+  if (youtubeFeatures.captions === 'overlay') {
+    // The app draws these captions itself (CaptionOverlay); the player has none.
+    usePlayer.setState({ caption: wantedCaption });
+    return;
+  }
   if (wantedCaption === null) {
     appliedCaption = '';
     if (player.subtitleTrack) player.subtitleTrack = null;
@@ -207,8 +215,10 @@ export async function play(details: VideoDetails): Promise<void> {
   history.record(video);
   lastSavedAt = start;
   usePlayer.setState({ ...idle, ...inPlaylist, current: video, quality: quality?.height ?? null });
-  await load(video, quality ? { uri: quality.uri, contentType: 'dash' } : video.sources[0], start);
+  await load(video, quality ? qualitySource(quality) : video.sources[0], start);
 }
+
+const qualitySource = (q: VideoQuality): PlaybackSource => ({ uri: q.uri, contentType: q.contentType ?? 'dash' });
 
 /**
  * Keeps a quality (a height, or null for automatic) for the next videos and
@@ -219,7 +229,7 @@ export async function setQuality(height: number | null): Promise<void> {
   const { current } = usePlayer.getState();
   if (!current || !player) return;
   const quality = pickQuality(current.qualities, height);
-  const source = quality ? { uri: quality.uri, contentType: 'dash' as const } : current.sources[0];
+  const source = quality ? qualitySource(quality) : current.sources[0];
   if (!source) return;
   const position = player.currentTime;
   const wasPlaying = player.playing;

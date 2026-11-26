@@ -5,6 +5,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { chooseMusicFolder } from '@/features/youtube/components/useDownloadFlow';
 import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { cancelDownload, clearFinished, isFinished, useDownloads } from '@/features/youtube/downloads';
+import { youtubeFeatures } from '@/features/youtube/native';
 import { useYouTubeSettings } from '@/features/youtube/stores';
 import type { DownloadUpdate } from '@/features/youtube/types';
 import { Button } from '@/ui/components';
@@ -40,13 +41,22 @@ export default function DownloadsScreen() {
         keyExtractor={(d) => d.id}
         renderItem={({ item }) => <DownloadRow download={item} />}
         ListHeaderComponent={
-          <View style={[styles.folderBox, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.folderText, { color: theme.textMuted }]}>
-              Videos (MP4) go to Movies/Lite Social. Songs (MP3) go to your Musicolet folder
-              {musicFolder ? `: ${musicFolder.name}` : ' (asked on your first MP3)'}. You choose the subfolder each time.
-            </Text>
-            <Button label={musicFolder ? 'Change music folder' : 'Choose music folder'} variant="secondary" onPress={() => void chooseMusicFolder()} />
-          </View>
+          youtubeFeatures.musicFolder ? (
+            <View style={[styles.folderBox, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.folderText, { color: theme.textMuted }]}>
+                Videos (MP4) go to Movies/Lite Social. Songs (MP3) go to your Musicolet folder
+                {musicFolder ? `: ${musicFolder.name}` : ' (asked on your first MP3)'}. You choose the subfolder each time.
+              </Text>
+              <Button label={musicFolder ? 'Change music folder' : 'Choose music folder'} variant="secondary" onPress={() => void chooseMusicFolder()} />
+            </View>
+          ) : (
+            <View style={[styles.folderBox, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.folderText, { color: theme.textMuted }]}>
+                Videos (MP4) and audio (M4A) are saved in the Files app: On My iPhone → Lite Social → Downloads. Keep Lite Social
+                open until a download is saved.
+              </Text>
+            </View>
+          )
         }
         ListEmptyComponent={
           <Text style={[styles.empty, { color: theme.textMuted }]}>Nothing downloaded yet. Open a video and tap Download.</Text>

@@ -1,9 +1,14 @@
 /**
- * Typed access to the native YouTube module (modules/youtube, Android only).
- * Missing on iOS and in Expo Go: `youtubeAvailable` is then false and calls throw.
+ * The YouTube backend. Android: the native module (modules/youtube, NewPipe Extractor).
+ * iOS: Lite Social's own engine plus the module's iOS side (iosBackend.ts). This is the
+ * only file that picks by OS; screens read `youtubeFeatures` for what differs.
+ * Missing in Expo Go: `youtubeAvailable` is then false and calls throw.
  */
 import { requireOptionalNativeModule } from 'expo';
+import type { VideoPlayer } from 'expo-video';
 import { Platform } from 'react-native';
+
+import { createIosBackend, type IosYouTubeModule } from './iosBackend';
 
 import type { ChannelPage, DownloadFormat, DownloadUpdate, FeedResult, MusicFolder, Page, SearchItem, SwipeLevel, Video, VideoDetails } from './types';
 
@@ -49,14 +54,52 @@ interface YouTubeNativeModule {
   addListener(event: 'onSwipeAdjust', listener: (event: SwipeLevel) => void): { remove(): void };
 }
 
-const module = Platform.OS === 'android' ? requireOptionalNativeModule<YouTubeNativeModule>('LiteSocialYouTube') : null;
+const iosNative = Platform.OS === 'ios' ? requireOptionalNativeModule<IosYouTubeModule>('LiteSocialYouTube') : null;
+
+const module: YouTubeNativeModule | null =
+  Platform.OS === 'android'
+    ? requireOptionalNativeModule<YouTubeNativeModule>('LiteSocialYouTube')
+    : iosNative
+      ? (createIosBackend(iosNative) as unknown as YouTubeNativeModule)
+      : null;
 
 export const youtubeAvailable = module !== null;
 
 export function youtube(): YouTubeNativeModule {
-  if (!module) throw new Error('YouTube needs the Android app (it is not available in Expo Go or on iOS).');
+  if (!module) throw new Error('YouTube needs the Lite Social app (it is not available in Expo Go).');
   return module;
 }
+
+/** What the YouTube backend on this phone can do, where Android and iOS differ. */
+export interface YouTubeFeatures {
+  /** Audio downloads: MP3 into a Musicolet folder (Android) or M4A into the Files app (iOS, which has no MP3 encoder). */
+  audioFormat: 'mp3' | 'm4a';
+  /** A music folder to pick, with subfolders per song (Android). */
+  musicFolder: boolean;
+  /** Downloads finish with the app closed (Android's foreground service); iOS needs the app open. */
+  backgroundDownloads: boolean;
+  /** Full-screen swipes set brightness and volume (Android). */
+  swipeAdjust: boolean;
+  /** Pinch to zoom runs natively on the player (Android); else in JavaScript (ZoomableVideo). */
+  nativeZoom: boolean;
+  /** Captions shown by the player from its DASH manifest (Android), or drawn by the app over the video (iOS, HLS). */
+  captions: 'player' | 'overlay';
+  /** iOS: caps the height the player picks from the HLS manifest, for a picked quality. */
+  capVideoHeight?: (player: VideoPlayer, height: number | null) => void;
+}
+
+export const youtubeFeatures: YouTubeFeatures =
+  Platform.OS === 'ios'
+    ? {
+        audioFormat: 'm4a',
+        musicFolder: false,
+        backgroundDownloads: false,
+        swipeAdjust: false,
+        nativeZoom: false,
+        captions: 'overlay',
+        capVideoHeight: iosNative ? (player, height) => void iosNative.capVideoHeight(player, height).catch(() => undefined) : undefined,
+      }
+    : { audioFormat: 'mp3', musicFolder: true, backgroundDownloads: true, swipeAdjust: true, nativeZoom: true, captions: 'player' };
 
 /**
  * The readable part of an error from the native module. Expo puts "Call to function

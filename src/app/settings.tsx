@@ -20,7 +20,7 @@ import { useDailyLimit } from '@/features/timeLimit/useDailyLimit';
 import { checkForUpdate, installedVersion, installUpdate, updatesSupported, useUpdates } from '@/features/updates/updates';
 import { chooseMusicFolder } from '@/features/youtube/components/useDownloadFlow';
 import { useHistory } from '@/features/youtube/history';
-import { youtubeAvailable } from '@/features/youtube/native';
+import { youtubeAvailable, youtubeFeatures } from '@/features/youtube/native';
 import { setQuality } from '@/features/youtube/player';
 import { MP3_BITRATES, PLAYBACK_HEIGHTS, useSubscriptions, useYouTubeSettings, VIDEO_HEIGHTS } from '@/features/youtube/stores';
 import { platforms } from '@/platforms/registry';
@@ -238,15 +238,17 @@ function YouTubeSection() {
   return (
     <Section
       title="YouTube"
-      footer="MP3s are saved into the music folder you pick (the one Musicolet plays from); you choose the subfolder for each song. Videos go to Movies/Lite Social."
+      footer={
+        youtubeFeatures.musicFolder
+          ? 'MP3s are saved into the music folder you pick (the one Musicolet plays from); you choose the subfolder for each song. Videos go to Movies/Lite Social.'
+          : 'Videos (MP4) and audio (M4A) are saved in the Files app: On My iPhone → Lite Social → Downloads.'
+      }
     >
       <LinkRow label="Your channels" detail={String(subscriptions)} onPress={() => router.push('/youtube/subscriptions')} />
       <LinkRow label="Watch history" detail={String(watched)} onPress={() => router.push('/youtube/history')} />
-      <LinkRow
-        label="Music folder"
-        detail={musicFolder?.name ?? 'Not chosen'}
-        onPress={() => void chooseMusicFolder()}
-      />
+      {youtubeFeatures.musicFolder && (
+        <LinkRow label="Music folder" detail={musicFolder?.name ?? 'Not chosen'} onPress={() => void chooseMusicFolder()} />
+      )}
       <TextRow>Playback quality (up to)</TextRow>
       <Chips
         options={PLAYBACK_HEIGHTS}
@@ -254,8 +256,12 @@ function YouTubeSection() {
         onChange={(h) => void setQuality(h === 'auto' ? null : h)}
         format={(h) => (h === 'auto' ? 'Auto' : `${h}p`)}
       />
-      <TextRow>MP3 quality</TextRow>
-      <Chips options={MP3_BITRATES} value={mp3Kbps as (typeof MP3_BITRATES)[number]} onChange={setMp3Kbps} format={(k) => `${k} kbps`} />
+      {youtubeFeatures.audioFormat === 'mp3' && (
+        <>
+          <TextRow>MP3 quality</TextRow>
+          <Chips options={MP3_BITRATES} value={mp3Kbps as (typeof MP3_BITRATES)[number]} onChange={setMp3Kbps} format={(k) => `${k} kbps`} />
+        </>
+      )}
       <TextRow>Video download quality (up to)</TextRow>
       <Chips
         options={VIDEO_HEIGHTS}

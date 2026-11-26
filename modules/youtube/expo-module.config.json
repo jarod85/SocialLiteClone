@@ -1,6 +1,9 @@
 {
-  "platforms": ["android"],
+  "platforms": ["android", "apple"],
   "android": {
     "modules": ["com.jarod85.litesocial.youtube.YouTubeModule"]
+  },
+  "apple": {
+    "modules": ["YouTubeModule"]
   }
 }

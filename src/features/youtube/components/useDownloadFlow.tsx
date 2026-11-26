@@ -6,7 +6,7 @@ import { requestNotificationPermission } from '@/features/instagramAlerts/instag
 
 import { pickCaption } from '../captions';
 import { startDownload } from '../downloads';
-import { youtube } from '../native';
+import { youtube, youtubeFeatures } from '../native';
 import { useYouTubeSettings } from '../stores';
 import type { CaptionTrack, MusicFolder } from '../types';
 
@@ -43,7 +43,10 @@ export function useDownloadFlow() {
   const started = useCallback(
     (format: string) => {
       void requestNotificationPermission(); // Progress and "saved" notifications.
-      Alert.alert('Download started', `The ${format} downloads in the background. You'll get a notification when it's saved.`, [
+      const where = youtubeFeatures.backgroundDownloads
+        ? `The ${format} downloads in the background. You'll get a notification when it's saved.`
+        : `The ${format} downloads while Lite Social is open. Keep it open until it's saved.`;
+      Alert.alert('Download started', where, [
         { text: 'OK' },
         { text: 'Show downloads', onPress: () => router.push('/youtube/downloads') },
       ]);
@@ -92,10 +95,18 @@ export function useDownloadFlow() {
             else downloadMp4(target, null);
           },
         },
-        { text: 'Audio (MP3)', onPress: () => void askForMp3Folder(target) },
+        youtubeFeatures.musicFolder
+          ? { text: 'Audio (MP3)', onPress: () => void askForMp3Folder(target) }
+          : {
+              text: 'Audio (M4A)',
+              onPress: () => {
+                startDownload(target, 'mp3');
+                started('audio');
+              },
+            },
       ]);
     },
-    [askForMp3Folder, downloadMp4],
+    [askForMp3Folder, downloadMp4, started],
   );
 
   let element = null;

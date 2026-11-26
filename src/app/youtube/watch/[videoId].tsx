@@ -14,7 +14,7 @@ import { YouTubeHeader } from '@/features/youtube/components/YouTubeHeader';
 import { formatAge, formatCount } from '@/features/youtube/format';
 import { enterFullscreen, exitFullscreen, useFullscreen } from '@/features/youtube/fullscreen';
 import { parseYouTubeLink, routeForLink, splitLinks, startSeconds, withTimestamps } from '@/features/youtube/links';
-import { errorText, watchUrl, youtube } from '@/features/youtube/native';
+import { errorText, watchUrl, youtube, youtubeFeatures } from '@/features/youtube/native';
 import { getPlayer, pause, play, usePlayer } from '@/features/youtube/player';
 import { videoFromDetails } from '@/features/youtube/playlists';
 import { useSubscriptions } from '@/features/youtube/stores';
@@ -261,7 +261,7 @@ export default function WatchScreen() {
           </View>
 
           <Button label="Save to playlist" variant="secondary" onPress={() => openSaveToPlaylist(videoFromDetails(details))} />
-          <Button label="Download (MP4 or MP3)" variant="secondary" onPress={() => download({ url: details.url, title: details.title, captions: details.captions })} />
+          <Button label={`Download (MP4 or ${youtubeFeatures.audioFormat.toUpperCase()})`} variant="secondary" onPress={() => download({ url: details.url, title: details.title, captions: details.captions })} />
 
           {details.description ? (
             <Pressable onPress={() => setExpanded((e) => !e)} style={[styles.description, { backgroundColor: theme.surface }]}>

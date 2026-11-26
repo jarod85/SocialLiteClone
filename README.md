@@ -27,6 +27,27 @@ refuses to install over it). You'll need to log in to Instagram again and re-add
 
 With a USB cable you can also run `adb install -r release\LiteSocial-<version>.apk`.
 
+## Install on your iPhone
+
+There's no App Store version: you build Lite Social on a Mac and install it over a cable, with your Apple ID (a
+free one works).
+
+1. On the Mac, install **Xcode** from the App Store, open it once and let it install the iOS platform. Install
+   CocoaPods (`brew install cocoapods`), clone this repository and run `npm install` in it.
+2. Xcode → **Settings → Accounts** → **+** → Apple ID, and sign in.
+3. Connect the iPhone with a cable, unlock it and tap **Trust** for the Mac.
+4. On the iPhone: **Settings → Privacy & Security → Developer Mode** → on, and restart when asked. (The switch shows
+   up once the iPhone has been connected to a Mac with Xcode.)
+5. In the repository: `npx expo run:ios --device --configuration Release` and pick your iPhone. The first build takes
+   several minutes. If it stops because signing needs a team, open `ios/LiteSocial.xcworkspace` in Xcode, select the
+   LiteSocial target → **Signing & Capabilities** → Team: your Apple ID, and run the command again.
+6. On the iPhone: **Settings → General → VPN & Device Management** → your Apple ID → **Trust**. Open Lite Social, tap
+   Instagram and log in on Instagram's own login page.
+
+With a free Apple ID the app stops opening after **7 days**: connect the iPhone and run step 5 again (logins,
+settings and YouTube channels stay). A paid Apple Developer account makes that a year. The iPhone gets no in-app
+updates: `git pull` and run step 5 again.
+
 ## What it does
 
 | Setting (Instagram) | Default | What it does |
@@ -44,14 +65,15 @@ With a USB cable you can also run `adb install -r release\LiteSocial-<version>.a
 | Hide Stories | Off | Blocks opening stories; hides the tray where it can be found |
 | Daily time limit | Off | 15–120 min/day; then a break screen, with one "5 more minutes" per day |
 
-**Calls (Android).** Instagram's audio and video call buttons show at the top of a DM conversation. Instagram only
+**Calls.** Instagram's audio and video call buttons show at the top of a DM conversation. Instagram only
 offers calls to browsers it doesn't take for a phone, so DM pages (`/direct/…`, `/call/…`) load with the same
-browser identity minus its "Mobile" token, the way Chrome on a tablet sends it, and the page reloads once when you
-go in or out of DMs. A call opens in a full-screen window (Back hangs up). The first call asks for camera and
-microphone access. Incoming calls only ring while a DM page is open. This comes from a small patch to
-react-native-webview (`patches/`, applied by `npm install`).
+browser identity minus its "Mobile" token, the way Chrome on a tablet sends it (on iPhone: Safari on a Mac, the way
+Safari on an iPad sends it), and the page reloads once when you go in or out of DMs. A call opens in a full-screen
+window (Back hangs up; on iPhone the ✕ at the top). The first call asks for camera and microphone access. Incoming
+calls only ring while a DM page is open. This comes from a small patch to react-native-webview (`patches/`, applied
+by `npm install`).
 
-### Instagram notifications (Android)
+### Instagram notifications
 
 Lite Social can't receive Instagram's push notifications: the site runs in a WebView, and Android's WebView has no
 web push. So Lite Social checks Instagram itself, in the background, with the login from its in-app browser. It
@@ -78,6 +100,12 @@ can't be read either way, the unread-messages count is the fallback ("3 unread m
 parsing in `DirectInbox.kt`). The GraphQL query is named by an id (`INBOX_DOC_ID`) that Instagram changes now and
 then; when it goes stale, the older inbox is tried, and failing both, the unread count.
 
+**On iPhone** the same checks run in TypeScript (`src/features/instagramAlerts/checker/`), and a small Swift module
+in `modules/instagram-alerts/ios/` sends the requests with the in-app browser's Instagram login (its cookies only
+ever go to www.instagram.com and never reach the JavaScript side). iOS decides when background checks run: at most
+every 15 minutes, often less, and never after you swipe Lite Social away; "Check now" works any time. Notifications
+have no sender picture, and there's no battery setting.
+
 ### YouTube
 
 YouTube is a native screen, not the website: Google blocks signing in inside embedded browsers, so there is no
@@ -101,6 +129,17 @@ YouTube account in Lite Social. It's built on [NewPipe Extractor](https://github
 
 Downloads run in a foreground service (progress notification), so they finish with the app closed. Musicolet scans
 its folders itself: if a new song doesn't show up, pull down in Musicolet's folder view or use its rescan option.
+
+**On iPhone** YouTube is read by Lite Social's own client for the same YouTube endpoints
+(`src/features/youtube/innertube/`) instead of NewPipe Extractor, which only runs on Android. The differences:
+
+- The player plays YouTube's HLS stream (up to 1080p) and draws the captions over the video itself.
+- Downloads are **MP4** and **M4A** (the audio as YouTube sends it, instead of MP3: no conversion and no Musicolet
+  folder). They're saved in the Files app under **On My iPhone → Lite Social → Downloads**; an MP4's captions go
+  only into the `.srt` next to it.
+- Downloads run while Lite Social is open and for the short time iOS allows after you leave it. One that's cut off
+  shows "Interrupted. Start it again."
+- Full screen has no brightness and volume swipes.
 
 Also: "Open in app" banners are hidden, links that try to switch to the Instagram
 app are ignored, links to other sites open in your normal browser, videos don't
@@ -366,9 +405,9 @@ Said plainly, so nothing is oversold:
 - **Reels opened through `/p/` links** look like normal posts by URL; the in-page video check catches them,
   routing doesn't.
 - **Hide Stories** reliably blocks *opening* stories. Hiding the tray is best-effort (it has no stable link).
-- **Calls** work on Android only: iOS would need its own popup window, which isn't built. Incoming calls ring
-  only while a DM page is open, since the website gets no call notifications. If Instagram changes how its site
-  decides who may call, the buttons disappear again.
+- **Calls**: incoming calls ring only while a DM page is open, since the website gets no call notifications. If
+  Instagram changes how its site decides who may call, the buttons disappear again. On iPhone, calls depend on
+  Instagram also running them in Safari (WebKit), which its site decides.
 - **Feed limit:** Instagram may keep loading posts in the background after the limit card (they stay hidden).
 - **Following feed** relies on Instagram's `?variant=following`. If Instagram drops it, you get the normal feed.
 - **Stories at the top** reads the tray from Instagram's own `/api/v1/feed/reels_tray/` (and your name and picture
@@ -409,6 +448,10 @@ Said plainly, so nothing is oversold:
   background. Once chosen, blocked videos open in it until the app restarts.
   There's no account: no likes, comments or members-only videos, and the watch history is Lite Social's own (it doesn't
   sync with YouTube's). Age-restricted videos don't play.
+- **YouTube on iPhone** uses the client constants in `src/features/youtube/innertube/clients.ts` (taken from NewPipe
+  Extractor). When YouTube changes or blocks that client, update them from NewPipe Extractor's current ones.
+- **iPhone installs** last 7 days with a free Apple ID and get no in-app updates (see
+  [Install on your iPhone](#install-on-your-iphone)).
 - **MP3 conversion takes a moment.** It runs on the phone's CPU (a 4-minute song takes roughly 10–30 seconds).
 - **It's not a device-level blocker.** The Instagram and YouTube apps and websites still work outside Lite Social. Blocking
   those needs Screen Time (iOS) or Accessibility/VPN (Android) APIs, a separate project.

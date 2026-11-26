@@ -157,3 +157,28 @@ tap the **flag** in the toolbar on that screen (a leak report) and note the step
       available" → Install update. First time: allow Lite Social to install apps, then Install again.
 - [ ] U3. The download progresses, Android's installer opens, Update. Lite Social restarts at the new version with
       Instagram still logged in and settings and YouTube channels kept.
+
+## iPhone
+
+Install with README → "Install on your iPhone" (`npx expo run:ios --device --configuration Release`), then run the
+Instagram steps above (1–7e, the reels and stories steps) on the iPhone too, and these:
+
+- [ ] iP1. Lite Social opens after trusting the developer in Settings → General → VPN & Device Management.
+- [ ] iP2. Instagram: pinching a photo zooms the photo only (the page itself never zooms); swiping from the left edge
+      goes back; pulling the page down reloads it; in a DM the composer stays above the keyboard.
+- [ ] iP3. YouTube: subscribe to a channel from Search. The feed lists its videos with durations and dates. A video
+      plays with sound; Quality → 360p visibly lowers the picture. Leave the app: the sound keeps playing, and the lock
+      screen shows play/pause.
+- [ ] iP4. Captions → English, then English (auto-generated): the text shows over the video, in time with the speech.
+- [ ] iP5. Full screen turns the video sideways and back. Pinching the video zooms it, the "2.0× · Reset" chip shows,
+      Reset brings it back.
+- [ ] iP6. Download a video as MP4 with captions and one as audio (M4A). Both play from the Files app (On My iPhone →
+      Lite Social → Downloads); the `.srt` sits next to the MP4; the M4A shows its title, channel and cover.
+- [ ] iP7. Swipe Lite Social away during a download, reopen it: Downloads shows "Interrupted. Start it again."
+- [ ] iP8. Settings → Instagram notifications on: iOS asks to allow notifications. "Send test notification" shows
+      one; "Check now" shows the counts. Settings says iOS decides when background checks run, and has no battery row.
+- [ ] iP9. Have someone message you, Check now: a notification with their name and text. Tapping it opens that DM.
+      Log out of Instagram → Check now says "Not logged in", and no notification appears.
+- [ ] iP10. Calls: open a DM. The audio and video call buttons show at the top. Start an audio call: iOS asks for the
+      microphone, a full-screen call window opens and the call connects. A video call shows both cameras. The ✕
+      closes the call window and the call ends; the other side hanging up closes it too.
